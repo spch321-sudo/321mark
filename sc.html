@@ -1896,5 +1896,75 @@ function setRole(r){
  } catch(e){}
 })();
 </script>
+<script id="tri321">
+/* ═══ TRI321 · 繁／简／EN 三語切換（頁首一鍵切換；三個版本在同一個資料夾，用檔名互連） ═══ */
+(function () {
+  if (window.__tri321) return; window.__tri321 = 1;
+  var path = location.pathname, file = (path.split('/').pop() || 'index.html');
+  var PAGE = /^en\.html$/i.test(file) ? 'en' : (/^sc\.html$/i.test(file) ? 'sc' : 'tc');
+  var INPLACE = typeof window.toggleSC === 'function' && PAGE === 'tc';
+  var base = path.replace(/[^\/]*$/, '');
+  function isSC() { try { return !!(S && S.set && S.set.sc); } catch (e) { return false; } }
+  function cur() { return PAGE === 'en' ? 'en' : (PAGE === 'sc' ? 'sc' : (isSC() ? 'sc' : 'tc')); }
+  var has = { tc: true, sc: INPLACE, en: PAGE === 'en' };
+  /* 從別的語言跳回來：index.html?lang=sc / tc */
+  try {
+    var q = new URLSearchParams(location.search).get('lang');
+    if (q && PAGE === 'tc' && typeof window.toggleSC === 'function') {
+      if ((q === 'sc') !== isSC()) setTimeout(function () { try { toggleSC(); } catch (e) {} paint(); }, 300);
+      history.replaceState(null, '', base + file + location.hash);
+    }
+  } catch (e) {}
+  function go(k) {
+    if (k === cur()) return;
+    if (k === 'en') { location.href = base + 'en.html'; return; }
+    if (INPLACE && PAGE === 'tc') { try { toggleSC(); } catch (e) {} paint(); return; }
+    if (k === 'sc' && has.scFile) { location.href = base + 'sc.html'; return; }
+    location.href = base + 'index.html?lang=' + k;
+  }
+  var st = document.createElement('style');
+  st.textContent = '.tri321{display:inline-flex;flex:none;border:1px solid rgba(127,127,127,.35);border-radius:999px;overflow:hidden;height:30px;margin:0 2px}' +
+    '.tri321 button{border:0;background:transparent;color:inherit;font:600 13px/30px system-ui,-apple-system,"PingFang TC",sans-serif;padding:0 9px;min-width:30px;cursor:pointer}' +
+    '.tri321 button.on{background:rgba(127,127,127,.28);font-weight:800}' +
+    '.tri321 button[hidden]{display:none}#lang.tri-hide{display:none!important}';
+  document.head.appendChild(st);
+  var box = document.createElement('div'); box.className = 'tri321'; box.setAttribute('role', 'group'); box.setAttribute('aria-label', 'Language');
+  [['tc', '繁'], ['sc', '简'], ['en', 'EN']].forEach(function (x) {
+    var b = document.createElement('button'); b.type = 'button'; b.setAttribute('data-k', x[0]); b.innerHTML = '<span>' + x[1] + '</span>';
+    b.onclick = function () { go(x[0]); }; box.appendChild(b);
+  });
+  function paint() {
+    var c = cur();
+    Array.prototype.forEach.call(box.querySelectorAll('button'), function (b) {
+      var k = b.getAttribute('data-k'); b.classList.toggle('on', k === c); b.hidden = !(has[k] || k === c);
+    });
+  }
+  function mount() {
+    var bar = document.querySelector('header .bar') || document.querySelector('header');
+    if (!bar) return setTimeout(mount, 300);
+    var old = document.getElementById('lang'); if (old) old.classList.add('tri-hide');
+    var fsz = document.getElementById('fsz');
+    if (fsz && fsz.parentNode === bar) bar.insertBefore(box, fsz); else bar.appendChild(box);
+    paint();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount); else mount();
+  /* 有哪些版本：網站上找得到才顯示 */
+  function probe(f, k, flag) {
+    if (!/^https?:/.test(location.protocol)) return;
+    fetch(base + f, { method: 'HEAD', cache: 'no-store' }).then(function (r) { if (r.ok) { has[k] = true; if (flag) has[flag] = true; paint(); } }).catch(function () {});
+  }
+  if (PAGE !== 'en') probe('en.html', 'en');
+  if (PAGE !== 'tc') { has.tc = true; }
+  if (!INPLACE) probe('sc.html', 'sc', 'scFile');
+  if (PAGE === 'en') { has.sc = true; }   /* 中文版可在 index.html 內切到简体 */
+  /* 原本的繁简按鈕被按到（例如全螢幕模式）時，同步標示 */
+  if (typeof window.toggleSC === 'function') {
+    var t0 = window.toggleSC;
+    window.toggleSC = function () { var r = t0.apply(this, arguments); setTimeout(paint, 0); return r; };
+    try { toggleSC = window.toggleSC; } catch (e) {}
+  }
+})();
+
+</script>
 </body>
 </html>
