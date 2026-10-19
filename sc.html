@@ -1896,6 +1896,2435 @@ function setRole(r){
  } catch(e){}
 })();
 </script>
+<script id="GXB">/* ===== GXB 美圖工作室（講義版，v1.3.202610191930） ===== */
+/* ═══ GXB · 美圖工作室（講義版）：GX-lite 底座 ═══
+   講義舊版外殼沒有 GX 底座，這裡只補上美圖工作室用得到的幾樣：
+   語言、簡體轉換、讀者對象、一次性問小智、我的作品路由。 */
+var GX = (function () {
+  'use strict';
+  const EN = /^en/i.test(document.documentElement.getAttribute('lang') || '');
+  const T = (zh, en) => EN ? en : zh;
+  const GXD = {"keys": ["adult", "teen", "kid", "seeker", "elder", "single_parent", "single", "parent", "couple", "pastor"], "icon": {"adult": "🧑", "teen": "🧒", "kid": "🧸", "seeker": "🌱", "elder": "👴", "single_parent": "👩‍👧", "single": "🙋", "parent": "👨‍👩‍👧", "couple": "💑", "pastor": "⛪"}, "names": {"adult": "成人", "teen": "青少年", "kid": "兒童", "seeker": "慕道友", "elder": "長輩", "single_parent": "單親", "single": "單身", "parent": "父母", "couple": "夫妻", "pastor": "牧者"}, "hints": {"adult": "有深度，貼近工作、家庭與關係", "teen": "幽默風趣、不說教，用你的世界來比喻", "kid": "非常簡單好懂，像在聽故事", "seeker": "還沒信主也聽得懂，不說教，給實際的幫助", "elder": "尊敬溫和、慢慢說，句子清楚好懂", "single_parent": "先接住你的辛苦，給做得到的小步驟與盼望", "single": "真誠平等，不催婚，談身分、等待與使命", "parent": "貼近養兒育女的日常：溝通、管教、陪伴與禱告", "couple": "夫妻同行：溝通、饒恕、同心與一起禱告", "pastor": "同工口吻：牧養、講道預備、團隊與不倦怠"}, "lenNames": {"brief": "簡要", "mid": "適中", "full": "詳細"}, "len": {"brief": " 回答長度：簡要。整段回答控制在 3～5 句話（約 150 字內）：直接給核心答案、一句關鍵經文或一個比喻，最後一句禱告或一個小步驟。不用表格、不列長清單。", "full": " 回答長度：詳細。請完整、有條理地回答（約 800～1200 字）：說明經文脈絡、關鍵字詞的意思、相關經文對照、清楚的321應用、這星期可以操練的具體步驟，最後以禱告結束。可用簡短小標題。"}, "aud": {"adult": {"sys": " 回答對象：成年人。請用成熟、沉穩而溫暖的口吻，可以有適度的深度：點出經文脈絡與關鍵字詞的意思，連結工作、婚姻、教養、人際與屬靈爭戰，最後帶出一個這星期就能操練的具體步驟。", "write": "\n讀者是成年人：口吻成熟、溫暖、真誠。", "style": "風格：沉穩清楚；其中一兩題帶出生命應用。", "res": ["再讀一遍這章，細細品味，下次會更好。", "不錯！這章的信息已經進到你裡面了。", "太棒了！經文的話已經住在你心裡。"], "q": ["這段經文讓我看見神是怎樣的一位神？", "這段經文照出我裡面什麼樣的舊人有己？", "若讓耶穌在這件事上作王，我會怎麼做？", "這段經文中，耶穌給我看見什麼樣的榜樣？", "聖靈要藉這段話引導我今天走哪一步？", "這裡的人為什麼會失敗？根源是驕傲還是恐懼？", "這段經文如何幫助我操練無己的生命？", "我可以把這段經文用在與誰的關係上？", "這段經文與主禱文「願你的國降臨」有什麼關聯？", "請用一個比喻幫我明白這段經文的核心。"], "fu": [["💍", "婚姻", "請針對你剛才的回答，說明怎麼把它應用在夫妻關係與婚姻裡，並給我一個這個星期可以做的具體小步驟。"], ["👨‍👩‍👧", "家庭", "請針對你剛才的回答，說明怎麼把它應用在家庭與教養孩子（或與父母相處）上，並給我一個這個星期可以做的具體小步驟。"], ["💼", "職場", "請針對你剛才的回答，說明怎麼把它應用在工作與職場上（同事、主管、壓力、誠信），並給我一個這個星期可以做的具體小步驟。"], ["🏡", "日常", "請針對你剛才的回答，說明怎麼把它應用在日常生活的小事上（時間、金錢、習慣），並給我一個這個星期可以做的具體小步驟。"], ["💭", "內心", "請針對你剛才的回答，說明怎麼把它應用在面對內心的情緒與軟弱上（焦慮、憤怒、驕傲），並給我一個這個星期可以做的具體小步驟。"], ["🙏", "禱告", "請把你剛才說的重點，寫成一段簡短、真誠的禱告，讓我可以拿來禱告。"]]}, "teen": {"sys": " 回答對象：青少年（約12–18歲）。請用幽默風趣、輕鬆有梗的口吻，像一位很酷的大哥哥大姊姊在聊天，不說教、不居高臨下。多用他們熟悉的世界來比喻：手機剩1%電量、遊戲過關、追劇、社群按讚與追蹤數、考試、同儕壓力、打球。可以適度用一點流行說法和小玩笑，但絕不拿聖經、神或耶穌開玩笑，也不輕看罪與傷痛；笑完一定要回到經文的真理上。答案精簡，重點先講，段落要短，結尾給一個今天就能試的小挑戰。若他提到被欺負、受傷害或想傷害自己，要溫柔回應，並鼓勵他馬上告訴信任的大人（爸媽、老師、牧者）。", "write": "\n讀者是青少年：口氣輕鬆幽默、像朋友聊天，可以有一點梗，但不說教、不輕浮、不拿神和聖經開玩笑；不要用表情符號。", "style": "風格：題目與解析的口氣幽默風趣、輕鬆有梗（像在跟朋友鬥嘴），選項可以有趣，但正確答案必須明確、不含糊，絕不拿神與聖經開玩笑。", "res": ["哎呀，這章有點滑溜～再讀一次，下一局你就是王者！", "不賴喔！再練幾次就可以去嘲笑你的朋友了（開玩笑的）。", "滿分級的操作！聖經達人就是你！"], "q": ["這段經文跟我的日常（學校、朋友、手機）有什麼關係？", "如果這段經文是神傳給我的一則訊息，它想說什麼？", "朋友都那樣做，我不跟會不會很怪？經文怎麼看？", "用遊戲或電影來比喻這段經文，可以嗎？", "這段經文有什麼讓人意外、很少人知道的地方？", "考試壓力好大，這段經文能給我什麼力量？", "我很難原諒一個人，這段經文能幫我什麼？", "神真的看得到我嗎？我哪裡值得被愛？"], "fu": [["🏫", "學校", "用你剛才講的，幫我想想怎麼用在學校與課業上，給我一個今天就能試的小招。"], ["🤝", "朋友", "用你剛才講的，幫我想想怎麼用在朋友相處上，給我一個今天就能試的小招。"], ["🏠", "家人", "用你剛才講的，幫我想想怎麼用在跟爸媽、家人的相處上，給我一個今天就能試的小招。"], ["📱", "手機網路", "用你剛才講的，幫我想想怎麼用在手機、網路與社群上，給我一個今天就能試的小招。"], ["💭", "壓力", "用你剛才講的，幫我想想怎麼用在壓力和情緒上，給我一個今天就能試的小招。"], ["🌟", "未來", "用你剛才講的，幫我想想怎麼用在未來和夢想上，給我一個今天就能試的小招。"], ["🎯", "今天挑戰", "請給我一個跟剛才有關、今天就能完成的小挑戰，要具體、有點好玩。"]]}, "kid": {"sys": " 回答對象：兒童（約5–11歲）。請用非常淺顯易懂的話，像說故事給小朋友聽。句子要短，一句只講一件事；用具體的小事當比喻（種子、小熊、手牽手、捉迷藏、生日蛋糕）；不用艱深的神學名詞，必須用時馬上用一句話解釋。語氣親切活潑，可以說「你知道嗎？」「一起想一想」，並適度加幾個可愛的表情符號。整個回答控制在五到七句短句。不要用表格；只引用一節簡短的經文。遇到暴力或可怕的經文，用孩子能承受的方式溫柔帶過，不渲染細節。最後用一句小禱告或一個孩子答得出來的簡單問題作結。若孩子說有人傷害他、或他很難過，要親切回應，並告訴他馬上跟信任的大人（爸爸媽媽、老師、牧者）說。", "write": "\n讀者是小朋友：用非常簡單的字詞和短句，像說故事，一句只講一件事，不用艱深名詞；不要用表情符號。", "style": "風格：給5到11歲的小朋友，字詞非常簡單、句子很短，像在說故事；選項要短；解析一句話、親切，最多加一個可愛的表情符號。", "res": ["沒關係！我們再讀一次故事，再玩一次就會了！🌱", "好棒喔！你記得好多！🌟", "哇！太厲害了！神一定很高興！🎉"], "q": ["這段故事在說什麼？請講給我聽。", "神在這個故事裡做了什麼事？", "耶穌愛我嗎？我怎麼知道？", "這個故事裡誰最勇敢？為什麼？", "我可以怎樣學習故事裡的人？", "請教我一句可以背起來的短經文。", "我跟好朋友吵架了，耶穌會怎麼做？", "可以教我做一個小禱告嗎？"], "fu": [["🏠", "在家", "剛剛講的，我在家裡可以怎麼做呢？請用簡單的話告訴我。"], ["🏫", "在學校", "剛剛講的，我在學校可以怎麼做呢？請用簡單的話告訴我。"], ["🤝", "跟朋友", "剛剛講的，我在跟好朋友相處時可以怎麼做呢？請用簡單的話告訴我。"], ["🙏", "小禱告", "請教我一個很短的小禱告，我可以跟耶穌說。"], ["📖", "小故事", "可以再講一個跟這個有關的小故事給我聽嗎？"]]}, "seeker": {"sys": " 回答對象：慕道友（還沒有信主、正在了解基督信仰的朋友）。請完全站在他的立場和角度：他可能沒讀過聖經、不懂教會用語，心裡有疑問，甚至有些保留。①先從他真實的生活處境、感受或疑問切入，再帶到經文，讓他覺得「這跟我有關」。②用最平常的話說；321理念只是你心裡的方向，不要在回答裡出現「無己、作王、得勝、屬靈」這類內部用語，也不用教會與神學術語；一定要提到的詞（如恩典、罪、救恩），馬上用生活的說法解釋。③誠實、尊重、不說教、不施壓、不要求他現在就相信，也不論斷他；有疑問或質疑很正常，先認真承認那個問題的份量，再誠實回答。④清楚說出聖經在這件事上的真理（神是怎樣的神、耶穌為我們做了什麼），用故事、比喻和日常例子，讓他聽得懂、記得住。⑤一定要有實際有用的幫助：給一兩個他這個星期就能自己試試看的小步驟（一個觀察、一個提問、一個簡單的行動）。⑥合適時，可以溫和邀請他繼續探索（例如讀一小段、問一個問題），不要硬把話題轉到決志。⑦不要說「我們基督徒都知道」這類預設他已經信的話。引用經文用和合本，並用白話解釋它的意思。若寫到禱告，只當作「若你願意，可以這樣對神說」的邀請，不強迫。整個回答要簡明、段落要短。", "write": "\n讀者是還沒信主的朋友：用生活化、親切、不說教的話，不用教會術語，不預設他已經信；不要用表情符號。", "style": "風格：給還沒信主、沒讀過聖經的人。題目要把背景交代清楚（人物、事件的名字直接寫出來），不假設他懂聖經或教會用語；用字平實，解析用一句白話說明這件事對一般人有什麼意義。", "res": ["沒關係，剛接觸這些內容本來就不容易，再看一遍會更清楚。", "不錯喔！你已經抓到這一章的重點了。", "太厲害了！你對這一章的內容很清楚。"], "q": ["這段話跟我現在的生活有什麼關係？", "我還不是基督徒，這段話對我有什麼意義？", "神真的存在嗎？有什麼理由可以相信？", "聖經為什麼說每個人都需要耶穌？", "我壓力很大，聖經能給我什麼實際的幫助？", "這段話裡的「罪」是什麼意思？跟我有關嗎？", "基督徒常說的「恩典」，用白話說是什麼？", "如果我想多了解，可以從哪裡開始？"], "fu": [["🤝", "人際", "剛才說的放在人際關係裡（家人、朋友、同事），對一個還不是基督徒的人有什麼實際的幫助？請舉一個生活的例子。"], ["💍", "婚姻家庭", "剛才說的放在婚姻與家庭裡，對一個還不是基督徒的人有什麼實際的幫助？請舉一個生活的例子。"], ["💼", "工作", "剛才說的放在工作與職場裡，對一個還不是基督徒的人有什麼實際的幫助？請舉一個生活的例子。"], ["😟", "壓力焦慮", "剛才說的放在壓力與焦慮裡，對一個還不是基督徒的人有什麼實際的幫助？請舉一個生活的例子。"], ["🌍", "人生意義", "剛才說的放在尋找人生的意義與方向裡，對一個還不是基督徒的人有什麼實際的幫助？請舉一個生活的例子。"], ["❓", "我的疑問", "我心裡還有疑問，請誠實告訴我：信耶穌對一個人的生活到底有什麼實際的幫助？也請告訴我可以怎麼自己去查證。"], ["🌱", "下一步", "如果我想進一步了解，下一步可以做什麼？請給我一兩個不會有壓力的建議。"]]}, "elder": {"sys": " 回答對象：長輩（約65歲以上）。請用尊敬、溫和、慢慢說的口吻，像晚輩敬重地陪長輩讀經；句子清楚、不拐彎，不用網路用語和英文縮寫；比喻取自一生的閱歷（田地、家人、歲月、病痛、孫子、老街坊）。重點先講，分成短段落，不要太長。肯定他們一生走過的路與在主裡的忠心，不說教、不指責、不用「你應該」。可以談健康與軟弱、孤單、放下與交託、把信仰傳給下一代、永恆的盼望與感恩。結尾給一件簡單、容易做到的小事（一句禱告、打電話問候家人、數算一件感謝）。若提到身體不適、孤單或失去親人，要先溫柔安慰，並鼓勵他和家人、教會關懷同工聯絡。", "write": "\n讀者是長輩：用語尊敬、溫和、清楚好懂，不用網路用語；不要用表情符號。", "style": "風格：給長輩，字詞平實、句子清楚，題目不要繞、不要太冷僻，選項簡短；解析用一句溫和的話。", "res": ["沒關係，慢慢來，再讀一遍會更清楚。", "很好！這一章的話您記得不少。", "太好了！神的話已經住在您心裡。"], "q": ["這段經文用最簡單的話，是在說什麼？", "這段經文對年紀大的人有什麼安慰？", "身體漸漸衰弱了，神怎麼看顧我？", "我常常覺得孤單，這段經文能給我什麼？", "我該怎麼把信仰傳給兒孫？", "有些事放不下，這段經文怎麼教我交託？", "我老了，還能為神做什麼？", "請幫我寫一段簡短的禱告，我想念給主聽。"], "fu": [["🩺", "健康", "請針對你剛才的回答，用簡單清楚、慢慢說的話說明怎麼把它用在身體的軟弱與健康，並給我一個這個星期做得到的具體小步驟。"], ["🤍", "孤單", "請針對你剛才的回答，用簡單清楚、慢慢說的話說明怎麼把它用在孤單與思念，並給我一個這個星期做得到的具體小步驟。"], ["👨‍👩‍👧‍👦", "兒孫", "請針對你剛才的回答，用簡單清楚、慢慢說的話說明怎麼把它用在和兒孫、家人的關係，並給我一個這個星期做得到的具體小步驟。"], ["🕊️", "交託", "請針對你剛才的回答，用簡單清楚、慢慢說的話說明怎麼把它用在放下心中的牽掛、交託給主，並給我一個這個星期做得到的具體小步驟。"], ["🌅", "盼望", "請針對你剛才的回答，用簡單清楚、慢慢說的話說明怎麼把它用在永恆的盼望與感恩，並給我一個這個星期做得到的具體小步驟。"], ["🙏", "禱告", "請把你剛才說的重點，用簡單的話寫成一段短短的禱告，讓我可以慢慢念給主聽。"]]}, "single_parent": {"sys": " 回答對象：單親爸爸或媽媽（一個人撐起一個家）。請先接住他的辛苦：他常常很累、有愧疚、有孤單，也有經濟、時間與教養的壓力。口吻溫暖、接納、不評斷，不追問過去的原因，不說「你應該再找個伴」，也不把單親說成缺憾。引用神的心意：神是孤兒的父、寡婦的伸冤者（詩篇68:5），祂與我們同在。再給盼望與實際：每一個小步驟都要在忙碌中做得到（五分鐘禱告、跟孩子的一個小儀式、開口向弟兄姊妹求助）。內容簡短、段落要短。結尾給一個這個星期做得到的小步驟。若他提到被暴力對待、疲憊到撐不下去或想傷害自己，要溫柔回應，並鼓勵他立刻聯絡信任的人、教會同工或專業協助。", "write": "\n讀者是單親爸媽：口吻溫暖、接納、不評斷，肯定他的辛苦；不要用表情符號。", "style": "風格：給單親爸媽，題目貼近日常的忙碌、教養與盼望；口氣溫暖，解析一句話帶出安慰。", "res": ["沒關係，您已經很努力了，有空再讀一遍就好。", "不錯！在這麼忙的日子裡還記得這麼多。", "太棒了！神的話正在托住您。"], "q": ["這段經文對一個人撐起一個家的我，有什麼安慰？", "我常常覺得累，也覺得對孩子有虧欠，神怎麼看？", "神怎麼看顧孤兒和寡婦？這跟我有什麼關係？", "經濟壓力很大，這段經文能給我什麼？", "孩子在頂嘴、情緒很大，我該怎麼辦？", "我不知道怎麼跟孩子說爸爸（或媽媽）不在身邊的事。", "我真的很孤單，可以怎麼向教會或弟兄姊妹開口求助？", "請幫我寫一段五分鐘內能禱告完的短禱告。"], "fu": [["😮‍💨", "疲累", "請針對你剛才的回答，說明怎麼把它用在一個人撐家的疲累與內疚，並給我一個這個星期做得到的具體小步驟。"], ["👧", "孩子", "請針對你剛才的回答，說明怎麼把它用在陪伴孩子與教養，並給我一個這個星期做得到的具體小步驟。"], ["💰", "經濟", "請針對你剛才的回答，說明怎麼把它用在經濟與時間的壓力，並給我一個這個星期做得到的具體小步驟。"], ["🤝", "求助", "請針對你剛才的回答，說明怎麼把它用在向弟兄姊妹或教會開口求助，並給我一個這個星期做得到的具體小步驟。"], ["🌤️", "盼望", "請針對你剛才的回答，說明怎麼把它用在在這個階段看見神的同在與盼望，並給我一個這個星期做得到的具體小步驟。"], ["🙏", "禱告", "請把你剛才說的重點，寫成一段我在忙碌中五分鐘內就能禱告完的短禱告。"]]}, "single": {"sys": " 回答對象：單身的人（可能未婚、離婚、喪偶，或正在等候；不要預設他想結婚或不想結婚）。請不要把單身說成缺憾、「預備期」或「還沒到的人生」，也不要用催婚的口氣。談在基督裡的身分已經完整、被愛；談孤單時怎麼與神、與朋友、與團契連結；談時間、金錢與恩賜的運用與使命；談等待中的信靠；談感情與婚姻的智慧，以及在情感與身體上的聖潔，態度要尊重、不論斷。口吻真誠、平等、輕鬆。結尾給一個這個星期可以做的小步驟。若他提到孤單到想傷害自己，要溫柔回應並鼓勵他立刻聯絡信任的人或專業協助。", "write": "\n讀者是單身朋友：口吻真誠、平等、輕鬆，不催婚、不把單身說成缺憾；不要用表情符號。", "style": "風格：給單身的朋友，題目貼近孤單、身分、等待、友誼與使命；口氣真誠平等，不催婚。", "res": ["沒關係，慢慢來，再讀一遍就會更清楚。", "不錯喔！你把這一章的重點抓到了。", "太棒了！你很認真，神的話正在你裡面扎根。"], "q": ["單身的我，這段經文想對我說什麼？", "我覺得孤單，這段經文能給我什麼？", "在基督裡，我的身分和價值是什麼？", "等待的時候，要怎麼信靠神？", "感情的事，聖經給我什麼智慧？", "單身的時間和精力，可以怎麼為神所用？", "怎樣在教會和朋友中建立好的關係？", "請幫我寫一段單身者的簡短禱告。"], "fu": [["🫶", "孤單", "請針對你剛才的回答，說明怎麼把它用在孤單時怎麼與神、與朋友連結，並給我一個這個星期做得到的具體小步驟。"], ["💝", "身分", "請針對你剛才的回答，說明怎麼把它用在我在基督裡的身分與價值，並給我一個這個星期做得到的具體小步驟。"], ["⏳", "等待", "請針對你剛才的回答，說明怎麼把它用在等待中的信靠，並給我一個這個星期做得到的具體小步驟。"], ["💞", "感情", "請針對你剛才的回答，說明怎麼把它用在感情與交友的智慧，並給我一個這個星期做得到的具體小步驟。"], ["🎯", "使命", "請針對你剛才的回答，說明怎麼把它用在把時間與恩賜用在神的使命上，並給我一個這個星期做得到的具體小步驟。"], ["🙏", "禱告", "請把你剛才說的重點，寫成一段簡短、真誠的禱告，讓我可以拿來禱告。"]]}, "parent": {"sys": " 回答對象：正在養育孩子的父母（孩子可能從嬰幼兒到成年）。請站在父母的位置：他們常常疲累、擔心孩子、也常常內疚。口吻溫暖、貼近生活、不評斷；承認每個孩子與每個家庭都不同。談陪伴與榜樣、管教與恩典的平衡、親子溝通（怎麼聽、怎麼說）、為孩子禱告、夫妻同心、面對自己的軟弱與失敗；可用日常場景當比喻（吃飯、功課、手機、睡前）。結尾給一個這個星期可以做的具體小步驟（一句話、一個擁抱、一段睡前禱告）。若提到孩子遭受傷害、家庭暴力或孩子有自傷的念頭，要溫柔回應並鼓勵立刻尋求專業協助與信任的人。", "write": "\n讀者是正在養育孩子的父母：口吻溫暖、貼近生活、不評斷；不要用表情符號。", "style": "風格：給養育孩子的父母，題目貼近親子溝通、管教、陪伴與為孩子禱告；口氣溫暖，解析一句話帶出提醒。", "res": ["沒關係，慢慢來，有空再讀一遍就會更清楚。", "不錯！這一章的重點您已經抓到了。", "太棒了！神的話正在您的家裡扎根。"], "q": ["這段經文對養育孩子的我有什麼提醒？", "孩子不聽話、情緒很大，我該怎麼回應？", "管教和恩典要怎麼拿捏？", "怎麼跟青春期的孩子好好說話？", "我常常對孩子發脾氣，事後很內疚怎麼辦？", "怎麼帶孩子認識神，而不只是去教會？", "夫妻在教養上意見不同，這段經文怎麼說？", "請幫我寫一段為孩子祝福的短禱告。"], "fu": [["🗣️", "溝通", "請針對你剛才的回答，說明怎麼把它用在跟孩子好好溝通（怎麼聽、怎麼說），並給我一個這個星期做得到的具體小步驟。"], ["⚖️", "管教", "請針對你剛才的回答，說明怎麼把它用在管教與恩典的平衡，並給我一個這個星期做得到的具體小步驟。"], ["😔", "內疚", "請針對你剛才的回答，說明怎麼把它用在對孩子發脾氣或覺得虧欠的內疚，並給我一個這個星期做得到的具體小步驟。"], ["💑", "夫妻", "請針對你剛才的回答，說明怎麼把它用在夫妻在教養上同心，並給我一個這個星期做得到的具體小步驟。"], ["📖", "信仰", "請針對你剛才的回答，說明怎麼把它用在帶孩子認識神、一起親近神，並給我一個這個星期做得到的具體小步驟。"], ["🙏", "禱告", "請把你剛才說的重點，寫成一段我可以為孩子祝福的短禱告。"]]}, "couple": {"sys": " 回答對象：夫妻（正在經營婚姻的丈夫與妻子，可能是新婚、有孩子的中年夫妻，或相伴多年的伴侶）。請站在夫妻同行的位置：口吻溫暖、真誠、不評斷，不偏袒任何一方；承認每段婚姻都有磨合、疲累與受傷的時候。談愛是決定與付出、彼此饒恕、傾聽與表達（怎麼說、怎麼聽）、尊重與同心、金錢與家務的分工、姻親與孩子的教養、一起禱告與一起讀經、在主裡成為一體；可用日常場景當比喻（飯桌、手牽手、吵完架之後、睡前）。結尾給一個這個星期兩個人就能一起做的具體小步驟（一句感謝的話、一段兩人的禱告、一次不看手機的散步）。不要教導妻子順服或丈夫掌權的單方面要求，要強調彼此相愛、彼此順服。若提到家庭暴力、外遇、對方的威脅或有自傷念頭，要溫柔回應，把安全放在第一位，並鼓勵立刻尋求專業協助與信任的人，不要勸人一味忍耐。", "write": "\n讀者是夫妻：口吻溫暖、貼近生活、不評斷、不偏袒任何一方；不要用表情符號。", "style": "風格：給夫妻，題目貼近溝通、饒恕、同心、共同禱告與彼此相愛；口氣溫暖，解析一句話帶出提醒。", "res": ["沒關係，慢慢來，找個晚上兩個人再一起讀一遍。", "不錯！這一章的重點你們抓到了。", "太棒了！神的話正在你們的婚姻裡扎根。"], "q": ["這段經文對我們夫妻有什麼提醒？", "我們吵架之後總是冷戰，怎麼先伸出手？", "怎麼把心裡的話好好說給另一半聽？", "對方做錯事傷了我，我真的要饒恕嗎？", "我們為金錢與家務的事常常意見不同，怎麼辦？", "夫妻怎麼一起禱告、一起親近神？", "忙碌的日子裡，夫妻感情變淡了，怎麼重新連結？", "請幫我寫一段為我們婚姻祝福的短禱告。"], "fu": [["🗣️", "溝通", "請針對你剛才的回答，說明夫妻怎麼把它用在好好說、好好聽，並給我們一個這個星期兩個人做得到的具體小步驟。"], ["🤝", "饒恕", "請針對你剛才的回答，說明夫妻怎麼把它用在彼此認錯與饒恕，並給我們一個這個星期兩個人做得到的具體小步驟。"], ["💞", "親密", "請針對你剛才的回答，說明夫妻怎麼把它用在重新連結感情、表達愛與感謝，並給我們一個這個星期兩個人做得到的具體小步驟。"], ["👨‍👩‍👧", "同心", "請針對你剛才的回答，說明夫妻怎麼把它用在金錢、家務與教養上同心，並給我們一個這個星期兩個人做得到的具體小步驟。"], ["📖", "同讀", "請針對你剛才的回答，說明夫妻怎麼一起讀經、一起親近神，並給我們一個這個星期兩個人做得到的具體小步驟。"], ["🙏", "禱告", "請把你剛才說的重點，寫成一段夫妻可以一起禱告的短禱告。"]]}, "pastor": {"sys": " 回答對象：牧者與傳道同工（教會的牧師、傳道人、小組長與事奉的同工）。請站在同工的位置：他們常常肩負許多人的重擔，自己也會疲累、孤單、被誤解或灰心。口吻尊重、平等、真誠，像同工之間彼此扶持，不說教、不居高臨下。可以有適度的深度：點出經文脈絡、原文語境與關鍵字詞的意思，談牧養羊群與生命建造、預備講道與教導、帶領小組與門徒訓練、團隊同心與衝突、面對批評與孤單、屬靈爭戰、自己的靈命與家庭，以及不倦怠的安息與依靠；也可提供講章或查經的切入點、段落與應用建議，但要提醒最後仍須自己在神面前領受。結尾給一個這個星期可以做的具體小步驟（一段安靜親近神的時間、一通關心的電話、一次向同工的坦誠分享）。若提到極度疲憊、憂鬱、想放棄或有自傷念頭，要溫柔回應，並鼓勵立刻尋求信任的同工、屬靈長輩與專業協助。", "write": "\n讀者是牧者與傳道同工：口吻尊重、平等、真誠，像同工彼此扶持；不要用表情符號。", "style": "風格：給牧者與傳道同工，題目貼近牧養、講道預備、帶領團隊、面對疲累與屬靈爭戰；口氣尊重真誠，解析一句話帶出提醒。", "res": ["沒關係，慢慢來，有空再讀一遍就會更清楚。", "不錯！這一章的重點您已經抓到了。", "太棒了！神的話先餵養了牧者，也必流向羊群。"], "q": ["這段經文對事奉中的我有什麼提醒？", "請幫我找這段經文的講道架構與切入點。", "事奉很累、快要倦怠了，這段經文怎麼安慰我？", "怎麼面對教會裡的批評與誤解？", "帶領團隊與同工同心，這段經文怎麼說？", "怎麼在忙碌的牧養中保守自己的靈命？", "怎麼牧養軟弱、受傷或離開的羊？", "請幫我寫一段為教會與同工代求的短禱告。"], "fu": [["📖", "講道", "請針對你剛才的回答，提供一個可用於講道或查經的架構（三個要點與一個應用），並提醒我自己先在神面前領受。"], ["🐑", "牧養", "請針對你剛才的回答，說明怎麼把它用在牧養羊群與關心個別的人，並給我一個這個星期做得到的具體小步驟。"], ["🤝", "團隊", "請針對你剛才的回答，說明怎麼把它用在帶領團隊、同工同心與處理衝突，並給我一個這個星期做得到的具體小步驟。"], ["🕊️", "安息", "請針對你剛才的回答，說明怎麼把它用在自己的疲累與靈命保守，並給我一個這個星期做得到的具體小步驟。"], ["⚔️", "爭戰", "請針對你剛才的回答，說明怎麼把它用在面對批評、孤單與屬靈爭戰，並給我一個這個星期做得到的具體小步驟。"], ["🙏", "代禱", "請把你剛才說的重點，寫成一段我可以為教會與同工代求的短禱告。"]]}}};
+  const SITE = 'https://spch321-sudo.github.io/bible/';
+  const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const isSC = () => !EN && !!(S && S.set && S.set.sc);
+  const sc = s => (isSC() && typeof toSC === 'function') ? toSC(String(s)) : String(s);
+  const FELLOW = T('國度321空中團契', 'Kingdom 321 Online Fellowship');
+  const BOOK = T('馬可福音', 'Mark');
+  const oneCh = () => { try { return Object.keys(D.txt).filter(k => +k > 0).length === 1; } catch (e) { return false; } };
+  const chLabel = n => oneCh() ? BOOK : T('馬可福音 第' + n + '章', 'Mark ' + n);
+  const AUD_KEYS = GXD.keys;
+  const aud = () => (S.set && AUD_KEYS.indexOf(S.set.aud) >= 0) ? S.set.aud : 'adult';
+  const A = () => GXD.aud[aud()];
+  async function aiRaw(sys, ask, ms, maxT) {
+    let out = '', why = '';
+    const waits = [900, 1800];
+    for (let a = 0; a <= waits.length; a++) {
+      const ac = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+      const tm = ac ? setTimeout(() => ac.abort(), ms || 60000) : 0;
+      try {
+        const r = await fetch(SVC.xz, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ model: SVC.model, max_tokens: maxT || 1600, system: sys, messages: [{ role: 'user', content: ask }] }),
+          signal: ac ? ac.signal : undefined
+        });
+        if (!r.ok) throw new Error('http ' + r.status);
+        const d = await r.json().catch(() => null);
+        if (d && d.content && d.content.length) out = d.content.map(b => b.text || '').join('');
+        else if (d) out = d.reply || d.text || d.message || '';
+        if (!out) why = T('回覆是空的', 'empty reply');
+        clearTimeout(tm);
+        break;
+      } catch (e) {
+        clearTimeout(tm);
+        why = (e && e.name === 'AbortError') ? T('逾時', 'timeout') : ((e && e.message) ? String(e.message) : 'network');
+        if (a === waits.length) break;
+        await new Promise(rs => setTimeout(rs, waits[a]));
+      }
+    }
+    return { out: String(out || '').trim(), why };
+  }
+  const routes = {};
+  function addRoute(k, fn) { routes[k] = fn; }
+  return { EN, T, esc, sc, SITE, FELLOW, BOOK, chLabel, aud, A, D: GXD, aiRaw, addRoute, routes };
+})();
+
+var GXS = (function () {
+  'use strict';
+  const EN = GX.EN, T = GX.T, esc = GX.esc, SITE = GX.SITE;
+  const q1 = (s, r) => (r || document).querySelector(s);
+  const qa = (s, r) => Array.prototype.slice.call((r || document).querySelectorAll(s));
+  const say = (m) => { try { toast(m); } catch (e) {} };
+  const keep = () => { try { save(); } catch (e) {} };
+  const PEXELS_KEY = 'ofCQ7i2mqaEddrACvvmzdgfrpZ90Z8gVOI9D6vYVf7uxWXCCtzQbj9yR';
+  const isSC = () => !EN && !!(S && S.set && S.set.sc);
+  const sc = s => GX.sc(s);
+  const isIOS = () => /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+  const TPL = {
+    navy:  { n: ['深藍聖夜', 'Midnight Navy'], bg: ['#123F92', '#0D3988', '#071A42'], glow: 'rgba(212,166,91,.30)', ink: '#F2ECDD', accent: '#F7EFDC', gold: '#D4A65B', sub: '#BBA98A', frame: 'rgba(212,166,91,.42)' },
+    paper: { n: ['素樸信箋', 'Plain Letter'], bg: ['#FBF8F1', '#F4EFE3', '#EDE6D6'], glow: 'rgba(212,166,91,.45)', ink: '#3A3122', accent: '#23211C', gold: '#A9762F', sub: '#8A7C63', frame: 'rgba(169,118,47,.34)' },
+    dawn:  { n: ['晨曦盼望', 'Dawn of Hope'], bg: ['#FFF6EC', '#FBE9D2', '#F6D9B8'], glow: 'rgba(255,214,150,.6)', ink: '#3A2A1A', accent: '#8A4B16', gold: '#C97A22', sub: '#8A6A4A', frame: 'rgba(181,101,29,.30)' },
+    grace: { n: ['青草安歇', 'Green Pastures'], bg: ['#F2F7F1', '#E4EFE6', '#D6E7DA'], glow: 'rgba(160,200,170,.5)', ink: '#1C2E26', accent: '#255943', gold: '#3C8A64', sub: '#5C7A6A', frame: 'rgba(46,106,80,.28)' },
+    rose:  { n: ['溫柔玫瑰', 'Gentle Rose'], bg: ['#FCF5F3', '#F6E7E3', '#EFD8D2'], glow: 'rgba(220,160,150,.45)', ink: '#33221E', accent: '#8A3D2E', gold: '#B36A54', sub: '#8A6A62', frame: 'rgba(154,74,58,.28)' },
+    sky:   { n: ['平安晴空', 'Peaceful Sky'], bg: ['#F1F7FB', '#DFEEF6', '#CFE4F0'], glow: 'rgba(150,200,230,.5)', ink: '#1B2A33', accent: '#1E5270', gold: '#2E7DA0', sub: '#5A7684', frame: 'rgba(37,96,128,.28)' },
+    linen: { n: ['素雅棉麻', 'Soft Linen'], bg: ['#F7F4EE', '#EFEAE0', '#E6DFD2'], glow: 'rgba(200,190,170,.4)', ink: '#2A2620', accent: '#4A4234', gold: '#8A7A5A', sub: '#7A7263', frame: 'rgba(90,80,64,.26)' },
+    night: { n: ['深夜星光', 'Starry Night'], bg: ['#101E1B', '#16302A', '#0E2420'], glow: 'rgba(232,201,122,.26)', ink: '#EDEAE0', accent: '#E8C97A', gold: '#E8C97A', sub: '#9FB0AA', frame: 'rgba(232,201,122,.34)' },
+    plain: { n: ['純白簡潔', 'Pure White'], bg: ['#FFFFFF', '#FFFFFF', '#FFFFFF'], glow: 'rgba(0,0,0,0)', ink: '#23211C', accent: '#1F4D3D', gold: '#A9762F', sub: '#6B6255', frame: 'rgba(31,77,61,.22)' }
+  };
+  const TPL_ORDER = ['plain', 'navy', 'paper', 'dawn', 'grace', 'rose', 'sky', 'linen', 'night'];
+  const SIZES = { p: [1080, 1920, ['直式 9:16', 'Portrait 9:16']], t: [1080, 1350, ['直式 4:5', 'Portrait 4:5']], s: [1080, 1080, ['方形', 'Square']], w: [1920, 1080, ['橫式 16:9', 'Landscape 16:9']], f: [1440, 1080, ['橫式 4:3', 'Landscape 4:3']] };
+  const BORDERS = [['classic', ['古典雙框', 'Classic']], ['corner', ['雅緻角飾', 'Corners']], ['inline', ['內斂細線', 'Fine line']], ['dots', ['珠鏈點框', 'Dots']], ['ornate', ['華麗花角', 'Ornate']], ['none', ['無邊框', 'None']]];
+  const FS = [[0.9, ['小一點', 'Smaller']], [1, ['標準', 'Standard']], [1.2, ['大', 'Large']], [1.45, ['特大', 'Extra large']], [1.7, ['超大', 'Huge']]];
+  const DEF_TOP = () => GX.FELLOW;
+  const DEF_TO = () => T('親愛的家人：平安！', 'Dear family, peace be with you!');
+  const DEF_SIGN = () => T('願上帝賜福你！', 'God bless you!');
+
+  function st() {
+    if (!S.gxs || typeof S.gxs !== 'object') S.gxs = {};
+    const g = S.gxs;
+    if (!TPL[g.tpl]) g.tpl = 'plain';
+    if (!SIZES[g.size]) g.size = 'p';
+    if (!BORDERS.some(b => b[0] === g.border)) g.border = 'none';
+    if (!(+g.fs >= .85 && +g.fs <= 1.8)) g.fs = 1.45;
+    if (g.to == null) g.to = DEF_TO();
+    if (g.top == null) g.top = '';
+    if (g.sign == null) g.sign = '';
+    if (!(+g.vol > 0)) g.vol = 0.22;
+    if ([15, 30, 60, 0].indexOf(+g.mc) < 0) g.mc = 30;
+    if (!g.bgCat) g.bgCat = 'scenery';
+    return g;
+  }
+  /* 稱呼若還是某個語言的預設字，就換成目前語言；自己改過的不動 */
+  const toVal = () => {
+    const v = String(st().to || '').trim();
+    return (v === '親愛的家人：平安！' || v === '亲爱的家人：平安！' || v === 'Dear family, peace be with you!') ? DEF_TO() : v;
+  };
+
+  /* ── 工作室狀態（這一次） ── */
+  let item = null;           // { t, ref, n0, plain }
+  let note = '';             // 內文
+  let tab = 'look', busy = false, EL = null, rendering = 0;
+  let bgList = null, pxS = { q: '', page: 1, items: [], busy: false, end: false };
+  let hymns = null, bgmBlob = null, bgmName = '', bgmCredit = '', hymnEl = null, hymnPrev = null;
+  const songBase = {};
+
+  const SERIF0 = () => isSC() ? '"Noto Serif SC","Source Han Serif SC","Songti SC","STSong","SimSun",Georgia,serif'
+    : (EN ? 'Georgia,"Times New Roman",serif' : '"Noto Serif TC","Songti TC","STSong","PMingLiU",Georgia,serif');
+  const SANS0 = () => isSC() ? '"Noto Sans SC","PingFang SC","Microsoft YaHei","Heiti SC",sans-serif'
+    : (EN ? '-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif' : '"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif');
+
+  /* ── 畫卡片 ─────────────────────────────────────────────────── */
+  function rr(c, x, y, w, h, r) {
+    c.beginPath(); c.moveTo(x + r, y);
+    c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r);
+    c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r);
+    c.closePath();
+  }
+  const NO_START = '，。、；：？！）」』】》〉·…—％‰';
+  const NO_END = '（「『【《〈';
+  function wrapEN(c, text, maxW) {
+    const out = [];
+    String(text || '').split('\n').forEach(par => {
+      if (!par) { out.push(''); return; }
+      let line = '';
+      par.split(/\s+/).forEach(w => {
+        if (!w) return;
+        const probe = line ? line + ' ' + w : w;
+        if (c.measureText(probe).width > maxW && line) { out.push(line); line = w; }
+        else line = probe;
+      });
+      if (line) out.push(line);
+    });
+    return out;
+  }
+  function wrapText(c, text, maxW) {
+    if (EN) return wrapEN(c, text, maxW);
+    const out = [];
+    String(text || '').split('\n').forEach(par => {
+      if (!par) { out.push(''); return; }
+      let line = '';
+      for (const ch of par) {
+        if (c.measureText(line + ch).width > maxW && line) {
+          if (NO_START.indexOf(ch) >= 0) { line += ch; continue; }
+          let carry = '';
+          while (line.length > 1 && NO_END.indexOf(line[line.length - 1]) >= 0) { carry = line[line.length - 1] + carry; line = line.slice(0, -1); }
+          out.push(line); line = carry + ch;
+        } else line += ch;
+      }
+      out.push(line);
+    });
+    return out;
+  }
+  function drawBorder(c, W, H, pad, F, Tp) {
+    const B = st().border; if (B === 'none') return;
+    const line = Tp.frame, line2 = Tp.frame.replace(/[\d.]+\)$/, '0.55)'), gold = Tp.gold;
+    const m = pad * .5, x = m, y = m, w = W - m * 2, h = H - m * 2, R = Math.round(18 * F);
+    if (B === 'classic') {
+      c.strokeStyle = line; c.lineWidth = Math.max(2, W * .0022); rr(c, x, y, w, h, R); c.stroke();
+      c.strokeStyle = line2; c.lineWidth = Math.max(1, W * .0009);
+      rr(c, x + 9 * F, y + 9 * F, w - 18 * F, h - 18 * F, Math.round(12 * F)); c.stroke();
+      c.fillStyle = gold;
+      [[x, y], [x + w, y], [x, y + h], [x + w, y + h]].forEach(p => { c.beginPath(); c.arc(p[0], p[1], Math.round(5 * F), 0, 7); c.fill(); });
+    } else if (B === 'corner') {
+      c.strokeStyle = gold; c.lineWidth = Math.max(2, W * .003); c.lineCap = 'round';
+      const L = Math.round(56 * F);
+      const seg = (cx, cy, dx, dy) => { c.beginPath(); c.moveTo(cx, cy); c.lineTo(cx + dx * L, cy); c.moveTo(cx, cy); c.lineTo(cx, cy + dy * L); c.stroke(); };
+      seg(x, y, 1, 1); seg(x + w, y, -1, 1); seg(x, y + h, 1, -1); seg(x + w, y + h, -1, -1);
+      c.lineCap = 'butt';
+    } else if (B === 'inline') {
+      c.strokeStyle = line2; c.lineWidth = Math.max(1, W * .0013);
+      rr(c, x + 6 * F, y + 6 * F, w - 12 * F, h - 12 * F, Math.round(14 * F)); c.stroke();
+    } else if (B === 'dots') {
+      c.fillStyle = line2;
+      const r0 = Math.max(2, W * .0026), gap = Math.round(26 * F);
+      const ex = x + 6 * F, ey = y + 6 * F, ew = w - 12 * F, eh = h - 12 * F;
+      const dot = (px, py) => { c.beginPath(); c.arc(px, py, r0, 0, 7); c.fill(); };
+      for (let px = ex; px <= ex + ew; px += gap) { dot(px, ey); dot(px, ey + eh); }
+      for (let py = ey; py <= ey + eh; py += gap) { dot(ex, py); dot(ex + ew, py); }
+    } else if (B === 'ornate') {
+      c.strokeStyle = line; c.lineWidth = Math.max(2, W * .0022); rr(c, x, y, w, h, R); c.stroke();
+      c.strokeStyle = gold; c.lineWidth = Math.max(1.5, W * .0016); c.lineCap = 'round';
+      const L = Math.round(34 * F), o = Math.round(16 * F);
+      const flo = (cx, cy, dx, dy) => {
+        c.beginPath(); c.moveTo(cx + dx * o, cy + dy * o); c.lineTo(cx + dx * (o + L), cy + dy * o);
+        c.moveTo(cx + dx * o, cy + dy * o); c.lineTo(cx + dx * o, cy + dy * (o + L)); c.stroke();
+        c.fillStyle = gold; c.beginPath(); c.arc(cx + dx * o, cy + dy * o, Math.round(4.5 * F), 0, 7); c.fill();
+      };
+      flo(x, y, 1, 1); flo(x + w, y, -1, 1); flo(x, y + h, 1, -1); flo(x + w, y + h, -1, -1);
+      c.lineCap = 'butt';
+    }
+  }
+  function coverDraw(c, img, x, y, w, h) {
+    const r = Math.max(w / img.width, h / img.height);
+    const dw = img.width * r, dh = img.height * r;
+    c.drawImage(img, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);
+  }
+  function verseText() {
+    const raw = sc(String(item.t || '')).replace(/〔[^〕]*〕/g, '').replace(/\[[^\]]*\]/g, '')
+      .replace(/\s+/g, ' ').replace(/\s+([,.;:!?”’])/g, '$1').trim().replace(/[，、；：,;]+$/, '');
+    if (item.plain) return raw;
+    return EN ? ((/^[“"']/.test(raw) ? '' : '“') + raw + (/[”"']$/.test(raw) ? '' : '”'))
+      : ((/^[「『]/.test(raw) ? '' : '「') + raw + (/[」』]$/.test(raw) ? '' : '」'));
+  }
+  const refText = () => sc(item.ref || '');
+  const topText = () => sc(String(st().top || '').trim() || DEF_TOP());
+  const signText = () => sc(String(st().sign || '').trim() || DEF_SIGN());
+  const toText = () => sc(toVal());
+  /* ── 相片狀態（照互動聖經 v2.18：背景與貼紙可並存；photoMode 預設 full）── */
+  let photoImg = null, photoBy = '', stkImg = null, stkBy = '';
+  let photoMode = 'full';
+  let stkSize = 0.30, stkPos = 'br', stkShape = 'p';
+  let origScale = 1, origDX = 0, origDY = 0, origMove = false;
+  let origLay = 'auto', origSplit = false, origTarget = 'v', origNX = 0, origNY = 0;
+  let fullKind = 'verse', fullScale = 1.1, fullBless = '', blessOwn = '';
+  let suppressSticker = false;
+  function setPhoto(im, by) {
+    if (photoMode === 'sticker') { stkImg = im; stkBy = by || ''; }
+    else { photoImg = im; photoBy = by || ''; }
+  }
+  const isFull = () => !!(photoImg && photoMode === 'full');
+  const isFullV = () => isFull() && fullKind === 'verse';
+  const STK_SIZES = [[0.22, ['小張', 'Small']], [0.30, ['中等', 'Medium']], [0.38, ['大張', 'Large']], [0.46, ['滿版', 'Full']], [0.62, ['超大', 'Huge']], [0.84, ['整排', 'Full width']]];
+  const STK_POS = [['bl', ['左下', 'Bottom left']], ['bc', ['正下', 'Bottom centre']], ['br', ['右下', 'Bottom right']], ['tl', ['左上', 'Top left']], ['tr', ['右上', 'Top right']]];
+  const STK_SHAPES = [['p', ['直式', 'Portrait']], ['w', ['橫式 16:9', 'Landscape 16:9']], ['s', ['方形', 'Square']]];
+  const stkRatio = () => stkShape === 'w' ? 0.72 : (stkShape === 's' ? 1.06 : 1.12);
+  function coverDraw2(c, img, x, y, w, h) {
+    const ir = img.width / img.height, r = w / h;
+    let sw, sh, sx, sy;
+    if (ir > r) { sh = img.height; sw = sh * r; sx = (img.width - sw) / 2; sy = 0; }
+    else { sw = img.width; sh = sw / r; sx = 0; sy = (img.height - sh) / 2; }
+    c.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+  }
+  function dims() {
+    if (isFull()) {
+      const pw = photoImg.width, ph = photoImg.height;
+      const long = Math.max(1080, Math.min(1920, Math.max(pw, ph))), k = long / Math.max(pw, ph);
+      return [Math.round(pw * k / 2) * 2, Math.round(ph * k / 2) * 2];
+    }
+    return SIZES[st().size];
+  }
+
+  /* 整張原圖：只有 稱呼／經文或問候語（＋祝福）／署名，排在相片上方最空的地方（照互動聖經 drawFullCard） */
+  function drawFull(cv, W, H) {
+    const ctx = cv.getContext('2d'); cv.width = W; cv.height = H;
+    ctx.drawImage(photoImg, 0, 0, W, H);
+    const S2 = Math.min(W, H) / 1080, sans = SANS(), serif = SERIF();
+    const toName = toText();
+    const sign = signText();
+    let body, ref = '';
+    if (fullKind === 'greet') {
+      body = sc(String(st().greet || '').trim() || T('平安喜樂，主愛你！', 'Peace and joy to you, the Lord loves you!'));
+    } else { body = verseText(); ref = refText(); }
+    const bless = (fullKind === 'verse' ? sc(fullBless || '') : '').trim();
+    const mg = Math.round(W * .07);
+    const tw = Math.min(W - mg * 2, Math.max(H * 1.05, W * .6));
+    const roomMax = Math.min(H * .85, H * .46 * Math.max(1, fullScale || 1));
+    const FSc = fullScale || 1;
+    const ts = Math.round(44 * S2 * FSc), ss = Math.round(26 * S2 * FSc);
+    let row = null, rl = null; const sh = Math.max(24, Math.round(96 * H / W));
+    try {
+      const sw = 96, sc2 = document.createElement('canvas'); sc2.width = sw; sc2.height = sh;
+      const sx = sc2.getContext('2d'); sx.drawImage(photoImg, 0, 0, sw, sh);
+      const d = sx.getImageData(0, 0, sw, sh).data, g = new Float32Array(sw * sh);
+      for (let i = 0; i < sw * sh; i++) g[i] = (d[i * 4] * .299 + d[i * 4 + 1] * .587 + d[i * 4 + 2] * .114);
+      const x0 = Math.floor((W - tw) / 2 / W * sw), x1 = Math.ceil((W + tw) / 2 / W * sw);
+      row = new Float32Array(sh); rl = new Float32Array(sh);
+      for (let y = 0; y < sh; y++) {
+        let e = 0, l = 0, n = 0;
+        for (let x = x0; x < x1 - 1; x++) {
+          e += Math.abs(g[y * sw + x + 1] - g[y * sw + x]) + (y + 1 < sh ? Math.abs(g[(y + 1) * sw + x] - g[y * sw + x]) : 0);
+          l += g[y * sw + x]; n++;
+        }
+        row[y] = e / Math.max(1, n); rl[y] = l / Math.max(1, n) / 255;
+      }
+    } catch (e) { row = null; }
+    let vs = Math.round(58 * S2 * FSc), vl, rs, bs = 0, bl = [], total, ty = mg, lum = .3, pick = null;
+    const vsMin = FSc !== 1 ? vs : Math.round(22 * S2);   /* 使用者指定大小就不再自動縮小 */
+    for (;;) {
+      ctx.font = `600 ${vs}px ${serif}`; vl = wrapText(ctx, body, tw);
+      rs = Math.min(Math.round(30 * S2 * FSc), Math.round(vs * .8));
+      bs = Math.round(vs * .66); bl = [];
+      if (bless) { ctx.font = `500 ${bs}px ${sans}`; bl = wrapText(ctx, bless, tw); }
+      total = (toName ? ts * 1.9 : 0) + vl.length * vs * 1.5 + (ref ? rs * 2 : 0) + (bl.length ? bs * .9 + bl.length * bs * 1.55 : 0) + ss * 2.2;
+      let bestE = 0, bty = mg, blum = .3;
+      if (row) {
+        const hh = Math.max(1, Math.round(total / H * sh)), y0 = Math.round(mg / H * sh);
+        const maxY = Math.max(y0, Math.min(sh - hh, Math.round(sh * .55)));
+        bestE = 1e9;
+        for (let y = y0; y <= maxY; y++) {
+          let e = 0, l = 0;
+          for (let k = y; k < y + hh && k < sh; k++) { e += row[k]; l += rl[k]; }
+          const s3 = e / hh + (y / sh) * 8;
+          if (s3 < bestE) { bestE = s3; bty = y / sh * H; blum = l / hh; }
+        }
+      }
+      const fits = total <= roomMax;
+      if (fits && (!pick || bestE < pick.e)) pick = { e: bestE, vs, vl, rs, bs, bl, total, ty: bty, lum: blum };
+      if ((fits && bestE <= 2.2) || vs <= vsMin) break;
+      vs -= Math.max(1, Math.round(2 * S2));
+    }
+    if (!pick) pick = { e: 0, vs, vl, rs, bs, bl, total, ty: mg, lum: .3 };
+    vs = pick.vs; vl = pick.vl; rs = pick.rs; bs = pick.bs; bl = pick.bl; total = pick.total; ty = pick.ty; lum = pick.lum;
+    ty = Math.max(mg, Math.min(ty, H - mg - total));
+    const x1c = -(W - tw) / 2 + mg * .5, x2c = (W - tw) / 2 - mg * .5;
+    origDX = Math.max(x1c / W, Math.min(x2c / W, origDX));
+    origDY = Math.max(-(ty - mg) / H, Math.min((H - mg - (ty + total)) / H, origDY));
+    const dark = lum > .55;
+    const inkC0 = inkVal(), ink = inkC0 || (dark ? '#2a2118' : '#ffffff'), sub = inkC0 || (dark ? 'rgba(42,33,24,.92)' : 'rgba(255,255,255,.95)');
+    ctx.save(); ctx.translate(origDX * W, origDY * H);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+    ctx.shadowColor = dark ? 'rgba(255,255,255,.65)' : 'rgba(0,0,0,.55)'; ctx.shadowBlur = Math.round(10 * S2);
+    const cx = W / 2; let y = ty;
+    if (toName) {
+      let t2 = ts; ctx.font = `600 ${t2}px ${serif}`;
+      while (t2 > Math.round(22 * S2) && ctx.measureText(toName).width > tw) { t2 -= 2; ctx.font = `600 ${t2}px ${serif}`; }
+      ctx.fillStyle = ink; y += ts * 1.05; ctx.fillText(toName, cx, y); y += ts * .85;
+    }
+    ctx.fillStyle = ink; ctx.font = `600 ${vs}px ${serif}`;
+    y += vs * .1;
+    vl.forEach(l => { y += vs * 1.0; ctx.fillText(l, cx, y); y += vs * .5; });
+    if (ref) { ctx.font = `${rs}px ${sans}`; ctx.fillStyle = sub; y += rs * .6; ctx.fillText(ref, cx, y); y += rs * 1.4; }
+    if (bl.length) { ctx.font = `500 ${bs}px ${sans}`; ctx.fillStyle = sub; y += bs * .3; bl.forEach(l => { y += bs * 1.1; ctx.fillText(l, cx, y); y += bs * .45; }); y += bs * .2; }
+    let s2 = ss; ctx.font = `600 ${s2}px ${sans}`;
+    while (s2 > Math.round(14 * S2) && ctx.measureText(sign).width > tw) { s2 -= 2; ctx.font = `600 ${s2}px ${sans}`; }
+    ctx.fillStyle = sub; y += ss * 1.1; ctx.fillText(sign, cx, y);
+    ctx.restore();
+  }
+
+  /* 一般卡片（照互動聖經 drawVerseCard：背景／貼紙／原圖） */
+  function drawCard(cv, W, H) {
+    if (isFull()) return drawFull(cv, W, H);
+    const ctx = cv.getContext('2d'); cv.width = W; cv.height = H;
+    const Tp = inkT(TPL[st().tpl]);
+    const Sm = Math.min(W, H), F = Sm / 1080, pad = Math.round(Sm * .085), iw = W - pad * 2;
+    const wide = W > H * 1.2;
+    let colW = wide ? Math.min(iw, Math.round(H * 1.5)) : iw;
+    const sans = SANS(), serif = SERIF();
+    const FB = st().fs;
+    const orig = !!(photoImg && photoMode === 'orig');
+    let TX = 0, TY = 0, TW = W, TH = H, TP = pad, pz = null;
+    if (orig) {
+      const gp = Math.round(24 * F), fr = Math.round(9 * F), pa = photoImg.width / photoImg.height;
+      const AW = iw, AH = H - pad * 2;
+      const shapeCap = W / H > 1.2 ? .55 : (W / H > .9 ? .40 : .46);
+      const zhS = Math.min(AH * Math.min(.66, shapeCap * origScale), (AW - fr * 2) / pa + fr * 2);
+      const stack = { pz: { x: pad, y: pad, w: AW, h: Math.round(zhS) } };
+      stack.TX = pad; stack.TY = pad + Math.round(zhS) + gp; stack.TW = AW; stack.TH = H - pad - stack.TY;
+      stack.area = Math.min(AW - fr * 2, (zhS - fr * 2) * pa) * Math.min((AW - fr * 2) / pa, zhS - fr * 2);
+      stack.ok = stack.TH >= AH * .52;
+      const zwS = Math.min(AW * Math.min(.62, .5 * origScale), (AH - fr * 2) * pa + fr * 2);
+      const side = { pz: { x: pad, y: pad, w: Math.round(zwS), h: AH } };
+      const gs = Math.round(44 * F);
+      side.TX = pad + Math.round(zwS) + gs; side.TY = pad; side.TW = AW - Math.round(zwS) - gs; side.TH = AH;
+      side.area = Math.min(zwS - fr * 2, (AH - fr * 2) * pa) * Math.min((zwS - fr * 2) / pa, AH - fr * 2);
+      side.ok = side.TW >= AW * .38;
+      let pk;
+      if (origLay === 'stack') pk = stack; else if (origLay === 'side') pk = side;
+      else if (stack.ok && side.ok) pk = stack.area >= side.area ? stack : side;
+      else pk = stack.ok ? stack : (side.ok ? side : (W >= H * 1.2 ? side : stack));
+      pz = pk.pz; TX = pk.TX; TY = pk.TY; TW = pk.TW; TH = pk.TH;
+      TP = Math.round(W * .02);
+    }
+    const stkW = Math.round(Sm * stkSize);
+    const stkHas = !!(stkImg && !suppressSticker && !orig);
+    let stkSide = false;
+    if (!orig) {
+      const sideIw = W - 2 * (pad + stkW + Math.round(28 * F));
+      if (wide && stkHas && stkPos !== 'bc' && sideIw >= W * .45) { stkSide = true; colW = Math.min(colW, sideIw); }
+      TW = colW + 2 * pad; TX = Math.round((W - TW) / 2);
+    }
+    const tiw = TW - TP * 2;
+    const g = ctx.createLinearGradient(0, 0, W * .3, H);
+    g.addColorStop(0, Tp.bg[0]); g.addColorStop(.55, Tp.bg[1]); g.addColorStop(1, Tp.bg[2]);
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    if (photoImg && !orig) {
+      coverDraw2(ctx, photoImg, 0, 0, W, H);
+      const hx = Tp.bg[1].replace('#', '');
+      const R0 = parseInt(hx.slice(0, 2), 16), G0 = parseInt(hx.slice(2, 4), 16), B0 = parseInt(hx.slice(4, 6), 16);
+      const scg = ctx.createLinearGradient(0, 0, 0, H);
+      scg.addColorStop(0, `rgba(${R0},${G0},${B0},0.46)`);
+      scg.addColorStop(.5, `rgba(${R0},${G0},${B0},0.66)`);
+      scg.addColorStop(1, `rgba(${R0},${G0},${B0},0.56)`);
+      ctx.fillStyle = scg; ctx.fillRect(0, 0, W, H);
+    }
+    const rg = ctx.createRadialGradient(W * .84, H * .10, 10, W * .84, H * .10, W * .75);
+    rg.addColorStop(0, Tp.glow); rg.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = rg; ctx.fillRect(0, 0, W, H);
+    drawBorder(ctx, W, H, pad, F, Tp);
+    if (orig) {
+      const fr = Math.round(9 * F);
+      const k = Math.min((pz.w - fr * 2) / photoImg.width, (pz.h - fr * 2) / photoImg.height);
+      const dw = Math.round(photoImg.width * k), dh = Math.round(photoImg.height * k);
+      const bx = Math.round(pz.x + (pz.w - dw - fr * 2) / 2), by = Math.round(pz.y + (pz.h - dh - fr * 2) / 2);
+      ctx.save();
+      ctx.shadowColor = 'rgba(0,0,0,.26)'; ctx.shadowBlur = Math.round(22 * F); ctx.shadowOffsetY = Math.round(8 * F);
+      rr(ctx, bx, by, dw + fr * 2, dh + fr * 2, Math.round(10 * F)); ctx.fillStyle = '#FDFBF6'; ctx.fill();
+      ctx.restore();
+      ctx.save(); rr(ctx, bx + fr, by + fr, dw, dh, Math.round(4 * F)); ctx.clip();
+      ctx.drawImage(photoImg, bx + fr, by + fr, dw, dh); ctx.restore();
+    }
+    ctx.save(); ctx.translate(TX, TY);
+    const FT = F;
+    const grp = topText();
+    const grpSz = Math.round(27 * FT * FB), grpY = TP + Math.round(42 * FT);
+    ctx.textAlign = 'center'; ctx.fillStyle = Tp.sub; ctx.font = `600 ${grpSz}px ${sans}`;
+    const gw = ctx.measureText(grp).width;
+    ctx.fillText(grp, TW / 2, grpY);
+    ctx.strokeStyle = Tp.frame.replace(/[\d.]+\)$/, '0.6)'); ctx.lineWidth = Math.max(1, 1.5 * FT);
+    [[TW / 2 - gw / 2 - 28 * FT, -1], [TW / 2 + gw / 2 + 28 * FT, 1]].forEach(p => {
+      ctx.beginPath(); ctx.moveTo(p[0], grpY - 9 * FT); ctx.lineTo(p[0] + p[1] * 30 * FT, grpY - 9 * FT); ctx.stroke();
+    });
+    const toName = toText();
+    if (toName) {
+      let ts2 = Math.round(40 * FT * FB);
+      ctx.textAlign = 'center'; ctx.fillStyle = Tp.ink;
+      while (ts2 > Math.round(22 * FT * FB)) { ctx.font = `600 ${ts2}px ${serif}`; if (ctx.measureText(toName).width <= tiw) break; ts2 -= Math.max(1, Math.round(2 * FT)); }
+      ctx.font = `600 ${ts2}px ${serif}`;
+      ctx.fillText(toName, TW / 2, TP + Math.round(132 * FT));
+    }
+    const stkBottom = stkHas && !stkSide && stkPos !== 'tl' && stkPos !== 'tr';
+    const liftRoom = stkBottom ? Math.round(stkW * stkRatio()) + Math.round(30 * FT) : 0;
+    const topRoom = TP + Math.round((toName ? 176 : 100) * FT), botRoom = TP + Math.round(70 * FT) + liftRoom;
+    const room = TH - topRoom - botRoom;
+    const verse = verseText();
+    const nt = sc(String(note || '').trim());
+    const ref = refText();
+    let vs = Math.round(58 * FT * FB), vl, fixed, ns, nl, total;
+    const vsMin = Math.round((orig ? 20 : 28) * FT);
+    for (;;) {
+      for (;;) {
+        ctx.font = `600 ${vs}px ${serif}`;
+        vl = wrapText(ctx, verse, tiw - (orig ? Math.round(vs * .7) : 0));
+        if (vl.length <= (EN ? 9 : 7) || vs <= vsMin) break;
+        vs -= Math.max(1, Math.round(3 * FT));
+      }
+      fixed = vs * .9 + vl.length * vs * 1.52 + Math.round(64 * FT) + (nt ? Math.round(86 * FT) : 0);
+      ns = Math.min(Math.round(38 * FT * FB), Math.round(vs * .82)); nl = [];
+      if (nt) {
+        for (;;) {
+          ctx.font = `${ns}px ${sans}`;
+          nl = wrapText(ctx, nt, tiw);
+          if (fixed + nl.length * ns * 1.76 <= room || ns <= Math.round(21 * FT)) break;
+          ns -= Math.max(1, Math.round(2 * FT));
+        }
+      }
+      total = fixed + (nt ? nl.length * ns * 1.76 : 0);
+      if (!orig || total <= room || vs <= vsMin) break;
+      vs -= Math.max(1, Math.round(3 * FT));
+    }
+    if (nt && total > room + 1) {
+      const fit = Math.max(1, Math.floor((room - fixed) / (ns * 1.76)));
+      if (nl.length > fit) {
+        nl = nl.slice(0, fit); let last = nl[fit - 1]; ctx.font = `${ns}px ${sans}`;
+        while (last.length > 1 && ctx.measureText(last + '…').width > tiw) last = last.slice(0, -1);
+        nl[fit - 1] = last.replace(/[，。、；：,.;:\s]+$/, '') + '…';
+        total = fixed + nl.length * ns * 1.76;
+      }
+    }
+    let y = topRoom + Math.max(0, (room - total) / 2);
+    const vh = vs * .9 + vl.length * vs * 1.52 + Math.round(64 * FT), nh = total - vh;
+    let vx = 0, vy = 0, nx = 0, ny = 0;
+    if (orig) {
+      const mg = Math.round(12 * F);
+      const clampMv = (dx, dy, top, hh) => {
+        const x1 = -(TX + TP) + mg, x2 = W - (TX + TW - TP) - mg;
+        const y1 = -(TY + top) + mg, y2 = H - (TY + top + hh) - mg;
+        return [Math.max(x1 / W, Math.min(x2 / W, dx)), Math.max(y1 / H, Math.min(y2 / H, dy))];
+      };
+      if (origSplit && nt) {
+        let r1 = clampMv(origDX, origDY, y, vh); origDX = r1[0]; origDY = r1[1];
+        let r2 = clampMv(origNX, origNY, y + vh, nh); origNX = r2[0]; origNY = r2[1];
+        nx = origNX * W; ny = origNY * H;
+      } else {
+        let r1 = clampMv(origDX, origDY, y, total); origDX = r1[0]; origDY = r1[1];
+        origNX = origDX; origNY = origDY; nx = origDX * W; ny = origDY * H;
+      }
+      vx = origDX * W; vy = origDY * H;
+    }
+    ctx.save(); ctx.translate(vx, vy);
+    ctx.fillStyle = Tp.accent; ctx.font = `600 ${vs}px ${serif}`;
+    y += vs * .9;
+    vl.forEach(l => { ctx.fillText(l, TW / 2, y); y += vs * 1.52; });
+    ctx.font = `${Math.min(Math.round(30 * FT), Math.round(vs * .85))}px ${sans}`; ctx.fillStyle = Tp.accent;
+    if (ref) ctx.fillText(ref, TW / 2, y);
+    y += Math.round(64 * FT);
+    ctx.restore();
+    if (nt) {
+      ctx.save(); ctx.translate(nx, ny);
+      ctx.fillStyle = Tp.gold;
+      ctx.beginPath(); ctx.arc(TW / 2, y, Math.round(5 * FT), 0, 7); ctx.fill();
+      ctx.strokeStyle = Tp.gold; ctx.lineWidth = 2.5 * FT;
+      ctx.beginPath(); ctx.moveTo(TW / 2 - 52 * FT, y); ctx.lineTo(TW / 2 - 16 * FT, y); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(TW / 2 + 16 * FT, y); ctx.lineTo(TW / 2 + 52 * FT, y); ctx.stroke();
+      y += Math.round(86 * FT);
+      ctx.textAlign = 'left'; ctx.fillStyle = Tp.ink; ctx.font = `${ns}px ${sans}`;
+      nl.forEach(l => { ctx.fillText(l, TP, y); y += ns * 1.76; });
+      ctx.textAlign = 'center';
+      ctx.restore();
+    }
+    const lift = stkBottom ? Math.round(stkW * stkRatio()) + Math.round(16 * FT) : 0;
+    ctx.textAlign = 'center'; ctx.fillStyle = Tp.sub;
+    const sign = signText();
+    let ss = Math.round(25 * FT * FB);
+    while (ss > Math.round(15 * FT * FB)) { ctx.font = `600 ${ss}px ${sans}`; if (ctx.measureText(sign).width <= tiw) break; ss -= 2; }
+    ctx.font = `600 ${ss}px ${sans}`;
+    ctx.fillText(sign, TW / 2, TH - TP * .72 - Math.round(24 * FT) - lift);
+    ctx.restore();
+    if (stkHas) {
+      const sw = stkW, sh = Math.round(sw * stkRatio());
+      const top = stkPos === 'tl' || stkPos === 'tr';
+      const bx = (stkPos === 'bl' || stkPos === 'tl') ? pad - 4 * F : (stkPos === 'bc') ? Math.round((W - sw) / 2) : W - pad - sw + 4 * F;
+      const by = top ? pad + Math.round(70 * F) : H - pad - sh + 4 * F;
+      ctx.save();
+      ctx.translate(bx + sw / 2, by + sh / 2);
+      ctx.rotate((stkShape === 'w' ? -1.4 : -3) * Math.PI / 180);
+      ctx.shadowColor = 'rgba(0,0,0,.30)'; ctx.shadowBlur = Math.round(24 * F); ctx.shadowOffsetY = Math.round(9 * F);
+      const fr = Math.round(10 * F), pb = (stkShape === 'p') ? Math.round(26 * F) : fr;
+      rr(ctx, -sw / 2, -sh / 2, sw, sh, Math.round(10 * F)); ctx.fillStyle = '#FDFBF6'; ctx.fill();
+      ctx.shadowColor = 'transparent';
+      const iw2 = sw - fr * 2, ih2 = sh - fr - pb;
+      ctx.save(); rr(ctx, -sw / 2 + fr, -sh / 2 + fr, iw2, ih2, Math.round(4 * F)); ctx.clip();
+      coverDraw2(ctx, stkImg, -sw / 2 + fr, -sh / 2 + fr, iw2, ih2); ctx.restore();
+      ctx.restore();
+    }
+  }
+  function drawSelfie(cx, vid, W, H, F) {
+    if (!vid || !vid.videoWidth) return;
+    const pad = Math.round(Math.min(W, H) * .085), R = Math.round(Math.min(W, H) * 0.115);
+    const cxx = W - pad - R + 4 * F, cyy = H - pad - R + 4 * F;
+    cx.save();
+    cx.shadowColor = 'rgba(0,0,0,.28)'; cx.shadowBlur = Math.round(22 * F); cx.shadowOffsetY = Math.round(8 * F);
+    cx.beginPath(); cx.arc(cxx, cyy, R, 0, 7); cx.fillStyle = '#000'; cx.fill();
+    cx.restore();
+    cx.save(); cx.beginPath(); cx.arc(cxx, cyy, R, 0, 7); cx.clip();
+    const vw = vid.videoWidth, vh = vid.videoHeight, side = Math.min(vw, vh);
+    cx.translate(cxx, cyy); cx.scale(-1, 1);
+    cx.drawImage(vid, (vw - side) / 2, (vh - side) / 2, side, side, -R, -R, R * 2, R * 2);
+    cx.restore();
+    cx.beginPath(); cx.arc(cxx, cyy, R, 0, 7);
+    cx.lineWidth = Math.max(3, W * .006); cx.strokeStyle = '#F4EFE3'; cx.stroke();
+    cx.beginPath(); cx.arc(cxx, cyy, R + 4 * F, 0, 7);
+    cx.lineWidth = Math.max(2, W * .003); cx.strokeStyle = 'rgba(212,166,91,.85)'; cx.stroke();
+  }
+
+  /* ── 我的相片庫（IndexedDB，最多 40 張；進美圖自動接回上次那張）── */
+  const PLIB_MAX = 40;
+  let pdb = null, plRestored = false;
+  function plOpen() {
+    return new Promise((res, rej) => {
+      if (pdb) return res(pdb);
+      try {
+        const q = indexedDB.open(EN ? 'gn_photos_en' : 'gn_photos', 1);
+        q.onupgradeneeded = e => e.target.result.createObjectStore('p', { keyPath: 'id' });
+        q.onsuccess = e => { pdb = e.target.result; res(pdb); };
+        q.onerror = () => rej(q.error);
+      } catch (e) { rej(e); }
+    });
+  }
+  const plReq = r => new Promise((res, rej) => { r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+  async function plAll() {
+    try { const db = await plOpen(); return (await plReq(db.transaction('p').objectStore('p').getAll())).sort((a, b) => b.ts - a.ts); }
+    catch (e) { return []; }
+  }
+  async function plSave(img, by) {
+    try {
+      const db = await plOpen();
+      const mk = (max, q, url) => new Promise(r => {
+        const k = Math.min(1, max / Math.max(img.width, img.height)), c = document.createElement('canvas');
+        c.width = Math.max(1, Math.round(img.width * k)); c.height = Math.max(1, Math.round(img.height * k));
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        if (url) r(c.toDataURL('image/jpeg', q)); else c.toBlob(b => r(b), 'image/jpeg', q);
+      });
+      const pair = await Promise.all([mk(1600, .88, false), mk(260, .72, true)]);
+      const id = 'p' + Date.now();
+      await plReq(db.transaction('p', 'readwrite').objectStore('p').put({ id, ts: Date.now(), blob: pair[0], thumb: pair[1], by: by || '', w: img.width, h: img.height }));
+      const all = await plAll();
+      for (const o of all.slice(PLIB_MAX)) await plReq(db.transaction('p', 'readwrite').objectStore('p').delete(o.id));
+      if (photoMode !== 'sticker') { st().photoLast = id; st().photoMode = photoMode; keep(); }
+    } catch (e) {}
+  }
+  async function plLoad(rec) {
+    const url = URL.createObjectURL(rec.blob);
+    try {
+      const im = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error('decode')); i.src = url; });
+      setPhoto(im, rec.by || '');
+      if (photoMode !== 'sticker') { st().photoLast = rec.id; keep(); }
+      return true;
+    } finally { setTimeout(() => { try { URL.revokeObjectURL(url); } catch (_) {} }, 30000); }
+  }
+  async function plRestore() {
+    if (plRestored || photoImg || !st().photoLast) return;
+    plRestored = true;
+    try {
+      const db = await plOpen();
+      const rec = await plReq(db.transaction('p').objectStore('p').get(st().photoLast));
+      if (rec) { photoMode = st().photoMode || 'full'; await plLoad(rec); }
+    } catch (e) {}
+  }
+
+  /* ── 預覽 ───────────────────────────────────────────────────── */
+  let cardURL = '';
+  function renderCard() {
+    if (!item) return;
+    clearTimeout(rendering);
+    rendering = setTimeout(() => {
+      const d = dims(), cv = document.createElement('canvas');
+      try { drawCard(cv, d[0], d[1]); cardURL = cv.toDataURL('image/png'); } catch (e) { cardURL = ''; }
+      const pv = q1('#gxsPv');
+      if (pv && cardURL) { pv.src = cardURL; pv.style.aspectRatio = d[0] + ' / ' + d[1]; }
+    }, 40);
+  }
+  function cardBlob() {
+    const d = dims(), cv = document.createElement('canvas');
+    drawCard(cv, d[0], d[1]);
+    return new Promise(r => {
+      try { cv.toBlob(b => r(b), 'image/png'); }
+      catch (e) { r(null); }
+    });
+  }
+  const fileBase = () => (EN ? 'mark' : '321馬可福音') + '-' + String(item && item.ref || 'card').replace(/[\\/:*?"<>|\s]+/g, '');
+
+  /* ── 相片 ───────────────────────────────────────────────────── */
+  function loadImg(url, cors) {
+    return new Promise((res, rej) => {
+      const i = new Image();
+      if (cors) i.crossOrigin = 'anonymous';
+      i.onload = () => res(i);
+      i.onerror = () => rej(new Error('img'));
+      i.src = url;
+    });
+  }
+  async function setPhotoURL(url, by) {
+    say(T('載入相片中…', 'Loading photo…'));
+    try {
+      const r = await fetch(url, { mode: 'cors' });
+      if (!r.ok) throw new Error('http ' + r.status);
+      const b = await r.blob();
+      const o = URL.createObjectURL(b);
+      const im = await loadImg(o, false);
+      setPhoto(im, by || ''); plSave(im, by || '');
+      setTimeout(() => { try { URL.revokeObjectURL(o); } catch (e) {} }, 30000);
+      paint();
+      say(T('已選好這張相片', 'Photo selected'));
+    } catch (e) {
+      try { const im = await loadImg(url, true); setPhoto(im, by || ''); paint(); }
+      catch (e2) {
+        if (url.indexOf(SITE) === 0 && url.indexOf(SITE + 'bg/') !== 0) return setPhotoURL(SITE + 'bg/' + url.slice(SITE.length), by);
+        say(T('這張相片載入失敗，請換一張', 'Could not load this photo — try another'));
+      }
+    }
+  }
+  function pickOwn() {
+    const i = document.createElement('input');
+    i.type = 'file'; i.accept = 'image/*'; i.style.cssText = 'position:fixed;left:-9999px';
+    i.onchange = () => {
+      const f = i.files && i.files[0]; i.remove();
+      if (!f) return;
+      const r = new FileReader();
+      r.onload = async () => {
+        try { const im = await loadImg(String(r.result), false); setPhoto(im, ''); plSave(im, ''); paint(); }
+        catch (e) { say(T('這張相片讀不出來', 'Could not read this photo')); }
+      };
+      r.readAsDataURL(f);
+    };
+    document.body.appendChild(i); i.click();
+  }
+  async function bgLoad() {
+    if (bgList) return bgList;
+    const r = await fetch(SITE + 'bg.json', { cache: 'no-cache' });
+    if (!r.ok) throw new Error('http ' + r.status);
+    const d = await r.json();
+    bgList = { cats: (d.cats || []), list: (d.list || []) };
+    bgList.cats = bgList.cats.filter(c => bgList.list.some(x => x.c === c.id));
+    return bgList;
+  }
+  const bgName = x => EN ? (x.ne || x.n) : (isSC() ? (x.ns || x.n) : x.n);
+  async function pxFetch(reset) {
+    if (pxS.busy) return;
+    pxS.busy = true;
+    if (reset) { pxS.page = 1; pxS.items = []; pxS.end = false; }
+    const q = pxS.q.trim(), s = st().size;
+    const orient = s === 'w' || s === 'f' ? 'landscape' : (s === 's' ? 'square' : 'portrait');
+    const url = (q ? `https://api.pexels.com/v1/search?query=${encodeURIComponent(q)}&orientation=${orient}&`
+      : 'https://api.pexels.com/v1/curated?') + `per_page=24&page=${pxS.page}`;
+    try {
+      const r = await fetch(url, { headers: { Authorization: PEXELS_KEY } });
+      if (!r.ok) throw new Error('http ' + r.status);
+      const d = await r.json();
+      const got = (d && d.photos) || [];
+      pxS.items = pxS.items.concat(got); pxS.end = got.length < 24; pxS.page++;
+    } catch (e) { say(T('連不上圖庫，請稍後再試', 'Could not reach the photo library')); }
+    pxS.busy = false;
+  }
+  const PX_PRE = EN
+    ? [['Landscape', 'landscape'], ['Sunrise', 'sunrise'], ['Sky', 'sky'], ['Ocean', 'ocean'], ['Mountain', 'mountain'], ['Flowers', 'flowers'], ['Light', 'light rays'], ['Tree', 'tree'], ['Path', 'path'], ['Wheat', 'wheat field'], ['Water', 'calm water'], ['Clouds', 'clouds'], ['Mist', 'morning mist'], ['Stars', 'starry sky'], ['Desert', 'desert'], ['Cross', 'cross']]
+    : [['風景', 'landscape'], ['日出', 'sunrise'], ['天空', 'sky'], ['海', 'ocean'], ['山', 'mountain'], ['花', 'flowers'], ['光', 'light rays'], ['樹', 'tree'], ['小路', 'path'], ['麥田', 'wheat field'], ['水', 'calm water'], ['雲', 'clouds'], ['晨霧', 'morning mist'], ['星空', 'starry sky'], ['曠野', 'desert'], ['十字架', 'cross']];
+
+  /* ── 小智寫祝福、改一改 ─────────────────────────────────────── */
+  function amenOnly(s) {
+    return String(s || '')
+      .replace(/[，,、\s]*(奉|靠著?)\s*(主\s*)?(耶穌|耶稣)(基督)?\s*(的)?\s*(名|聖名|圣名)\s*(禱告|祷告|祈求|求|祈禱|祈祷)?[，,。\s]*/g, '，')
+      .replace(/[,;]?\s*(?:in|through)\s+(?:the\s+)?(?:(?:holy|precious|mighty)\s+)?name\s+of\s+(?:the\s+)?(?:Lord\s+)?Jesus(?:\s+Christ)?(?:\s+(?:we|I)\s+(?:pray|ask))?[,.]?/gi, '')
+      .replace(/[,;]?\s*(?:in|through)\s+(?:the\s+Lord\s+)?Jesus(?:\s+Christ)?['’]s?\s+(?:holy\s+)?name(?:\s+(?:we|I)\s+(?:pray|ask))?[,.]?/gi, '')
+      .replace(/([A-Za-z])\s+(Amen)\b/g, '$1. $2')
+      .replace(/([。！？!?.])\s*[，,]\s*/g, '$1').replace(/^[，,\s]+/, '').replace(/\s{2,}/g, ' ').trim();
+  }
+  function amenBang(s) {
+    s = String(s || '').trim();
+    if (/(阿們|阿门)[。！!]?$/.test(s)) return s.replace(/(阿們|阿门)[。！!]?$/, '$1！').replace(/[，,]\s*(阿們|阿门)！$/, '。$1！').replace(/[。．.]{2,}/g, '。');
+    if (/amen[.!]?$/i.test(s)) return s.replace(/amen[.!]?$/i, 'Amen!');
+    return s;
+  }
+  const whoLine = () => {
+    const w = toVal();
+    return w ? T(`\n這段話是寫給「${w}」的，請直接對他說話，但不要再寫一次稱呼。`, `\nThis is written for "${w}" — speak directly to them, but do not repeat the greeting.`) : '';
+  };
+  async function blessWrite() {
+    if (busy || !item) return;
+    busy = true; paint();
+    const full = isFull();
+    const sys = full
+      ? T('你是「小智」，國度321空中團契的屬靈同伴。請照使用者給的這段經文，寫一兩句很短的祝福送給弟兄姊妹：總共一到兩句、50字以內，口語、溫暖，從這段經文所顯明的神的心意出發。不要標題、不要引號、不要再抄一次經文、不要表情符號。祝福結尾只用「阿們」，不要寫「奉主耶穌的名禱告」。',
+          'You are Xiaozhi, a spiritual companion from Kingdom 321 Online Fellowship. From the passage the user gives you, write a very short blessing for a brother or sister: one or two sentences, under 35 words, warm and spoken, drawn from what this passage shows of God. No headings, no quotation marks, do not quote the passage again, no emoji. End with just "Amen" — do not write "in the name of Jesus we pray".')
+      : T('你是「小智」，國度321空中團契的屬靈同伴。請照使用者給的這段經文，寫一段溫暖的關懷祝福，送給弟兄姊妹。要求：先用一兩句點出這段經文裡神的心意，再寫一句貼近生活的祝福，最後用一句祝福收尾。總共三到四句、120 字以內，口語、溫暖、不說教，不要標題、不要條列、不要引號、不要再抄一次經文。祝福結尾只用「阿們」，不要寫「奉主耶穌的名禱告」。',
+          'You are Xiaozhi, a spiritual companion from Kingdom 321 Online Fellowship. From the passage the user gives you, write a short, warm word of encouragement for a brother or sister. First name in one or two sentences what this passage shows of God’s heart, then one sentence that touches ordinary daily life, then close with a blessing. Three to four sentences, under 60 words. Warm and spoken, never preachy. No headings, no bullet points, no quotation marks, and do not quote the passage again. End with just "Amen" — do not write "in the name of Jesus we pray".');
+    const own = String(blessOwn || '').trim();
+    const ask = T('經文：', 'Passage: ') + item.t + (item.ref ? '（' + item.ref + '）' : '') + whoLine() + GX.A().write + T('\n不要用表情符號。', '\nNo emoji.')
+      + (own ? T('\n\n使用者自己想說的話（請把這個意思自然融入祝福，仍要依經文來寫）：', '\n\nThe user’s own words (weave this in naturally, still grounded in the passage): ') + own : '');
+    const r = await GX.aiRaw(sys, ask, 60000, 600);
+    busy = false;
+    const out = amenBang(amenOnly(String(r.out || '').replace(/[*#>`]/g, '').replace(/^「|」$/g, '').trim()));
+    if (out) { if (full) fullBless = out.replace(/\s*\n+\s*/g, EN ? ' ' : ''); else note = out; say(T('小智寫好了，可以再改', 'Done — you can still edit it')); }
+    else say(T('小智連不上', 'Xiaozhi could not connect') + (r.why ? '（' + r.why + '）' : ''));
+    paint();
+  }
+  const TW_PICKS = EN ? ['Shorter', 'Longer', 'Warmer', 'More everyday', 'Stronger', 'Say it another way'] : ['短一點', '長一點', '更溫暖', '口語一點', '更有力', '換個說法'];
+  async function tweak(instr) {
+    if (busy || !item) return;
+    const cur = String(isFullV() ? fullBless : note || '').trim();
+    if (!cur) { say(T('內文還是空的——先自己寫一段，或請小智寫一段再來改。', 'The text is empty — write something first, or ask Xiaozhi to write it.')); return; }
+    busy = true; paint();
+    const sys = T('你是「小智」，國度321空中團契的屬靈同伴。請照使用者的要求，修改他給你的這段祝福。只回傳改好的內文本身——不要解釋、不要標題、不要條列、不要引號、不要再抄一次經文。保持溫暖、口語、不說教。祝福結尾只用「阿們」，不要寫「奉主耶穌的名禱告」。',
+      'You are Xiaozhi from Kingdom 321 Online Fellowship. Rewrite the short blessing the user gives you, following their instruction. Return ONLY the rewritten text — no explanation, no heading, no bullet points, no quotation marks, and do not quote the passage again. Keep it warm and spoken, never preachy. Close with just "Amen" — do not write "in the name of Jesus we pray".');
+    const ask = T('經文：', 'Passage: ') + item.t + (item.ref ? '（' + item.ref + '）' : '') + whoLine() + GX.A().write
+      + T('\n\n目前的內文：\n', '\n\nCurrent text:\n') + cur + T('\n\n要怎麼改：', '\n\nHow to change it: ') + instr;
+    const r = await GX.aiRaw(sys, ask, 60000, 600);
+    busy = false;
+    const out = amenBang(amenOnly(String(r.out || '').replace(/[*#>`]/g, '').replace(/^「|」$/g, '').trim()));
+    if (out) { if (isFullV()) fullBless = out.replace(/\s*\n+\s*/g, EN ? ' ' : ''); else note = out; say(T('改好了', 'Rewritten')); }
+    else say(T('小智連不上', 'Xiaozhi could not connect') + (r.why ? '（' + r.why + '）' : ''));
+    paint();
+  }
+
+  /* ── 詩歌庫 ─────────────────────────────────────────────────── */
+  async function hymnList() {
+    if (hymns) return hymns;
+    const r = await fetch(SITE + 'music.json', { cache: 'no-cache' });
+    if (!r.ok) throw new Error('http ' + r.status);
+    const d = await r.json();
+    hymns = Array.isArray(d) ? d : ((d && d.songs) || []);
+    return hymns;
+  }
+  const songName = s => EN ? (s.ne || s.n) : (isSC() ? (s.ns || s.n) : s.n);
+  function hymnAudio() {
+    if (hymnEl) return hymnEl;
+    hymnEl = document.createElement('audio');
+    hymnEl.preload = 'auto'; hymnEl.playsInline = true;
+    hymnEl.setAttribute('playsinline', ''); hymnEl.setAttribute('webkit-playsinline', '');
+    hymnEl.style.cssText = 'position:absolute;width:1px;height:1px;opacity:0;pointer-events:none';
+    document.body.appendChild(hymnEl);
+    return hymnEl;
+  }
+  function hymnStop() { if (hymnEl) { try { hymnEl.pause(); } catch (e) {} } hymnPrev = null; qa('.gxhp').forEach(b => b.textContent = '▶'); }
+  function hymnPlay(i) {
+    const s = hymns && hymns[i]; if (!s) return;
+    const a = hymnAudio();
+    if (hymnPrev === i) { hymnStop(); return; }
+    hymnStop();
+    const base = songBase[s.f] != null ? songBase[s.f] : '';
+    a.src = SITE + base + encodeURIComponent(s.f);
+    const p = a.play(); if (p && p.catch) p.catch(() => {
+      if (base === '') { a.src = SITE + 'music/' + encodeURIComponent(s.f); const p2 = a.play(); if (p2 && p2.catch) p2.catch(() => say(T('這首歌暫時放不出來', 'This song could not play'))); }
+    });
+    hymnPrev = i;
+    const b = q1('#gxhp' + i); if (b) b.textContent = '⏸';
+  }
+  async function hymnFetch(s) {
+    const tries = songBase[s.f] != null ? [songBase[s.f]] : ['', 'music/'];
+    let why = '';
+    for (const b of tries) {
+      try {
+        const r = await fetch(SITE + b + encodeURIComponent(s.f), { mode: 'cors' });
+        if (!r.ok) { why = 'HTTP ' + r.status; continue; }
+        const blob = await r.blob();
+        if (!blob.size || /text\/html/.test(blob.type || '')) { why = T('檔案不對', 'bad file'); continue; }
+        songBase[s.f] = b;
+        return blob;
+      } catch (e) { why = T('網路', 'network'); }
+    }
+    throw new Error(why || 'fail');
+  }
+  async function hymnPick(i) {
+    const s = hymns && hymns[i]; if (!s) return;
+    hymnStop();
+    say(T('下載詩歌中…', 'Downloading…'));
+    try {
+      bgmBlob = await hymnFetch(s);
+      bgmName = songName(s);
+      bgmCredit = T('詩歌：', 'Music: ') + songName(s) + (s.by ? (EN ? ' / ' : '／') + s.by : '');
+      say(T('已選好配樂：', 'Music selected: ') + bgmName);
+      closeSub(); paint();
+    } catch (e) { say(T('這首詩歌下載失敗（', 'Could not download this song (') + e.message + T('）', ')')); }
+  }
+  function pickBgmFile() {
+    const i = document.createElement('input');
+    i.type = 'file'; i.accept = 'audio/*,video/*,.mp3,.m4a,.aac,.wav,.aif,.aiff,.caf,.flac,.ogg,.opus,.mp4,.mov,.webm';
+    i.style.cssText = 'position:fixed;left:-9999px';
+    i.onchange = () => {
+      const f = i.files && i.files[0]; i.remove();
+      if (!f) return;
+      if (f.size > 25 * 1024 * 1024) { say(T('檔案太大（上限 25MB）', 'File too large (max 25 MB)')); return; }
+      bgmBlob = f; bgmName = f.name; bgmCredit = '';
+      say(T('已選好配樂：', 'Music selected: ') + f.name); paint();
+    };
+    document.body.appendChild(i); i.click();
+  }
+
+  /* ── 小面板（圖庫、Pexels、詩歌庫） ─────────────────────────── */
+  function closeSub() { const m = q1('#gxsSub'); if (m) m.remove(); hymnStop(); }
+  function sub(title, inner) {
+    closeSub();
+    const m = document.createElement('div'); m.id = 'gxsSub'; m.className = 'gxsmask';
+    m.innerHTML = `<div class="gxscard"><div class="gxshead"><b>${esc(title)}</b><button class="ico" data-k="subx">✕</button></div><div id="gxsSubB">${inner}</div></div>`;
+    m.addEventListener('click', e => { if (e.target === m || (e.target.getAttribute && e.target.getAttribute('data-k') === 'subx')) closeSub(); });
+    document.body.appendChild(m);
+    return q1('#gxsSubB', m);
+  }
+  async function openGallery() {
+    const b = sub(T('內建圖庫', 'Built-in gallery'), `<p class="sm muted">${esc(T('載入中…', 'Loading…'))}</p>`);
+    try { await bgLoad(); } catch (e) { b.innerHTML = `<p class="sm muted">${esc(T('圖庫連不上，請稍後再試', 'Could not reach the gallery'))}</p>`; return; }
+    const draw = () => {
+      const cat = bgList.cats.some(c => c.id === st().bgCat) ? st().bgCat : (bgList.cats[0] || {}).id;
+      b.innerHTML = `<div class="gxchips">${bgList.cats.map(c => `<button class="${c.id === cat ? 'on' : ''}" data-c="${esc(c.id)}">${esc(bgName(c))}</button>`).join('')}</div>
+        <div class="gxgrid">${bgList.list.map((x, i) => x.c !== cat ? '' : `<button class="gxcell" data-i="${i}"><img src="${SITE + esc(x.t || x.f)}" alt="" loading="lazy" data-alt="${esc(x.t && x.t !== x.f ? SITE + x.f + '|' : '')}${SITE}bg/${esc(x.t || x.f)}" onerror="GXS.thumbErr(this)"><span>${esc(bgName(x))}</span></button>`).join('')}</div>
+        <p class="xs muted">${esc(T('圖片與《321互動聖經》共用同一個圖庫。', 'Shared with the 321 Interactive Bible gallery.'))}</p>`;
+      qa('[data-c]', b).forEach(x => x.onclick = () => { st().bgCat = x.getAttribute('data-c'); keep(); draw(); });
+      qa('.gxcell', b).forEach(x => x.onclick = async () => {
+        const it = bgList.list[+x.getAttribute('data-i')]; if (!it) return;
+        closeSub(); await setPhotoURL(SITE + it.f, '');
+      });
+    };
+    draw();
+  }
+  function openPexels() {
+    const b = sub(T('Pexels 免費圖庫', 'Pexels free photos'), `
+      <div class="gxbar"><input id="pxQ" placeholder="${esc(T('想找什麼樣的畫面…', 'What kind of picture…'))}" value="${esc(pxS.q)}"><button class="btn pri" id="pxGo">${esc(T('搜尋', 'Search'))}</button></div>
+      <div class="gxchips">${PX_PRE.map(p => `<button data-q="${esc(p[1])}">${esc(p[0])}</button>`).join('')}</div>
+      <div class="gxgrid" id="pxGrid"></div>
+      <div class="row" style="margin-top:10px"><button class="btn" id="pxMore">${esc(T('再多一些', 'More'))}</button></div>
+      <p class="xs muted">${esc(T('照片來自 Pexels，免費可商用；卡片角落會印上攝影師名字。', 'Photos from Pexels, free to use; the photographer is credited on the card.'))}</p>`);
+    const grid = q1('#pxGrid', b);
+    const draw = () => {
+      if (!pxS.items.length) { grid.innerHTML = `<p class="sm muted" style="grid-column:1/-1">${esc(pxS.busy ? T('載入中…', 'Loading…') : T('找不到相符的照片，換個字試試', 'Nothing found — try another word'))}</p>`; return; }
+      grid.innerHTML = pxS.items.map((p, i) => `<button class="gxcell" data-i="${i}"><img src="${esc((p.src && (p.src.tiny || p.src.small)) || '')}" alt="" loading="lazy"><span>${esc(p.photographer || '')}</span></button>`).join('');
+      qa('.gxcell', grid).forEach(x => x.onclick = async () => {
+        const p = pxS.items[+x.getAttribute('data-i')]; if (!p) return;
+        closeSub();
+        await setPhotoURL((p.src && (p.src.large2x || p.src.large || p.src.original)) || '', p.photographer || '');
+      });
+      const mb = q1('#pxMore', b); if (mb) mb.style.display = pxS.end ? 'none' : '';
+    };
+    const run = async reset => { grid.innerHTML = `<p class="sm muted" style="grid-column:1/-1">${esc(T('載入中…', 'Loading…'))}</p>`; await pxFetch(reset); draw(); };
+    q1('#pxGo', b).onclick = () => { pxS.q = q1('#pxQ', b).value; run(true); };
+    q1('#pxQ', b).onkeydown = e => { if (e.key === 'Enter' && !e.isComposing) { pxS.q = e.target.value; run(true); } };
+    qa('[data-q]', b).forEach(x => x.onclick = () => { pxS.q = x.getAttribute('data-q'); q1('#pxQ', b).value = pxS.q; run(true); });
+    q1('#pxMore', b).onclick = () => run(false);
+    if (pxS.items.length) draw(); else run(true);
+  }
+  /* ══ v1.3（2026-10-19）：AI 生圖、AI 配樂、內建字體與文字顏色、相機打不開的說明
+     照《321互動聖經》v2.19–v2.20；沒有 AI 影片（主耀已要求刪除）。
+     離開 App 去第三方工具的流程，一律先存「經文＋狀態」到 localStorage（key 含書卷代號），回來自動接回。 ══ */
+  const TS = (zh, en) => sc(T(zh, en));
+  const BKEY = String((window.GX_BOOK && window.GX_BOOK.slug) || (location.pathname.split('/')[1] || 'bk'));
+  const RKEY = k => 'gx_' + k + '_resume_' + BKEY;
+  const lsPut = (k, o) => { try { localStorage.setItem(RKEY(k), JSON.stringify(o)); } catch (e) {} };
+  const lsTake = k => { let o = null; try { o = JSON.parse(localStorage.getItem(RKEY(k)) || 'null'); localStorage.removeItem(RKEY(k)); } catch (e) {} return o; };
+  const itemSnap = () => item ? { t: item.t, ref: item.ref, n0: item.n0, plain: item.plain } : null;
+  const isFramed = () => { try { return window.top !== window.self; } catch (e) { return true; } };
+  const inAppBrowser = () => /Line\/|FBAN|FBAV|Instagram|MicroMessenger|Messenger|Telegram|MQQBrowser|Snapchat|TikTok|WhatsApp/i.test(navigator.userAgent || '');
+  const copyText = async (ta) => {
+    try { await navigator.clipboard.writeText(ta.value); }
+    catch (e) { try { ta.focus(); ta.select(); document.execCommand('copy'); } catch (_) {} }
+  };
+  const copyQuiet = (txt) => { try { const q = navigator.clipboard.writeText(txt); if (q && q.catch) q.catch(() => {}); } catch (e) {} };
+  const E2 = a => esc(sc(L2(a)));
+  const chipRow2 = (id, arr, cur) => `<div class="gxchips" id="${id}">` + arr.map(x => `<button data-v="${x[0]}" class="${x[0] === cur ? 'on' : ''}">${E2(x[1])}</button>`).join('') + '</div>';
+  const toolLinks = (arr, attr) => arr.map(x => `<a class="btn" ${attr}="1" style="display:block;margin-top:6px;text-align:left;text-decoration:none" target="_blank" rel="noopener" href="${x[0]}">${esc(x[1])}<span class="xs muted" style="margin-left:8px">${esc(sc(L2(x[2])))}</span></a>`).join('');
+
+  /* ── AI 生圖 ── */
+  const AIG_STYLES = [
+    ['sc', ['風景', 'Landscape'], 'majestic natural landscape, golden hour light, soft clouds, serene and peaceful'],
+    ['wc', ['水彩', 'Watercolor'], 'soft watercolor painting, gentle pastel colors, dreamy and hopeful'],
+    ['oil', ['油畫', 'Oil painting'], 'classic oil painting, rich warm colors, reverent atmosphere'],
+    ['lt', ['光影', 'Heavenly light'], 'rays of heavenly light breaking through clouds, cinematic, glowing, holy atmosphere'],
+    ['nt', ['星空', 'Starry night'], 'peaceful starry night sky, deep blue and gold, calm and awe-inspiring'],
+    ['fl', ['花草', 'Flowers'], 'lush flowers and green pastures, morning dew, soft sunlight, gentle and fresh']
+  ];
+  const AIG_SHAPES = [['p', ['直式 9:16', 'Portrait 9:16'], 576, 1024, '9:16'], ['w', ['橫式 16:9', 'Landscape 16:9'], 1024, 576, '16:9'], ['s', ['方形', 'Square'], 1024, 1024, '1:1']];
+  const AIG_TOOLS = () => [
+    ['https://gemini.google.com/app', 'Google Gemini', ['免費、需 Google 帳號', 'Free, Google account']],
+    ['https://chatgpt.com/', 'ChatGPT', ['免費版有每日張數限制、需登入', 'Free tier has a daily limit, sign-in']],
+    ['https://www.doubao.com/chat/', T('豆包 Doubao', 'Doubao (豆包)'), ['免費、中文提示詞很好用（中國大陸常用）', 'Free; works well with Chinese prompts']],
+    ['https://pollinations.ai/', 'Pollinations', ['免費、免註冊', 'Free, no sign-up']]
+  ];
+  let aigSt = 'sc', aigSh = 'p', aigNote = '', aigPr0 = '';
+  function aigPrompt() {
+    const s = AIG_STYLES.find(x => x[0] === aigSt) || AIG_STYLES[0];
+    const sh = AIG_SHAPES.find(x => x[0] === aigSh) || AIG_SHAPES[0];
+    const verse = item ? String(item.t || '').replace(/\s+/g, ' ').trim().slice(0, 160) : '';
+    const theme = (aigNote || '').trim();
+    return 'A beautiful, uplifting Christian inspirational background image, ' + s[2] + '. '
+      + (theme ? 'Scene: ' + theme + '. ' : '')
+      + (verse ? 'Mood inspired by this Bible verse: "' + verse + '". ' : '')
+      + 'No text, no letters, no words, no watermark, no people\'s faces; leave calm open space for verse text. Aspect ratio ' + sh[4] + ', high quality.';
+  }
+  function aiSave(pr) { lsPut('ai', { ts: Date.now(), item: itemSnap(), note, st: aigSt, sh: aigSh, sc: aigNote, pr: pr || '' }); }
+  function fileToPhoto(f) {
+    const r = new FileReader();
+    r.onload = async () => {
+      try { const im = await loadImg(String(r.result), false); setPhoto(im, ''); plSave(im, ''); paint(); say(T('已選好這張相片', 'Photo selected')); }
+      catch (e) { say(T('這張相片讀不出來', 'Could not read this photo')); }
+    };
+    r.readAsDataURL(f);
+  }
+  function openAiGen() {
+    if (!item) return;
+    const b = sub(TS('✨ 用 AI 生成美圖', '✨ Make a picture with AI'), `
+      <p class="xs muted" style="line-height:1.6;margin:0 0 6px">${esc(TS('不用找圖：用文字描述想要的畫面，免費 AI 工具幫你畫。已依這節經文寫好提示詞，可以直接用，也可以改。', 'No need to search: describe the scene and a free AI tool draws it. A prompt based on this verse is ready — use it or edit it.'))}</p>
+      <p class="gxlab">${esc(TS('畫風', 'Style'))}</p>${chipRow2('aigSt', AIG_STYLES, aigSt)}
+      <p class="gxlab">${esc(TS('尺寸', 'Shape'))}</p>${chipRow2('aigSh', AIG_SHAPES, aigSh)}
+      <p class="gxlab">${esc(TS('想要的畫面（選填，可用中文或英文）', 'Scene you want (optional)'))}</p>
+      <input id="aigScene" placeholder="${esc(TS('例如：清晨的湖邊、牧羊人與羊群、橄欖樹下的光', 'e.g. a quiet lake at dawn, a shepherd and sheep'))}" value="${esc(aigNote)}">
+      <p class="gxlab">${esc(TS('提示詞（可修改）', 'Prompt (editable)'))}</p>
+      <textarea id="aigPr" rows="8" style="font-size:13px;line-height:1.5"></textarea>
+      <div class="row" style="margin-top:10px"><button class="btn pri" id="aigGen">${esc(TS('⚡ 在 App 內直接生成（免費）', '⚡ Generate here (free)'))}</button><button class="btn" id="aigCopy">${esc(TS('📋 複製提示詞', '📋 Copy prompt'))}</button></div>
+      <p class="xs muted" id="aigMsg" style="min-height:18px;margin:8px 0 0"></p>
+      <p class="gxlab">${esc(TS('或到這些免費工具貼上提示詞（點進去會自動複製）', 'Or paste it into these free tools (tapping copies the prompt)'))}</p>
+      ${toolLinks(AIG_TOOLS(), 'data-aitool')}
+      <label class="btn pri" style="display:block;cursor:pointer;margin-top:12px;text-align:center">${esc(TS('🖼 圖畫好了：從相簿選這張圖', '🖼 Picture ready: choose it from Photos'))}<input type="file" accept="image/*" hidden id="aigBack"></label>
+      <p class="xs muted" style="line-height:1.6;margin:10px 0 0">${esc(TS('生成後把圖存到相簿，再回到這裡按上面的按鈕選它就能用。AI 生成的圖每次都不同；圖上不要有字，經文由 App 排上去。', 'Save the result to your album, then choose it with the button above. Each result is different. The picture has no text — the app adds the verse.'))}</p>`);
+    const pr = q1('#aigPr', b), msg = q1('#aigMsg', b);
+    let edited = false;
+    const fill = () => { if (!edited) pr.value = aigPrompt(); };
+    fill(); if (aigPr0) { pr.value = aigPr0; edited = true; aigPr0 = ''; }
+    pr.oninput = () => { edited = true; };
+    const chipsBind = (id, set) => qa('#' + id + ' button', b).forEach(x => x.onclick = () => {
+      set(x.getAttribute('data-v')); edited = false; fill();
+      qa('#' + id + ' button', b).forEach(o => o.classList.toggle('on', o === x));
+    });
+    chipsBind('aigSt', v => { aigSt = v; }); chipsBind('aigSh', v => { aigSh = v; });
+    const scn = q1('#aigScene', b); scn.oninput = () => { aigNote = scn.value; edited = false; fill(); };
+    q1('#aigCopy', b).onclick = async () => { await copyText(pr); aiSave(pr.value); msg.textContent = TS('已複製，到下面任一工具貼上就能生成', 'Copied — paste it into any tool below'); };
+    qa('a[data-aitool]', b).forEach(a => a.addEventListener('click', () => { aiSave(pr.value); copyQuiet(pr.value); }));
+    const back = q1('#aigBack', b);
+    back.onchange = () => { const f = back.files && back.files[0]; if (!f) return; closeSub(); fileToPhoto(f); };
+    let working = false;
+    q1('#aigGen', b).onclick = async () => {
+      if (working) return; working = true;
+      const sh = AIG_SHAPES.find(x => x[0] === aigSh) || AIG_SHAPES[0];
+      const url = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(pr.value) + '?width=' + sh[2] + '&height=' + sh[3]
+        + '&nologo=true&model=flux&seed=' + Math.floor(Math.random() * 1e6);
+      msg.textContent = TS('AI 正在畫圖，約 10–40 秒，請稍候…', 'Drawing… about 10–40 seconds');
+      try {
+        const ctl = new AbortController(); const tm = setTimeout(() => ctl.abort(), 90000);
+        const r = await fetch(url, { mode: 'cors', signal: ctl.signal }); clearTimeout(tm);
+        if (!r.ok) throw new Error('http ' + r.status);
+        const blob = await r.blob();
+        if (!/^image\//.test(blob.type)) throw new Error('type');
+        const obj = URL.createObjectURL(blob);
+        const im = await loadImg(obj, false);
+        setTimeout(() => { try { URL.revokeObjectURL(obj); } catch (e) {} }, 30000);
+        setPhoto(im, 'AI'); plSave(im, 'AI');
+        closeSub(); paint(); say(TS('已放進美圖', 'Added to your picture'));
+      } catch (e) { msg.textContent = TS('這次沒有生成成功（免費服務有時很忙）。可以再按一次，或複製提示詞到下面的工具。', 'Could not generate this time (the free service is sometimes busy). Try again, or copy the prompt into a tool below.'); }
+      working = false;
+    };
+  }
+
+  /* ── AI 配樂 ── */
+  const AIM_STYLES = [
+    ['pi', ['鋼琴', 'Piano'], 'solo piano, soft and warm, gentle arpeggios'],
+    ['st', ['弦樂', 'Strings'], 'warm string ensemble with soft piano, cinematic and tender'],
+    ['gt', ['木吉他', 'Guitar'], 'fingerstyle acoustic guitar with light ambient pads'],
+    ['am', ['空靈', 'Ambient'], 'ethereal ambient pads, slow evolving texture, spacious reverb'],
+    ['wh', ['敬拜', 'Worship'], 'contemporary worship instrumental, piano, soft drums, warm synth pad, building gently'],
+    ['hy', ['聖詩', 'Hymn'], 'reverent hymn-like instrumental, pipe organ and strings, unhurried']
+  ];
+  const AIM_MOODS = [
+    ['pe', ['平安', 'Peace'], 'peaceful and calm'], ['hp', ['盼望', 'Hope'], 'hopeful and uplifting'], ['jy', ['喜樂', 'Joy'], 'joyful and bright'],
+    ['cm', ['安慰', 'Comfort'], 'tender and comforting'], ['md', ['默想', 'Meditative'], 'quiet and meditative'], ['pr', ['讚美', 'Praise'], 'grateful and celebratory']
+  ];
+  const AIM_LENS = [['30', ['約 30 秒', '~30 sec'], 'about 30 seconds'], ['60', ['約 1 分鐘', '~1 min'], 'about 1 minute'], ['120', ['約 2 分鐘', '~2 min'], 'about 2 minutes']];
+  const AIM_TOOLS = () => [
+    ['https://suno.com/', 'Suno', ['每天有免費額度、可下載 MP3（免費方案多半限非商業）', 'Daily free credits, MP3 download (free plan is usually non-commercial)']],
+    ['https://labs.google/fx/tools/music-fx', 'Google MusicFX', ['免費、需 Google 帳號、英文提示詞、約 70 秒', 'Free, Google account, English prompts, ~70 s']],
+    ['https://stableaudio.com/', 'Stable Audio', ['有免費額度、可下載、適合純音樂', 'Free credits, download, good for instrumentals']]
+  ];
+  let aimSt = 'pi', aimMd = 'pe', aimLn = '60', aimNote = '', aimPr0 = '';
+  function aimPrompt() {
+    const s = AIM_STYLES.find(x => x[0] === aimSt) || AIM_STYLES[0];
+    const m = AIM_MOODS.find(x => x[0] === aimMd) || AIM_MOODS[0];
+    const l = AIM_LENS.find(x => x[0] === aimLn) || AIM_LENS[1];
+    const verse = item ? String(item.t || '').replace(/\s+/g, ' ').trim().slice(0, 100) : '';
+    const theme = (aimNote || '').trim();
+    return 'Instrumental only, no vocals, no lyrics. Gentle Christian worship background music, ' + s[2] + '. Mood: ' + m[2] + '. '
+      + (theme ? 'Imagery: ' + theme + '. ' : '')
+      + (verse ? 'Inspired by this Bible verse: "' + verse + '". ' : '')
+      + 'Slow to medium tempo, soft intro and gentle ending, easy to loop, ' + l[2] + '.';
+  }
+  function aimSave(pr) { lsPut('mu', { ts: Date.now(), item: itemSnap(), note, st: aimSt, md: aimMd, ln: aimLn, sc: aimNote, pr: pr || '' }); }
+  function openAiMusic() {
+    if (!item) return;
+    const b = sub(TS('🎼 用 AI 生成配樂', '🎼 Make music with AI'), `
+      <p class="xs muted" style="line-height:1.6;margin:0 0 6px">${esc(TS('不用找音樂：選曲風與心情，App 依這節經文寫好提示詞，貼到免費 AI 音樂工具，幾十秒就生成一首純音樂。', 'No need to hunt for music: pick a style and mood, the app writes a prompt from this verse; paste it into a free AI music tool and get an instrumental in under a minute.'))}</p>
+      <p class="gxlab">${esc(TS('曲風', 'Style'))}</p>${chipRow2('aimSt', AIM_STYLES, aimSt)}
+      <p class="gxlab">${esc(TS('心情', 'Mood'))}</p>${chipRow2('aimMd', AIM_MOODS, aimMd)}
+      <p class="gxlab">${esc(TS('長度', 'Length'))}</p>${chipRow2('aimLn', AIM_LENS, aimLn)}
+      <p class="gxlab">${esc(TS('想要的畫面或感覺（選填，中英文都可以）', 'Imagery or feeling (optional)'))}</p>
+      <input id="aimScene" placeholder="${esc(TS('例如：清晨的湖邊、慢慢升起的陽光', 'e.g. a quiet lake at dawn, slowly rising sunlight'))}" value="${esc(aimNote)}">
+      <p class="gxlab">${esc(TS('提示詞（可修改，英文效果最好）', 'Prompt (editable)'))}</p>
+      <textarea id="aimPr" rows="7" style="font-size:13px;line-height:1.5"></textarea>
+      <div class="row" style="margin-top:10px"><button class="btn pri" id="aimCopy">${esc(TS('📋 複製提示詞', '📋 Copy prompt'))}</button></div>
+      <p class="xs muted" id="aimMsg" style="min-height:18px;margin:8px 0 0"></p>
+      <p class="gxlab">${esc(TS('到這些免費工具貼上提示詞（點進去會自動複製）', 'Paste it into these free tools (tapping copies the prompt)'))}</p>
+      ${toolLinks(AIM_TOOLS(), 'data-aimtool')}
+      <label class="btn pri" style="display:block;cursor:pointer;margin-top:12px;text-align:center">${esc(TS('🎵 音樂做好了：從檔案選這首', '🎵 Music ready: choose the file'))}<input type="file" accept="audio/*,.mp3,.m4a,.wav" hidden id="aimBack"></label>
+      <p class="xs muted" style="line-height:1.6;margin:10px 0 0">${esc(TS('在工具裡把音樂下載（MP3），存到「檔案」，回到這裡按上面的按鈕選它，就會成為這張美圖的配樂，錄影時自動混進去。各工具的免費額度與使用條款會變動；AI 生成的音樂若要公開發布或商用，請先看該工具的條款。', 'Download the MP3 in the tool, save it to Files, then choose it with the button above; it becomes the background music when you record. Free quotas and terms change — check each tool’s terms before publishing or commercial use.'))}</p>`);
+    const pr = q1('#aimPr', b), msg = q1('#aimMsg', b);
+    let edited = false;
+    const fill = () => { if (!edited) pr.value = aimPrompt(); };
+    fill(); if (aimPr0) { pr.value = aimPr0; edited = true; aimPr0 = ''; }
+    pr.oninput = () => { edited = true; };
+    const chipsBind = (id, set) => qa('#' + id + ' button', b).forEach(x => x.onclick = () => {
+      set(x.getAttribute('data-v')); edited = false; fill();
+      qa('#' + id + ' button', b).forEach(o => o.classList.toggle('on', o === x));
+    });
+    chipsBind('aimSt', v => { aimSt = v; }); chipsBind('aimMd', v => { aimMd = v; }); chipsBind('aimLn', v => { aimLn = v; });
+    const scn = q1('#aimScene', b); scn.oninput = () => { aimNote = scn.value; edited = false; fill(); };
+    q1('#aimCopy', b).onclick = async () => { await copyText(pr); aimSave(pr.value); msg.textContent = TS('已複製，到下面任一工具貼上就能生成', 'Copied — paste it into a tool below'); };
+    qa('a[data-aimtool]', b).forEach(a => a.addEventListener('click', () => { aimSave(pr.value); copyQuiet(pr.value); }));
+    const back = q1('#aimBack', b);
+    back.onchange = () => {
+      const f = back.files && back.files[0]; if (!f) return;
+      closeSub();
+      if (f.size > 25 * 1024 * 1024) { say(T('檔案太大（上限 25MB）', 'File too large (max 25 MB)')); return; }
+      bgmBlob = f; bgmName = f.name; bgmCredit = '';
+      say(T('已選好配樂：', 'Music selected: ') + f.name); paint();
+    };
+  }
+
+  /* ── 卡片字體與文字顏色；楷體、圓體 App 自帶（霞鶩文楷、粉圓，開源，只含經文用字，第一次選用才下載，與互動聖經共用同一份） ── */
+  const CARD_FONTS = [['auto', ['自動', 'Auto']], ['mingti', ['明體', 'Serif']], ['hei', ['黑體', 'Sans']], ['kai', ['楷體', 'Script']], ['yuan', ['圓體', 'Rounded']]];
+  const CARD_INKS = [['', ['自動', 'Auto']], ['#FFFFFF', ['白', 'White']], ['#1F1B16', ['黑', 'Black']], ['#D4A65B', ['金', 'Gold']], ['#123F92', ['深藍', 'Navy']], ['#6B4423', ['咖啡', 'Brown']], ['#8A2D2D', ['酒紅', 'Wine']], ['#255943', ['深綠', 'Green']], ['#E8A0B4', ['粉紅', 'Pink']]];
+  const cardFontKey = () => CARD_FONTS.some(x => x[0] === st().cardFont) ? st().cardFont : 'auto';
+  const inkVal = () => /^#[0-9a-fA-F]{6}$/.test(st().cardInk || '') ? st().cardInk : '';
+  const inkT = Tp => { const c = inkVal(); return c ? Object.assign({}, Tp, { ink: c, accent: c, sub: c }) : Tp; };
+  const IBF = {};
+  function fontStatText() {
+    const k = cardFontKey();
+    if (EN || (k !== 'kai' && k !== 'yuan')) return '';
+    const s = IBF[k === 'kai' ? 'IBKai' : 'IBYuan'];
+    if (!s) return TS('字體準備中…', 'Preparing font…');
+    if (s === 'loading') return TS('⏳ 字體下載中（約 1–2 MB），請稍候…', '⏳ Downloading font (1–2 MB)…');
+    if (s === 'ok') return TS('✓ 字體已載入', '✓ Font loaded');
+    return TS('✗ 字體載入失敗（', '✗ Font failed to load (') + s + TS('）。請確認網路後，再按一次字體按鈕重試。', '). Check the network and tap the font button again.');
+  }
+  function fontStatShow() { const el = q1('#gxFontSt'); if (el) el.textContent = fontStatText(); }
+  function ensureIBFont(name, url) {
+    if (IBF[name]) return;
+    if (!window.FontFace) { IBF[name] = 'no FontFace'; return; }
+    IBF[name] = 'loading';
+    try {
+      const ff = new FontFace(name, 'url(' + url + ')');
+      ff.load().then(f => {
+        document.fonts.add(f); IBF[name] = 'ok';
+        if (EL && EL.classList.contains('on') && item && !recOn()) paint(); else fontStatShow();
+      }).catch(e => { IBF[name] = String((e && e.message) || e || 'error').slice(0, 60); fontStatShow(); });
+    } catch (e) { IBF[name] = String((e && e.message) || e).slice(0, 60); fontStatShow(); }
+  }
+  function cardFontStack() {
+    const k = cardFontKey();
+    if (!EN && k === 'kai') ensureIBFont('IBKai', SITE + 'fonts/kai2.woff');
+    if (!EN && k === 'yuan') ensureIBFont('IBYuan', SITE + 'fonts/yuan2.woff');
+    if (k === 'mingti') return SERIF0();
+    if (k === 'hei') return SANS0();
+    if (k === 'kai') return isSC() ? '"IBKai","Kaiti SC","STKaiti","KaiTi","楷体",serif'
+      : (EN ? '"Snell Roundhand","Apple Chancery","Brush Script MT",cursive' : '"IBKai","Kaiti TC","BiauKai","DFKai-SB","STKaiti","KaiTi",serif');
+    if (k === 'yuan') return isSC() ? '"IBYuan","Yuanti SC","PingFang SC","Noto Sans SC",sans-serif'
+      : (EN ? '"Avenir Next Rounded","Nunito","Trebuchet MS",sans-serif' : '"IBYuan","Yuanti TC","PingFang TC","Noto Sans TC",sans-serif');
+    return '';
+  }
+  const SERIF = () => cardFontStack() || SERIF0();
+  const SANS = () => cardFontStack() || SANS0();
+  function fontInkUI() {
+    const fk = cardFontKey(), ink = inkVal();
+    return `<p class="gxlab">${esc(TS('卡片字體', 'Card font'))}</p>${chips(CARD_FONTS.map(x => [x[0], sc(L2(x[1]))]), fk, 'cfont')}
+      <p class="xs muted" id="gxFontSt" style="margin:6px 0 0">${esc(fontStatText())}</p>
+      ${hint(TS('選了字體，稱呼、經文、內文與署名都用同一種字體。楷體、圓體第一次選用要下載約 1–2 MB。', 'The whole card uses the chosen font. Script and Rounded download 1–2 MB on first use (Chinese only).'))}
+      <p class="gxlab">${esc(TS('文字顏色', 'Text colour'))}</p>
+      <div class="gxchips">${CARD_INKS.map(x => `<button class="${ink.toLowerCase() === x[0].toLowerCase() ? 'on' : ''}" data-k="cink" data-v="${x[0]}">${x[0] ? `<i style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${x[0]};border:1px solid rgba(128,128,128,.5);margin-right:5px;vertical-align:-1px"></i>` : ''}${E2(x[1])}</button>`).join('')}
+        <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-size:13px">🎨 ${esc(TS('自選', 'Custom'))}<input type="color" id="gxInkC" value="${ink || '#1F1B16'}" style="width:34px;height:26px;padding:0;border:0;background:none"></label></div>
+      ${hint(TS('「自動」會依版型或相片明暗自己選黑或白；金色裝飾線與邊框不變。', '“Auto” picks black or white from the template or photo; gold rules and borders stay.'))}`;
+  }
+
+  /* ── 相機打不開：說清楚原因；內嵌視窗（團契 App）、內嵌瀏覽器（LINE 等）常擋相機，給兩條退路 ── */
+  function camFail(e) {
+    const n = (e && e.name) || '';
+    const noAPI = !(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+    const framed = isFramed();
+    let why;
+    if (framed) why = TS('目前是在團契 App 內嵌的視窗裡開的，系統不給內嵌視窗用相機。請按下面「用瀏覽器開啟並允許相機」，會用 Safari 開這個 App，並自動回到這節經文的自拍。', 'This app is open inside an embedded view, where the system blocks the camera. Tap “Open in browser and allow the camera” below to continue in Safari.');
+    else if (noAPI || inAppBrowser()) why = TS('這個畫面是在 LINE／內嵌瀏覽器裡開的，相機被擋住了。請點右上角「用瀏覽器開啟」（Safari／Chrome），或把 App 加到主畫面再開。', 'This page is open inside an in-app browser (e.g. LINE) which blocks the camera. Tap “Open in browser” (Safari/Chrome) or add the app to your Home Screen.');
+    else if (n === 'NotAllowedError' || n === 'SecurityError') why = TS('相機權限被拒絕。iPhone：設定 › Safari › 相機 選「允許」，或網址列左邊 AA › 網站設定 › 相機 › 允許，再回來按自拍。', 'Camera permission was denied. On iPhone: Settings › Safari › Camera › Allow, then try Selfie again.');
+    else if (n === 'NotReadableError' || n === 'AbortError') why = TS('相機正被其他 App 使用（例如視訊通話），請先關掉再試。', 'The camera is in use by another app. Close it and try again.');
+    else if (n === 'NotFoundError' || n === 'OverconstrainedError') why = TS('找不到前鏡頭。', 'No front camera found.');
+    else why = TS('相機打不開（', 'Could not open the camera (') + (n || TS('未知原因', 'unknown')) + TS('）。', ').');
+    const b = sub(TS('📷 自拍相機打不開', '📷 Camera unavailable'), `
+      <p style="font-size:14px;line-height:1.7;margin:6px 0 10px">${esc(why)}</p>
+      <p class="xs muted" style="line-height:1.6;margin:0 0 8px">${esc(TS('不想改設定也可以：用手機內建相機直接錄一段自拍影片，錄完會存進「我的作品」。', 'No need to change settings: record a selfie video with the phone camera; it is saved to My works.'))}</p>
+      ${framed ? `<button class="btn pri" id="camTop" style="display:block;width:100%;margin-bottom:8px">${esc(TS('🔓 用瀏覽器開啟並允許相機', '🔓 Open in browser and allow the camera'))}</button>` : ''}
+      <label class="btn ${framed ? '' : 'pri'}" style="display:block;cursor:pointer;text-align:center">${esc(TS('📱 用手機內建相機錄自拍', '📱 Record with the phone camera'))}<input type="file" accept="video/*" capture="user" hidden id="camNative"></label>`);
+    const ct = q1('#camTop', b);
+    if (ct) ct.onclick = () => {
+      lsPut('cam', { ts: Date.now(), item: itemSnap(), note });
+      const u = location.origin + location.pathname;
+      let w = null; try { w = window.open(u, '_blank'); } catch (_) {}
+      if (!w) { try { window.top.location.href = u; } catch (_) { location.href = u; } }
+      closeSub();
+    };
+    q1('#camNative', b).onchange = async ev => {
+      const f = ev.target.files && ev.target.files[0]; if (!f) return;
+      closeSub();
+      await saveWork(f, f.type || 'video/mp4', 'video', 0);
+    };
+  }
+
+  /* ── 離開 App 再回來（或被系統重載）時接回原位：相機（10 分鐘內、且不在內嵌視窗）→ AI 配樂 → AI 生圖（12 小時內） ── */
+  function resumeBoot() {
+    let o = null, mode = '';
+    if (!isFramed()) { o = lsTake('cam'); if (o && o.item && Date.now() - o.ts <= 10 * 60 * 1000) mode = 'cam'; else o = null; }
+    if (!mode) { o = lsTake('mu'); if (o && o.item && Date.now() - o.ts <= 12 * 3600 * 1000) mode = 'mu'; else o = null; }
+    if (!mode) { o = lsTake('ai'); if (o && o.item && Date.now() - o.ts <= 12 * 3600 * 1000) mode = 'ai'; else o = null; }
+    if (!mode) return;
+    let tries = 0;
+    const iv = setInterval(() => {
+      tries++;
+      let ready = false;
+      try { ready = !!(D && D.txt && S); } catch (e) { ready = false; }
+      if (!ready) { if (tries > 40) clearInterval(iv); return; }
+      clearInterval(iv);
+      try {
+        const it = o.item;
+        if (!open({ text: it.t, ref: it.ref, note: it.n0, plain: it.plain })) return;
+        if (o.note != null) note = o.note;
+        if (mode === 'cam') { tab = 'rec'; paint(); setTimeout(() => setRecMode('s'), 1200); }
+        else if (mode === 'mu') {
+          aimSt = o.st || aimSt; aimMd = o.md || aimMd; aimLn = o.ln || aimLn; aimNote = o.sc || ''; aimPr0 = o.pr || '';
+          tab = 'rec'; paint(); setTimeout(openAiMusic, 700);
+        } else {
+          aigSt = o.st || aigSt; aigSh = o.sh || aigSh; aigNote = o.sc || ''; aigPr0 = o.pr || '';
+          tab = 'photo'; paint(); setTimeout(openAiGen, 700);
+        }
+      } catch (e) {}
+    }, 400);
+  }
+  window.addEventListener('load', () => setTimeout(resumeBoot, 600));
+
+  async function openHymns() {
+    const b = sub(T('詩歌庫', 'Hymn library'), `<p class="sm muted">${esc(T('載入中…', 'Loading…'))}</p>`);
+    try { await hymnList(); } catch (e) { b.innerHTML = `<p class="sm muted">${esc(T('詩歌庫連不上，請稍後再試', 'Could not reach the hymn library'))}</p>`; return; }
+    b.innerHTML = hymns.map((s, i) => `<div class="gxhrow"><button class="gxhp" id="gxhp${i}" data-p="${i}">▶</button>
+      <span class="gxhn"><b>${esc(songName(s))}</b>${s.by ? `<small>${esc(s.by)}</small>` : ''}</span>
+      <button class="btn xs2" data-u="${i}">${esc(T('用這首', 'Use'))}</button></div>`).join('')
+      + `<p class="xs muted">${esc(T('詩歌與《321互動聖經》共用；用詩歌庫的歌錄影片時，影片下緣會印上出處。', 'Shared with the 321 Interactive Bible; videos made with these songs carry a credit line.'))}</p>`;
+    qa('[data-p]', b).forEach(x => x.onclick = () => hymnPlay(+x.getAttribute('data-p')));
+    qa('[data-u]', b).forEach(x => x.onclick = () => hymnPick(+x.getAttribute('data-u')));
+  }
+
+  /* ── iOS 分段 MP4 重新封裝（mx_*，照抄互動聖經，勿改）── */
+function mx_u32(b,p){return b[p]*16777216+b[p+1]*65536+b[p+2]*256+b[p+3];}
+function mx_i32(b,p){const v=mx_u32(b,p);return v>=2147483648?v-4294967296:v;}
+function mx_u64(b,p){return mx_u32(b,p)*4294967296+mx_u32(b,p+4);}
+function mx_typ(b,p){return String.fromCharCode(b[p],b[p+1],b[p+2],b[p+3]);}
+
+function mx_boxes(b,start,end){
+  const out=[];let p=start;
+  while(p+8<=end){
+    let size=mx_u32(b,p),hs=8;
+    if(size===1){size=mx_u64(b,p+8);hs=16;}
+    else if(size===0)size=end-p;
+    if(size<8||p+size>end)break;
+    out.push({type:mx_typ(b,p+4),start:p,size:size,hs:hs,body:p+hs,end:p+size});
+    p+=size;
+  }
+  return out;
+}
+function mx_find(list,t){return list.filter(x=>x.type===t);}
+function mx_one(list,t){const r=mx_find(list,t);return r.length?r[0]:null;}
+function mx_children(b,mx_box){return mx_boxes(b,mx_box.body,mx_box.end);}
+
+function mx_parseTrun(b,tr,tfhd,baseOffset){
+  const flags=mx_u32(b,tr.body)&0xffffff;
+  const cnt=mx_u32(b,tr.body+4);
+  let p=tr.body+8;
+  let dataOff=0;
+  if(flags&0x1){dataOff=mx_i32(b,p);p+=4;}
+  let firstFlags=null;
+  if(flags&0x4){firstFlags=mx_u32(b,p);p+=4;}
+  const samples=[];
+  let off=baseOffset+dataOff;
+  for(let i=0;i<cnt;i++){
+    let dur=tfhd.defDur, size=tfhd.defSize, fl=tfhd.defFlags, cto=0;
+    if(flags&0x100){dur=mx_u32(b,p);p+=4;}
+    if(flags&0x200){size=mx_u32(b,p);p+=4;}
+    if(flags&0x400){fl=mx_u32(b,p);p+=4;}
+    if(flags&0x800){cto=mx_i32(b,p);p+=4;}
+    if(i===0&&firstFlags!==null)fl=firstFlags;
+    samples.push({off:off,size:size,dur:dur,cto:cto,sync:!(fl&0x10000)});
+    off+=size;
+  }
+  return {samples:samples,dataOff:dataOff};
+}
+
+function mx_parseTfhd(b,mx_box){
+  const flags=mx_u32(b,mx_box.body)&0xffffff;
+  const trackId=mx_u32(b,mx_box.body+4);
+  let p=mx_box.body+8;
+  let base=null;
+  if(flags&0x1){base=mx_u64(b,p);p+=8;}
+  if(flags&0x2){p+=4;}
+  let defDur=0,defSize=0,defFlags=0;
+  if(flags&0x8){defDur=mx_u32(b,p);p+=4;}
+  if(flags&0x10){defSize=mx_u32(b,p);p+=4;}
+  if(flags&0x20){defFlags=mx_u32(b,p);p+=4;}
+  return {trackId:trackId,base:base,defDur:defDur,defSize:defSize,defFlags:defFlags,
+          defaultBaseIsMoof:!!(flags&0x020000),hasBase:!!(flags&0x1)};
+}
+
+/* ---- 產生 mx_box ---- */
+function mx_box(type,...parts){
+  let len=8;parts.forEach(p=>len+=p.length);
+  const head=new Uint8Array(8);
+  head[0]=(len>>>24)&255;head[1]=(len>>>16)&255;head[2]=(len>>>8)&255;head[3]=len&255;
+  for(let i=0;i<4;i++)head[4+i]=type.charCodeAt(i);
+  const out=new Uint8Array(len);out.set(head,0);
+  let p=8;parts.forEach(x=>{out.set(x,p);p+=x.length;});
+  return out;
+}
+function mx_b32(v){return new Uint8Array([(v>>>24)&255,(v>>>16)&255,(v>>>8)&255,v&255]);}
+function mx_b64(v){const hi=Math.floor(v/4294967296),lo=v>>>0;
+  return new Uint8Array([(hi>>>24)&255,(hi>>>16)&255,(hi>>>8)&255,hi&255,
+                         (lo>>>24)&255,(lo>>>16)&255,(lo>>>8)&255,lo&255]);}
+function mx_cat(arr){let n=0;arr.forEach(a=>n+=a.length);const o=new Uint8Array(n);let p=0;
+  arr.forEach(a=>{o.set(a,p);p+=a.length;});return o;}
+
+function mx_remux(bytes){
+  const b=bytes;
+  const top=mx_boxes(b,0,b.length);
+  const ftyp=mx_one(top,"ftyp");
+  const moov=mx_one(top,"moov");
+  if(!moov)throw new Error("no moov");
+  const moofs=mx_find(top,"moof");
+  if(!moofs.length)return null;              /* 不是分段 MP4，不用處理 */
+
+  const mvBoxes=mx_children(b,moov);
+  const mvhd=mx_one(mvBoxes,"mvhd");
+  const mvTimescale=mx_u32(b,mvhd.body+(b[mvhd.body]===1?20:12));
+  const traks=mx_find(mvBoxes,"trak");
+
+  /* 收集每個 track 的所有 sample */
+  const tracks={};
+  traks.forEach(tk=>{
+    const tkhd=mx_one(mx_children(b,tk),"tkhd");
+    const v=b[tkhd.body];
+    const id=mx_u32(b,tkhd.body+(v===1?20:12));
+    tracks[id]={trak:tk,samples:[]};
+  });
+
+  moofs.forEach(mf=>{
+    const trafs=mx_find(mx_children(b,mf),"traf");
+    trafs.forEach(tf=>{
+      const tfc=mx_children(b,tf);
+      const tfhdBox=mx_one(tfc,"tfhd");
+      if(!tfhdBox)return;
+      const tfhd=mx_parseTfhd(b,tfhdBox);
+      const t=tracks[tfhd.trackId];
+      if(!t)return;
+      /* 基準位移：預設是 moof 起點（default-base-is-moof） */
+      const base=tfhd.hasBase?tfhd.base:mf.start;
+      let running=null;
+      mx_find(tfc,"trun").forEach(tr=>{
+        const flags=mx_u32(b,tr.body)&0xffffff;
+        const hasOff=!!(flags&0x1);
+        const r=mx_parseTrun(b,tr,tfhd,hasOff?base:(running===null?base:running));
+        r.samples.forEach(s=>t.samples.push(s));
+        if(r.samples.length){
+          const last=r.samples[r.samples.length-1];
+          running=last.off+last.size;
+        }
+      });
+    });
+  });
+
+  /* 依序把 sample 資料集中成一個 mdat */
+  const order=[];
+  Object.keys(tracks).forEach(id=>{
+    tracks[id].samples.forEach((s,i)=>order.push({id:+id,i:i,off:s.off,size:s.size}));
+  });
+  order.sort((a,b2)=>a.off-b2.off);
+  let mdatSize=0;order.forEach(o=>mdatSize+=o.size);
+
+  const newOff={};
+  let cur=0;
+  order.forEach(o=>{
+    if(!newOff[o.id])newOff[o.id]=[];
+    newOff[o.id][o.i]=cur;cur+=o.size;
+  });
+
+  /* ---- 為每個 track 重建 stbl ---- */
+  function buildStbl(id,stblOld,mediaTimescale){
+    const ss=tracks[id].samples;
+    const offs=newOff[id]||[];
+    const old=mx_children(b,stblOld);
+    const keep=[];
+    ["stsd"].forEach(t=>{const x=mx_one(old,t);if(x)keep.push(b.slice(x.start,x.end));});
+
+    /* stts */
+    const stts=[];
+    let runDur=-1,runCnt=0;
+    ss.forEach(s=>{
+      if(s.dur===runDur){runCnt++;}
+      else{if(runCnt)stts.push([runCnt,runDur]);runDur=s.dur;runCnt=1;}
+    });
+    if(runCnt)stts.push([runCnt,runDur]);
+    const sttsBody=[mx_b32(0),mx_b32(stts.length)];
+    stts.forEach(e=>{sttsBody.push(mx_b32(e[0]));sttsBody.push(mx_b32(e[1]));});
+    keep.push(mx_box("stts",mx_cat(sttsBody)));
+
+    /* ctts（若有 composition offset） */
+    if(ss.some(s=>s.cto!==0)){
+      const ctts=[];let rv=null,rc=0;
+      ss.forEach(s=>{if(s.cto===rv){rc++;}else{if(rc)ctts.push([rc,rv]);rv=s.cto;rc=1;}});
+      if(rc)ctts.push([rc,rv]);
+      const body=[new Uint8Array([1,0,0,0]),mx_b32(ctts.length)];
+      ctts.forEach(e=>{body.push(mx_b32(e[0]));body.push(mx_b32(e[1]>>>0));});
+      keep.push(mx_box("ctts",mx_cat(body)));
+    }
+
+    /* stss（關鍵影格）*/
+    const syncs=[];
+    ss.forEach((s,i)=>{if(s.sync)syncs.push(i+1);});
+    if(syncs.length&&syncs.length!==ss.length){
+      const body=[mx_b32(0),mx_b32(syncs.length)];
+      syncs.forEach(v=>body.push(mx_b32(v)));
+      keep.push(mx_box("stss",mx_cat(body)));
+    }
+
+    /* stsc：每個 sample 自成一個 chunk，最單純也最不會出錯 */
+    keep.push(mx_box("stsc",mx_cat([mx_b32(0),mx_b32(1),mx_b32(1),mx_b32(1),mx_b32(1)])));
+
+    /* stsz */
+    const szBody=[mx_b32(0),mx_b32(0),mx_b32(ss.length)];
+    ss.forEach(s=>szBody.push(mx_b32(s.size)));
+    keep.push(mx_box("stsz",mx_cat(szBody)));
+
+    /* co64：用 64 位元，長度固定，才好兩段式計算位移 */
+    const coBody=[mx_b32(0),mx_b32(ss.length)];
+    ss.forEach((s,i)=>coBody.push(mx_b64(offs[i]||0)));
+    keep.push({__co:true,data:mx_cat(coBody),count:ss.length});
+
+    return keep;
+  }
+
+  /* 兩段式：先算出 moov 長度，再填入真正的 chunk 位移 */
+  function assemble(mdatStart){
+    const newTraks=[];
+    traks.forEach(tk=>{
+      const tkc=mx_children(b,tk);
+      const tkhd=mx_one(tkc,"tkhd");
+      const v=b[tkhd.body];
+      const id=mx_u32(b,tkhd.body+(v===1?20:12));
+      const mdia=mx_one(tkc,"mdia");
+      const mdc=mx_children(b,mdia);
+      const mdhd=mx_one(mdc,"mdhd");
+      const mv=b[mdhd.body];
+      const mts=mx_u32(b,mdhd.body+(mv===1?20:12));
+      const ss=tracks[id].samples;
+      let dur=0;ss.forEach(s=>dur+=s.dur);
+
+      /* tkhd：填入 movie timescale 的時長 */
+      const tkhdBuf=b.slice(tkhd.start,tkhd.end);
+      const mvDur=Math.round(dur/mts*mvTimescale);
+      if(v===1)writeU64(tkhdBuf,tkhd.body-tkhd.start+28,mvDur);
+      else writeU32(tkhdBuf,tkhd.body-tkhd.start+20,mvDur);
+
+      /* mdhd：填入 media timescale 的時長 */
+      const mdhdBuf=b.slice(mdhd.start,mdhd.end);
+      if(mv===1)writeU64(mdhdBuf,mdhd.body-mdhd.start+24,dur);
+      else writeU32(mdhdBuf,mdhd.body-mdhd.start+16,dur);
+
+      const minf=mx_one(mdc,"minf");
+      const mic=mx_children(b,minf);
+      const stbl=mx_one(mic,"stbl");
+      const parts=buildStbl(id,stbl,mts);
+      const stblParts=parts.map(x=>x.__co?mx_box("co64",x.data):x);
+      const newStbl=mx_box("stbl",...stblParts);
+      const minfParts=mic.map(x=>x.type==="stbl"?newStbl:b.slice(x.start,x.end));
+      const newMinf=mx_box("minf",...minfParts);
+      const mdiaParts=mdc.map(x=>x.type==="minf"?newMinf:(x.type==="mdhd"?mdhdBuf:b.slice(x.start,x.end)));
+      const newMdia=mx_box("mdia",...mdiaParts);
+      const trakParts=tkc.filter(x=>x.type!=="edts").map(x=>
+        x.type==="mdia"?newMdia:(x.type==="tkhd"?tkhdBuf:b.slice(x.start,x.end)));
+      newTraks.push(mx_box("trak",...trakParts));
+    });
+
+    /* mvhd：填入整體時長 */
+    let maxDur=0;
+    Object.keys(tracks).forEach(id=>{
+      const tk=tracks[id];const trak=tk.trak;
+      const mdhd=mx_one(mx_children(b,mx_one(mx_children(b,trak),"mdia")),"mdhd");
+      const mv=b[mdhd.body];
+      const mts=mx_u32(b,mdhd.body+(mv===1?20:12));
+      let d=0;tk.samples.forEach(s=>d+=s.dur);
+      maxDur=Math.max(maxDur,Math.round(d/mts*mvTimescale));
+    });
+    const mvhdBuf=b.slice(mvhd.start,mvhd.end);
+    if(b[mvhd.body]===1)writeU64(mvhdBuf,mvhd.body-mvhd.start+24,maxDur);
+    else writeU32(mvhdBuf,mvhd.body-mvhd.start+16,maxDur);
+
+    return mx_box("moov",mvhdBuf,...newTraks);
+  }
+
+  function writeU32(buf,p,v){buf[p]=(v>>>24)&255;buf[p+1]=(v>>>16)&255;buf[p+2]=(v>>>8)&255;buf[p+3]=v&255;}
+  function writeU64(buf,p,v){const hi=Math.floor(v/4294967296),lo=v>>>0;
+    writeU32(buf,p,hi);writeU32(buf,p+4,lo);}
+
+  const ftypBuf=ftyp?b.slice(ftyp.start,ftyp.end)
+                    :mx_box("ftyp",mx_strBytes("isom"),mx_b32(512),mx_strBytes("isomiso2avc1mp41"));
+  const pass1=assemble(0);
+  const mdatStart=ftypBuf.length+pass1.length+16;   /* 16 = mdat 的 64 位元表頭 */
+  Object.keys(newOff).forEach(id=>{
+    newOff[id]=newOff[id].map(v=>v+mdatStart);
+  });
+  const moovNew=assemble(mdatStart);
+
+  /* 組出 mdat（64 位元長度） */
+  const mdatHead=new Uint8Array(16);
+  mdatHead[3]=1;
+  "mdat".split("").forEach((c,i)=>mdatHead[4+i]=c.charCodeAt(0));
+  const total=mdatSize+16;
+  const hi=Math.floor(total/4294967296),lo=total>>>0;
+  writeU32(mdatHead,8,hi);writeU32(mdatHead,12,lo);
+
+  const out=new Uint8Array(ftypBuf.length+moovNew.length+16+mdatSize);
+  let p=0;
+  out.set(ftypBuf,p);p+=ftypBuf.length;
+  out.set(moovNew,p);p+=moovNew.length;
+  out.set(mdatHead,p);p+=16;
+  order.forEach(o=>{out.set(b.subarray(o.off,o.off+o.size),p);p+=o.size;});
+  return out;
+}
+function mx_strBytes(s){const a=new Uint8Array(s.length);for(let i=0;i<s.length;i++)a[i]=s.charCodeAt(i);return a;}
+
+/* 只處理分段 MP4；其他格式或失敗時原封不動回傳，不影響既有流程 */
+
+  async function fixVideoBlob(blob, mime) {
+    try {
+      if (!blob || !/mp4/i.test(mime || blob.type || '')) return blob;
+      const buf = new Uint8Array(await blob.arrayBuffer());
+      const out = mx_remux(buf);
+      if (!out || !out.length) return blob;
+      return new Blob([out], { type: 'video/mp4' });
+    } catch (e) { return blob; }
+  }
+
+  /* ── 作品庫（IndexedDB） ───────────────────────────────────── */
+  let wdb = null;
+  function openWDB() {
+    return new Promise(r => {
+      if (wdb) return r(wdb);
+      try {
+        const q = indexedDB.open(EN ? 'gn_works_en' : 'gn_works', 1);
+        q.onupgradeneeded = e => { e.target.result.createObjectStore('rec', { keyPath: 'id' }); };
+        q.onsuccess = e => { wdb = e.target.result; r(wdb); };
+        q.onerror = () => r(null);
+      } catch (e) { r(null); }
+    });
+  }
+  const wtx = mode => wdb.transaction('rec', mode).objectStore('rec');
+  const putRec = o => new Promise(r => { const q = wtx('readwrite').put(o); q.onsuccess = () => r(1); q.onerror = () => r(0); });
+  const allRec = async () => { await openWDB(); return new Promise(r => { if (!wdb) return r([]); const q = wtx('readonly').getAll(); q.onsuccess = () => r((q.result || []).sort((a, b) => b.ts - a.ts)); q.onerror = () => r([]); }); };
+  const delRec = id => new Promise(r => { const q = wtx('readwrite').delete(id); q.onsuccess = () => r(1); q.onerror = () => r(0); });
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+  /* ── 錄製 ───────────────────────────────────────────────────── */
+  let mr = null, chunks = [], recTimer = null, recSec = 0, recAnim = 0, recLabel = '';
+  let recMode = 'c', selfieStream = null, curFade = null, recFading = false, mcGain = null;
+  const BGM_FADEOUT = 5;
+  const sup = m => { try { return window.MediaRecorder && MediaRecorder.isTypeSupported(m); } catch (e) { return false; } };
+  const vidMime = () => ['video/mp4;codecs=avc1.42E01E,mp4a.40.2', 'video/mp4', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'].find(sup) || '';
+  const audMime = () => ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm'].find(sup) || '';
+  const canVideo = () => !!(vidMime() && HTMLCanvasElement.prototype.captureStream);
+  const extOf = m => (m || '').indexOf('mp4') >= 0 ? (m.indexOf('video') === 0 ? '.mp4' : '.m4a') : '.webm';
+  const recOn = () => !!(mr && mr.state === 'recording');
+  const mmss = s => (s < 600 ? '0' : '') + Math.floor(s / 60) + ':' + (s % 60 < 10 ? '0' : '') + (s % 60);
+
+  function attachSelfie() {
+    const el = q1('#gxsSelf');
+    if (!el || !selfieStream) return;
+    el.muted = true; el.playsInline = true;
+    ['playsinline', 'webkit-playsinline', 'muted', 'autoplay'].forEach(a => el.setAttribute(a, ''));
+    if (el.srcObject !== selfieStream) el.srcObject = selfieStream;
+    const go2 = () => { const q = el.play(); if (q && q.catch) q.catch(() => {}); };
+    el.onloadedmetadata = go2; go2();
+    [80, 300, 800].forEach(ms => setTimeout(go2, ms));
+  }
+  function stopSelfie() {
+    try { if (selfieStream) selfieStream.getTracks().forEach(t => t.stop()); } catch (e) {}
+    const el = q1('#gxsSelf'); if (el) { try { el.pause(); } catch (e) {} el.srcObject = null; }
+    selfieStream = null;
+  }
+  async function setRecMode(m) {
+    if (recOn()) { say(T('錄製中不能換，先按「停止並完成」', 'Stop the recording first')); return; }
+    recMode = m;
+    if (m !== 's') { stopSelfie(); paint(); return; }
+    try { selfieStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false }); }
+    catch (e) { recMode = 'c'; camFail(e); }
+    paint();
+    if (recMode === 's') setTimeout(attachSelfie, 60);
+  }
+  function liveCanvas(W, H, withSelfie) {
+    const base = document.createElement('canvas');
+    suppressSticker = !!withSelfie; drawCard(base, W, H); suppressSticker = false;
+    const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    const cx = cv.getContext('2d'), t0 = performance.now(), F = Math.min(W, H) / 1080;
+    const svid = q1('#gxsSelf');
+    const draw = () => {
+      const el = (performance.now() - t0) / 1000;
+      cx.drawImage(base, 0, 0);
+      const ph = (el / 16) % 2, gx = W * (0.12 + 0.76 * (ph > 1 ? 2 - ph : ph));
+      const rg = cx.createRadialGradient(gx, H * .12, 10, gx, H * .12, W * .55);
+      rg.addColorStop(0, 'rgba(255,255,255,.10)'); rg.addColorStop(1, 'rgba(255,255,255,0)');
+      cx.fillStyle = rg; cx.fillRect(0, 0, W, H);
+      if (withSelfie) drawSelfie(cx, svid, W, H, F);
+      if (bgmCredit) {
+        cx.textAlign = 'center'; cx.font = `${Math.round(19 * F)}px ${SANS()}`;
+        cx.fillStyle = 'rgba(255,255,255,.62)'; cx.shadowColor = 'rgba(0,0,0,.55)'; cx.shadowBlur = Math.round(6 * F);
+        cx.fillText(sc(bgmCredit), W / 2, H - Math.round(22 * F)); cx.shadowColor = 'transparent';
+      }
+    };
+    const loop = () => { draw(); recAnim = requestAnimationFrame(loop); };
+    loop();
+    const bgT = setInterval(() => { if (!recOn() && performance.now() - t0 > 4000) clearInterval(bgT); else if (document.hidden) draw(); }, 500);
+    const sw = q1('#gxsSelfWrap');
+    if (sw && withSelfie) sw.style.cssText = 'position:absolute;width:2px;height:2px;opacity:.01;overflow:hidden;pointer-events:none';
+    return cv;
+  }
+  function fadeIn(g, ac, to, sec) {
+    if (!g || !ac) return;
+    try { const t0 = ac.currentTime; g.gain.cancelScheduledValues(t0); g.gain.setValueAtTime(0.0001, t0); g.gain.linearRampToValueAtTime(to, t0 + sec); }
+    catch (e) { try { g.gain.value = to; } catch (_) {} }
+  }
+  function fadeOutStop(g, ac, sec) {
+    if (recFading) return;
+    if (!g || !ac) { if (recOn()) mr.stop(); return; }
+    recFading = true;
+    try { const t0 = ac.currentTime; g.gain.cancelScheduledValues(t0); g.gain.setValueAtTime(Math.max(g.gain.value, 0.0001), t0); g.gain.linearRampToValueAtTime(0.0001, t0 + sec); } catch (e) {}
+    recLabel = T('音樂淡出中…（再按一次立即停止）', 'Music fading out… (tap again to stop now)');
+    const s = q1('#gxsRecSt'); if (s) s.innerHTML = '<span class="recdot"></span>' + esc(recLabel);
+    setTimeout(() => { if (recOn()) mr.stop(); }, sec * 1000 + 150);
+  }
+  function recStopNow() { if (!recOn()) return; if (recFading || !curFade) mr.stop(); else curFade(); }
+  function recTick(label) {
+    recLabel = label;
+    const s = q1('#gxsRecSt'); if (s) s.innerHTML = '<span class="recdot"></span>' + esc(label);
+    clearInterval(recTimer);
+    recTimer = setInterval(() => { recSec++; const e = q1('#gxsRecTm'); if (e) e.textContent = mmss(recSec); }, 1000);
+  }
+  function stopTTS() { try { if (typeof stopSpeak === 'function') stopSpeak(); } catch (e) {} try { if (TTS321.isOn()) TTS321.stop(); } catch (e) {} }
+
+  async function toggleRec() {
+    if (recOn()) { recStopNow(); return; }
+    if (!item) return;
+    hymnStop(); stopTTS();
+    if (recMode === 's' && (!selfieStream || !selfieStream.active)) {
+      try { selfieStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false }); }
+      catch (e) { recMode = 'c'; camFail(e); paint(); }
+      if (recMode === 's') { paint(); attachSelfie(); await new Promise(r => setTimeout(r, 500)); }
+    }
+    let mic;
+    try { mic = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } }); }
+    catch (e) {
+      try { mic = await navigator.mediaDevices.getUserMedia({ audio: true }); }
+      catch (e2) { say(T('沒有取得麥克風權限', 'Microphone permission was not granted')); return; }
+    }
+    const svid = q1('#gxsSelf');
+    const useSelfie = recMode === 's' && svid && svid.videoWidth;
+    let ac = null, bgmEl = null, bgmURL = null, audioStream = mic, micGain = null, bgmGain = null;
+    try {
+      ac = new (window.AudioContext || window.webkitAudioContext)();
+      try { await ac.resume(); } catch (_) {}
+      const dst = ac.createMediaStreamDestination();
+      micGain = ac.createGain(); micGain.gain.value = 0.0001;
+      ac.createMediaStreamSource(mic).connect(micGain).connect(dst);
+      if (bgmBlob) {
+        bgmURL = URL.createObjectURL(bgmBlob);
+        bgmEl = new Audio(); bgmEl.src = bgmURL; bgmEl.loop = true;
+        bgmGain = ac.createGain(); bgmGain.gain.value = 0.0001;
+        ac.createMediaElementSource(bgmEl).connect(bgmGain).connect(dst);
+      }
+      audioStream = dst.stream;
+    } catch (e) {
+      try { if (ac) ac.close(); } catch (_) {}
+      ac = null; bgmEl = null; bgmGain = null; micGain = null; audioStream = mic;
+    }
+    let stream = audioStream, kind = 'audio', mime = audMime();
+    if (recMode !== 'a' && canVideo()) {
+      try {
+        const d = dims();
+        const cv = liveCanvas(d[0], d[1], useSelfie);
+        stream = new MediaStream(cv.captureStream(24).getVideoTracks().concat(audioStream.getAudioTracks()));
+        kind = 'video'; mime = vidMime();
+      } catch (e) { cancelAnimationFrame(recAnim); stream = mic; kind = 'audio'; mime = audMime(); }
+    } else if (recMode !== 'a') say(T('這台裝置不能錄影片，先錄聲音；也可以改用手機的螢幕錄影。', 'This device cannot record video — recording voice instead.'));
+    try {
+      mr = new MediaRecorder(stream, Object.assign(mime ? { mimeType: mime } : {}, kind === 'video' ? { videoBitsPerSecond: 2200000 } : {}));
+    } catch (e) {
+      cancelAnimationFrame(recAnim);
+      try { mr = new MediaRecorder(mic); kind = 'audio'; } catch (e2) { say(T('這台裝置不支援錄製', 'Recording is not supported on this device')); return; }
+    }
+    chunks = []; recSec = 0;
+    mr.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
+    mr.onstop = async () => {
+      clearInterval(recTimer); cancelAnimationFrame(recAnim); curFade = null; recFading = false;
+      mic.getTracks().forEach(t => t.stop());
+      stopSelfie();
+      try { if (bgmEl) { bgmEl.pause(); bgmEl.src = ''; } } catch (_) {}
+      try { if (bgmURL) URL.revokeObjectURL(bgmURL); } catch (_) {}
+      try { if (ac) ac.close(); } catch (_) {}
+      const type = mr.mimeType || mime || (kind === 'video' ? 'video/webm' : 'audio/webm');
+      await finishRec(new Blob(chunks, { type }), type, kind);
+    };
+    await new Promise(r => setTimeout(r, 380));
+    if (!mr) return;
+    mr.start(1000);
+    curFade = bgmEl ? (() => fadeOutStop(bgmGain, ac, BGM_FADEOUT)) : null;
+    fadeIn(micGain, ac, 1, 0.28);
+    if (bgmEl) { try { await bgmEl.play(); } catch (_) {} fadeIn(bgmGain, ac, st().vol, 0.9); }
+    paint();
+    recTick((kind === 'video' ? T('錄影中', 'Recording video') : T('錄音中', 'Recording voice')) + (bgmBlob ? '　♪' : ''));
+  }
+  async function musicRec() {
+    if (recOn()) { recStopNow(); return; }
+    if (!item) return;
+    if (!bgmBlob) { say(T('先選一首配樂', 'Choose some music first')); return; }
+    if (!canVideo()) { say(T('這台裝置不能錄影片', 'This device cannot record video')); return; }
+    hymnStop(); stopTTS();
+    let ac, bgmEl, bgmURL, audioStream;
+    try {
+      ac = new (window.AudioContext || window.webkitAudioContext)();
+      try { await ac.resume(); } catch (_) {}
+      bgmURL = URL.createObjectURL(bgmBlob);
+      bgmEl = new Audio(); bgmEl.src = bgmURL; bgmEl.loop = false;
+      mcGain = ac.createGain(); mcGain.gain.value = 0.0001;
+      const dst = ac.createMediaStreamDestination();
+      ac.createMediaElementSource(bgmEl).connect(mcGain).connect(dst);
+      mcGain.connect(ac.destination);
+      audioStream = dst.stream;
+    } catch (e) { say(T('這個音檔放不出來', 'This audio could not play')); return; }
+    const d = dims();
+    const cv = liveCanvas(d[0], d[1], false);
+    const mime = vidMime();
+    const stream = new MediaStream(cv.captureStream(24).getVideoTracks().concat(audioStream.getAudioTracks()));
+    try { mr = new MediaRecorder(stream, Object.assign(mime ? { mimeType: mime } : {}, { videoBitsPerSecond: 2200000 })); }
+    catch (e) { cancelAnimationFrame(recAnim); say(T('這台裝置不能錄影片', 'This device cannot record video')); return; }
+    chunks = []; recSec = 0;
+    mr.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
+    mr.onstop = async () => {
+      clearInterval(recTimer); cancelAnimationFrame(recAnim); curFade = null; recFading = false;
+      try { if (bgmEl) { bgmEl.pause(); bgmEl.src = ''; } } catch (_) {}
+      try { if (bgmURL) URL.revokeObjectURL(bgmURL); } catch (_) {}
+      try { if (ac) ac.close(); } catch (_) {}
+      const type = mr.mimeType || mime || 'video/webm';
+      await finishRec(new Blob(chunks, { type }), type, 'video');
+    };
+    mr.start(1000);
+    try { await bgmEl.play(); } catch (e) {}
+    fadeIn(mcGain, ac, 1, 0.6);
+    curFade = () => fadeOutStop(mcGain, ac, BGM_FADEOUT);
+    const len = +st().mc;
+    bgmEl.onended = () => { if (recOn()) mr.stop(); };
+    bgmEl.ontimeupdate = () => {
+      if (len > 0 || recFading || !isFinite(bgmEl.duration)) return;
+      const left = bgmEl.duration - bgmEl.currentTime;
+      if (left <= BGM_FADEOUT && recOn()) fadeOutStop(mcGain, ac, Math.max(.5, left));
+    };
+    const lim = len > 0 ? len : 8 * 60;
+    setTimeout(() => { if (!recFading && recOn()) fadeOutStop(mcGain, ac, BGM_FADEOUT); }, Math.max(0, lim - BGM_FADEOUT) * 1000);
+    setTimeout(() => { if (recOn()) mr.stop(); }, lim * 1000 + 300);
+    paint();
+    recTick(T('音樂卡片製作中', 'Making music card') + '　♪');
+  }
+  async function finishRec(blob, type, kind) {
+    mr = null;
+    const dur = recSec;
+    try { if (kind === 'video') blob = await fixVideoBlob(blob, type); } catch (e) {}
+    paint();
+    openReview(blob, blob.type || type, kind, dur);
+  }
+  async function saveWork(blob, type, kind, dur) {
+    try {
+      await openWDB();
+      if (!wdb) throw new Error('IndexedDB');
+      await putRec({ id: uid(), ts: Date.now(), blob, mime: blob.type || type, kind, dur: dur || 0, v: item ? item.t : '', r: item ? item.ref : '', n: note || '' });
+      say(kind === 'video' ? T('影片已存進「我的作品」', 'Video saved to My works') : T('語音已存進「我的作品」', 'Voice saved to My works'));
+      return true;
+    } catch (e) { say(T('存檔失敗：', 'Save failed: ') + (e && e.message || e)); return false; }
+  }
+  async function shareBlob(blob, mime, kind) {
+    const name = (EN ? 'mark-' : '321馬可福音-') + (kind === 'video' ? 'video' : 'voice') + '-' + Date.now() + extOf(mime);
+    const f = new File([blob], name, { type: mime });
+    if (navigator.canShare && navigator.canShare({ files: [f] })) {
+      if (isIOS()) say(T('在分享面板選「儲存影片」就會存進相簿', 'Choose “Save Video” to put it in Photos'));
+      try { await navigator.share({ files: [f] }); return; } catch (e) { if (e && e.name === 'AbortError') return; }
+    }
+    const u = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = u; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(u), 6000);
+    say(T('已下載', 'Downloaded'));
+  }
+  let rvURL = null;
+  function openReview(blob, mime, kind, dur) {
+    if (rvURL) { try { URL.revokeObjectURL(rvURL); } catch (e) {} }
+    rvURL = URL.createObjectURL(blob);
+    let kept = false;
+    const m = document.createElement('div'); m.className = 'gxsmask'; m.id = 'gxsRv';
+    m.innerHTML = `<div class="gxscard"><div class="gxshead"><b>${esc(kind === 'video' ? T('錄好了，先看看', 'Here is your video') : T('錄好了，先聽聽', 'Here is your recording'))}</b></div>
+      ${kind === 'video' ? `<video id="rvMedia" src="${rvURL}" controls playsinline webkit-playsinline autoplay style="width:100%;border-radius:14px;display:block;background:#000;max-height:56vh"></video>`
+        : `<audio id="rvMedia" src="${rvURL}" controls autoplay style="width:100%"></audio>`}
+      <p class="xs muted">${esc(T('滿意就儲存到「我的作品」，也可以直接分享。', 'Save it to My works, or share it right away.'))}</p>
+      <div class="gxacts">
+        <button class="btn pri" id="rvSave">${esc(T('儲存到我的作品', 'Save to My works'))}</button>
+        <button class="btn" id="rvShare">↗ ${esc(T('分享／存到手機', 'Share / save to phone'))}</button>
+        <button class="btn" id="rvAgain">${esc(T('重錄', 'Record again'))}</button>
+        <button class="btn danger" id="rvDrop">${esc(T('不要了', 'Discard'))}</button>
+      </div></div>`;
+    document.body.appendChild(m);
+    const shut = () => {
+      const md = q1('#rvMedia', m); try { if (md) { md.pause(); md.src = ''; } } catch (e) {}
+      m.remove();
+      if (rvURL) { try { URL.revokeObjectURL(rvURL); } catch (e) {} rvURL = null; }
+    };
+    m.onclick = e => { if (e.target === m && (kept || confirm(T('還沒儲存，確定關掉嗎？', 'Not saved yet — close anyway?')))) shut(); };
+    q1('#rvSave', m).onclick = async () => { const b = q1('#rvSave', m); b.disabled = true; if (await saveWork(blob, mime, kind, dur)) { kept = true; shut(); } else b.disabled = false; };
+    q1('#rvShare', m).onclick = () => shareBlob(blob, mime, kind);
+    q1('#rvAgain', m).onclick = async () => { shut(); if (recMode === 's') { await setRecMode('s'); await new Promise(r => setTimeout(r, 450)); } toggleRec(); };
+    q1('#rvDrop', m).onclick = () => { if (!confirm(T('確定不要這一段？', 'Discard this recording?'))) return; shut(); say(T('已刪掉', 'Discarded')); };
+  }
+
+  /* ── 我的作品 ───────────────────────────────────────────────── */
+  async function readyBlob(r) {
+    if (r.kind !== 'video') return r.blob;
+    const fixed = await fixVideoBlob(r.blob, r.mime);
+    if (fixed !== r.blob) { try { await putRec(Object.assign({}, r, { blob: fixed, mime: 'video/mp4' })); } catch (e) {} }
+    return fixed;
+  }
+  function vWorks() {
+    setTitle(T('我的作品', 'My works'), false);
+    return `<div class="sect" style="padding-bottom:6px"><p class="eyebrow">${esc(T('我的作品', 'My works'))}</p><h2 class="big">${esc(T('錄下來的，都在這裡。', 'Everything you recorded.'))}</h2>
+      <p class="sm muted">${esc(T('作品存在這台裝置上（不跟著備份走）。在畫線或小智回答上按「做成美圖」，就能錄語音、卡片影片或音樂卡片。', 'Works stay on this device (not in backups). Tap “make a card” on a highlight or a Xiaozhi answer to record voice, a card video or a music card.'))}</p></div>
+      <div id="gxWorks"><p class="sm muted">${esc(T('載入中…', 'Loading…'))}</p></div>`;
+  }
+  async function paintWorks() {
+    const box = q1('#gxWorks'); if (!box) return;
+    const list = await allRec();
+    if (!list.length) { box.innerHTML = `<div class="card"><p class="sm muted" style="margin:0">${esc(T('還沒有作品。', 'No works yet.'))}</p></div>`; return; }
+    box.innerHTML = list.map(r => `<div class="card gxwork">
+      <p class="xs muted" style="margin:0 0 4px">${r.kind === 'video' ? '🎬 ' + esc(T('影片', 'Video')) : '🎙 ' + esc(T('語音', 'Voice'))}　${r.dur ? mmss(r.dur) + '　' : ''}${esc(new Date(r.ts).toLocaleString())}</p>
+      <p class="sm" style="margin:0 0 4px;font-family:var(--serif)">${esc(String(r.v || '').slice(0, 80))}${String(r.v || '').length > 80 ? '…' : ''}</p>
+      ${r.r ? `<p class="xs muted" style="margin:0 0 8px">${esc(r.r)}</p>` : ''}
+      <div id="play_${r.id}"></div>
+      <div class="row"><button class="btn xs2" onclick="GXS.workPlay('${r.id}')">▶ ${esc(T('播放', 'Play'))}</button>
+      <button class="btn xs2" onclick="GXS.workShare('${r.id}')">↗ ${esc(T('分享', 'Share'))}</button>
+      <button class="btn xs2" onclick="GXS.workDl('${r.id}')">⬇ ${esc(T('下載', 'Download'))}</button>
+      <button class="btn xs2 danger" onclick="GXS.workDel('${r.id}')">✕</button></div></div>`).join('');
+  }
+  const getRec = async id => (await allRec()).find(x => x.id === id);
+  let playURL = null;
+  async function workPlay(id) {
+    const r = await getRec(id); if (!r) return;
+    if (playURL) URL.revokeObjectURL(playURL);
+    playURL = URL.createObjectURL(r.blob);
+    const box = q1('#play_' + id); if (!box) return;
+    box.innerHTML = r.kind === 'video'
+      ? `<video src="${playURL}" controls playsinline autoplay style="width:100%;border-radius:12px;display:block;margin-bottom:8px;max-height:60vh;background:#000"></video>`
+      : `<audio src="${playURL}" controls autoplay style="width:100%;margin-bottom:8px"></audio>`;
+  }
+  async function workShare(id) {
+    const r = await getRec(id); if (!r) return;
+    const blob = await readyBlob(r);
+    shareBlob(blob, (r.kind === 'video' && blob !== r.blob) ? 'video/mp4' : r.mime, r.kind);
+  }
+  async function workDl(id) {
+    const r = await getRec(id); if (!r) return;
+    const blob = await readyBlob(r);
+    const mime = (r.kind === 'video' && blob !== r.blob) ? 'video/mp4' : r.mime;
+    if (isIOS()) return shareBlob(blob, mime, r.kind);
+    const u = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = u; a.download = (EN ? 'mark-' : '321馬可福音-') + (r.kind === 'video' ? 'video' : 'voice') + extOf(mime);
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(u), 6000);
+  }
+  async function workDel(id) {
+    if (!confirm(T('確定刪除這個作品？', 'Delete this work?'))) return;
+    await openWDB(); await delRec(id); paintWorks(); say(T('已刪除', 'Deleted'));
+  }
+
+  /* ── 面板 ───────────────────────────────────────────────────── */
+  const TABS = [['text', ['文字', 'Text']], ['photo', ['相片', 'Photo']], ['look', ['版面', 'Layout']], ['rec', ['配樂與錄製', 'Music & record']]];
+  const L2 = a => T(a[0], a[1]);
+  function chips(list, cur, key) {
+    return `<div class="gxchips">${list.map(x => `<button class="${String(cur) === String(x[0]) ? 'on' : ''}" data-k="${key}" data-v="${esc(x[0])}">${esc(x[1])}</button>`).join('')}</div>`;
+  }
+  const hint = t => `<p class="xs muted" style="margin:6px 0 0">${esc(t)}</p>`;
+  function moveCtl(resetLabel) {
+    return `<div class="row" style="margin-top:8px">
+        <button class="btn xs2 ${origMove ? 'pri' : ''}" data-k="omTog">${esc(origMove ? T('✋ 拖動中：點此鎖定', '✋ Dragging on — tap to lock') : T('✋ 用手指拖動文字', '✋ Drag the text'))}</button>
+        <button class="btn xs2" data-k="omReset">${esc(resetLabel)}</button></div>
+      <div class="row" style="margin-top:6px"><button class="btn xs2" data-k="nudge" data-v="-1,0">←</button><button class="btn xs2" data-k="nudge" data-v="0,-1">↑</button><button class="btn xs2" data-k="nudge" data-v="0,1">↓</button><button class="btn xs2" data-k="nudge" data-v="1,0">→</button></div>
+      ${hint(origMove ? T('現在手指在上方預覽圖拖一拖，文字就會跟著移動；移好後按「鎖定」才能再捲動頁面。', 'Drag on the preview to move the text. Tap lock when done.') : T('也可以按方向鍵微調位置。', 'The arrows nudge the position.'))}`;
+  }
+  function tabText() {
+    const g = st(), FULL = isFull();
+    let h = `<p class="gxlab">${esc(T('經文／金句', 'Verse'))}</p>
+      <textarea id="gxsT" rows="3">${esc(item.t)}</textarea>
+      <p class="gxlab">${esc(T('出處', 'Reference'))}</p><input id="gxsR" value="${esc(item.ref || '')}">`;
+    if (FULL) {
+      h += `<p class="gxlab">${esc(T('文字內容', 'Text'))}</p>${chips([['verse', T('經文', 'Verse')], ['greet', T('問候語', 'Greeting')]], fullKind, 'fk')}`;
+      if (fullKind === 'verse') {
+        h += `<input id="gxsOwn" value="${esc(blessOwn)}" style="margin-top:8px" placeholder="${esc(T('自己說（選填）：想對他說什麼？例如：他最近工作很辛苦', 'Your own words (optional), e.g. he has been working hard'))}">
+          <div class="row" style="margin-top:8px">
+            <button class="btn pri" data-k="bless" ${busy ? 'disabled' : ''}>${busy ? esc(T('小智寫作中…', 'Xiaozhi is writing…')) : esc(T('✍️ 小智寫祝福（附在經文下面）', '✍️ Xiaozhi writes a blessing'))}</button>
+            <button class="btn" data-k="tw" ${busy ? 'disabled' : ''}>${esc(T('✨ 改一改', '✨ Revise'))}</button>
+            <button class="btn xs2" data-k="fbClr">${esc(T('不要祝福', 'No blessing'))}</button></div>
+          <div class="gxchips" id="gxsTw" style="display:none;margin-top:6px">${TW_PICKS.map(p => `<button data-k="twp" data-v="${esc(p)}">${esc(p)}</button>`).join('')}</div>
+          <textarea id="gxsFB" rows="2" style="margin-top:8px" placeholder="${esc(T('按上面的鈕，小智會依這節經文寫一兩句短祝福；也可以自己寫。', 'Tap the button for a one- or two-sentence blessing, or write your own.'))}">${esc(fullBless)}</textarea>`;
+      } else {
+        h += `<textarea id="gxsGreet" rows="2" style="margin-top:8px" placeholder="${esc(T('平安喜樂，主愛你！', 'Peace and joy to you!'))}">${esc(g.greet || '')}</textarea>`;
+      }
+    } else {
+      h += `<p class="gxlab">${esc(T('卡片內文', 'Card text'))}</p>
+        <textarea id="gxsN" rows="4" placeholder="${esc(T('寫下你的領受或祝福', 'Your note or blessing'))}">${esc(note)}</textarea>
+        <input id="gxsOwn" value="${esc(blessOwn)}" style="margin-top:6px" placeholder="${esc(T('自己說（選填）：想對他說什麼？例如：他最近工作很辛苦', 'Your own words (optional), e.g. he has been working hard'))}">
+        <div class="row" style="margin-top:8px">
+          <button class="btn pri" data-k="bless" ${busy ? 'disabled' : ''}>${busy ? esc(T('小智寫作中…', 'Xiaozhi is writing…')) : '✍️ ' + esc(T('請小智寫祝福', 'Xiaozhi writes a blessing'))}</button>
+          <button class="btn" data-k="tw" ${busy ? 'disabled' : ''}>${esc(T('✨ 改一改', '✨ Revise'))}</button>
+          ${item.n0 ? `<button class="btn xs2" data-k="mine">${esc(T('用我的領受', 'Use my note'))}</button>` : ''}
+          <button class="btn xs2" data-k="nonote">${esc(T('不要內文', 'No text'))}</button></div>
+        <div class="gxchips" id="gxsTw" style="display:none;margin-top:6px">${TW_PICKS.map(p => `<button data-k="twp" data-v="${esc(p)}">${esc(p)}</button>`).join('')}</div>
+        ${hint(T('寫給：', 'Written for: ') + GX.D.icon[GX.aud()] + ' ' + GX.D.names[GX.aud()] + T('（到「小智」頁或「我的」設定可以更改）', ' (change it in Xiaozhi or Me)'))}`;
+    }
+    h += `<p class="gxlab">${esc(T('稱呼（寫給誰）', 'Greeting (to whom)'))}</p><input id="gxsTo" value="${esc(toVal())}" placeholder="${esc(T('例如：親愛的小明：平安！（留空就不印）', 'e.g. Dear Sam, peace be with you! (blank for none)'))}">`;
+    if (!FULL) h += `<p class="gxlab">${esc(T('上方團體名', 'Group name (top)'))}</p><input id="gxsTop" value="${esc(g.top)}" placeholder="${esc(DEF_TOP())}">`;
+    h += `<p class="gxlab">${esc(T('署名', 'Signature'))}</p><input id="gxsSign" value="${esc(g.sign)}" placeholder="${esc(DEF_SIGN())}">`;
+    h += fontInkUI();
+    return h;
+  }
+  function tabLook() {
+    const g = st();
+    if (isFull()) return `${hint(T('整張相片就是整張卡片，不加邊框；只留稱呼、經文（或問候語）與署名，自動排在相片上方最空的地方。', 'The whole photo is the card, with no border: just the greeting, the verse (or a greeting line) and the signature, placed where the photo is emptiest.'))}
+      <p class="gxlab">${esc(T('文字大小（也可以在預覽圖上用兩指捏合縮放）', 'Text size (or pinch on the preview)'))}　<b id="fSzV">${Math.round(fullScale * 100)}%</b></p>
+      <input type="range" id="fSz" min="50" max="250" step="5" value="${Math.round(fullScale * 100)}" style="width:100%;padding:0;border:0;background:none">
+      ${moveCtl(T('↺ 回到自動位置', '↺ Auto position'))}`;
+    return `<p class="gxlab">${esc(T('樣式', 'Style'))}</p>
+      <div class="gxchips">${TPL_ORDER.map(k => `<button class="gxtpl${g.tpl === k ? ' on' : ''}" data-k="tpl" data-v="${k}"><i style="background:linear-gradient(135deg,${TPL[k].bg[0]},${TPL[k].bg[2]});border-color:${TPL[k].gold}"></i>${esc(L2(TPL[k].n))}</button>`).join('')}</div>
+      <p class="gxlab">${esc(T('外框', 'Border'))}</p>${chips(BORDERS.map(b => [b[0], L2(b[1])]), g.border, 'border')}
+      <p class="gxlab">${esc(T('尺寸', 'Size'))}</p>${chips(Object.keys(SIZES).map(k => [k, L2(SIZES[k][2])]), g.size, 'size')}
+      <p class="gxlab">${esc(T('字級', 'Text size'))}</p>${chips(FS.map(f => [f[0], L2(f[1])]), g.fs, 'fs')}
+      ${hint(T('字級會一起放大團體名稱、稱呼、經文、內文與署名。', 'Scales the group name, greeting, verse, text and signature together.'))}`;
+  }
+  function tabPhoto() {
+    const isStk = photoMode === 'sticker';
+    const cur = isStk ? stkImg : photoImg, by = isStk ? stkBy : photoBy;
+    const mk = (n, on) => n + (on ? ' ✓' : '');
+    let h = chips([['bg', mk(T('當背景', 'Background'), !!photoImg)], ['sticker', mk(T('貼在卡片上', 'Sticker'), !!stkImg)], ['orig', T('原圖', 'Original')], ['full', T('整張原圖', 'Full photo')]], photoMode, 'pmode');
+    h += `<p class="gxlab">${esc(T('內建圖庫（先選分類，點一下就套用）', 'Built-in gallery (pick a category, tap to use)'))}</p>
+      <div id="gxBgCats" class="gxchips"></div><div id="gxBgStrip" class="gxstrip"><span class="xs muted">${esc(T('載入中…', 'Loading…'))}</span></div>`;
+    if (cur) {
+      if (photoMode === 'full') h += hint(T('整張原圖：文字大小與位置到「版面」調整；稱呼、經文或問候語、祝福到「文字」修改。', 'Full photo: adjust text size and position under Layout; edit the words under Text.'));
+      if (photoMode === 'orig') {
+        h += hint(T('原圖完整呈現、不裁切，文字排在不蓋住相片的空位。', 'The photo is shown whole and uncropped; the text sits in the free space beside it.'))
+          + `<p class="gxlab">${esc(T('相片大小', 'Photo size'))}</p>${chips([[0.85, T('小', 'Small')], [1, T('中', 'Medium')], [1.15, T('大', 'Large')]], origScale, 'oSz')}
+          <p class="gxlab">${esc(T('構圖（自動會依相片與卡片尺寸挑最合適的）', 'Layout (Auto picks the best fit)'))}</p>${chips([['auto', T('自動', 'Auto')], ['stack', T('上圖下字', 'Photo on top')], ['side', T('左圖右字', 'Photo on left')]], origLay, 'oLay')}
+          <p class="gxlab">${esc(T('文字位置（經文、出處與領受是一個區塊，可自己移動）', 'Text position'))}</p>${chips([[0, T('整塊一起移', 'Move together')], [1, T('分開移動', 'Move separately')]], origSplit ? 1 : 0, 'oSp')}
+          ${origSplit ? `<p class="gxlab">${esc(T('現在要移動哪一塊？', 'Which part to move?'))}</p>${chips([['v', T('經文與出處', 'Verse & reference')], ['n', T('領受', 'My note')]], origTarget, 'oTg')}` : ''}
+          ${moveCtl(T('↺ 回到預設', '↺ Reset'))}`;
+      }
+      if (isStk) h += `<p class="gxlab">${esc(T('形狀', 'Shape'))}</p>${chips(STK_SHAPES.map(x => [x[0], L2(x[1])]), stkShape, 'sShape')}
+          <p class="gxlab">${esc(T('大小', 'Size'))}</p>${chips(STK_SIZES.map(x => [x[0], L2(x[1])]), stkSize, 'sSize')}
+          <p class="gxlab">${esc(T('位置', 'Position'))}</p>${chips(STK_POS.map(x => [x[0], L2(x[1])]), stkPos, 'sPos')}`;
+      if (by) h += hint(T('攝影：', 'Photo: ') + by + '（Pexels）');
+      h += `<div class="row" style="margin-top:12px">
+        <button class="btn xs2" data-k="own">${esc(T('換一張（從相簿）', 'Change (from album)'))}</button>
+        <button class="btn xs2" data-k="px">${esc(T('🖼 從免費圖庫選', '🖼 Free photo library'))}</button>
+        <button class="btn xs2" data-k="plib">${esc(T('📚 我的相片庫', '📚 My photos'))}</button>
+        <button class="btn xs2" data-k="aig">${esc(T('✨ AI 生成美圖', '✨ Make with AI'))}</button>
+        <button class="btn xs2 danger" data-k="nophoto">${esc(T('移除相片', 'Remove photo'))}</button></div>`;
+    } else {
+      h += `<button class="btn pri" style="width:100%;margin-top:12px" data-k="aig">${esc(T('✨ 用 AI 生成美圖（描述畫面，免費）', '✨ Make a picture with AI (free)'))}</button>
+        <button class="btn" style="width:100%;margin-top:8px" data-k="px">${esc(T('🖼 從免費圖庫選', '🖼 Free photo library'))}</button>
+        <button class="btn" style="width:100%;margin-top:8px" data-k="plib">${esc(T('📚 我的相片庫（用過的相片都在這裡）', '📚 My photos (everything you used before)'))}</button>
+        <button class="btn" style="width:100%;margin-top:8px" data-k="own">${esc(T('📷 從相簿選一張', '📷 Pick from your album'))}</button>
+        ${isStk && photoImg ? `<button class="btn" style="width:100%;margin-top:8px" data-k="useBg">${esc(T('把背景那張改成貼紙', 'Use the background photo as a sticker'))}</button>` : ''}
+        ${hint(isStk ? T('貼紙會以拍立得的樣子貼在卡片上，可選形狀、大小與位置。', 'The sticker sits on the card like a polaroid; choose shape, size and position.') : T('選一張相片：整張原圖會把相片當成整張卡片；當背景會疊一層半透明的版型顏色。', 'Full photo turns the photo into the whole card; background adds a soft tint of the style colour.'))}`;
+    }
+    return h;
+  }
+  async function fillBuiltins() {
+    const cats = q1('#gxBgCats', EL), strip = q1('#gxBgStrip', EL);
+    if (!cats || !strip) return;
+    try { await bgLoad(); } catch (e) { strip.innerHTML = `<span class="xs muted">${esc(T('圖庫連不上，請稍後再試', 'Could not reach the gallery'))}</span>`; return; }
+    const cat = bgList.cats.some(c => c.id === st().bgCat) ? st().bgCat : (bgList.cats[0] || {}).id;
+    cats.innerHTML = bgList.cats.map(c => `<button class="${c.id === cat ? 'on' : ''}" data-k="bgcat" data-v="${esc(c.id)}">${esc(bgName(c))}</button>`).join('');
+    strip.innerHTML = bgList.list.map((x, i) => x.c !== cat ? '' : `<button class="gxcell" data-k="bgpick" data-v="${i}" title="${esc(bgName(x))}"><img src="${SITE + esc(x.t || x.f)}" alt="" loading="lazy" data-alt="${esc(x.t && x.t !== x.f ? SITE + x.f + '|' : '')}${SITE}bg/${esc(x.t || x.f)}" onerror="GXS.thumbErr(this)"><span>${esc(bgName(x))}</span></button>`).join('');
+  }
+  async function openPhotoLib() {
+    const b = sub(T('📚 我的相片庫', '📚 My photos'), `<p class="xs muted">${esc(T('從相簿或圖庫選過的相片都會自動留在這裡（存在這支手機上，最多 40 張）。點一張就用；右上 × 是移出相片庫。', 'Photos you used are kept here on this phone (up to 40). Tap to use; × removes it.'))}</p><div class="gxgrid" id="plGrid"></div>`);
+    const grid = q1('#plGrid', b);
+    const draw = async () => {
+      const all = await plAll();
+      if (!all.length) { grid.innerHTML = `<p class="sm muted" style="grid-column:1/-1">${esc(T('還沒有相片。先從相簿或圖庫選一張，就會留在這裡。', 'No photos yet.'))}</p>`; return; }
+      grid.innerHTML = all.map(o => `<div class="gxcell" data-id="${o.id}" style="position:relative;cursor:pointer"><img src="${o.thumb}" alt=""><span class="pxdel" data-d="${o.id}">×</span></div>`).join('');
+      qa('.gxcell', grid).forEach(c => c.onclick = async e => {
+        const d = e.target.closest('[data-d]');
+        const db = await plOpen();
+        if (d) { await plReq(db.transaction('p', 'readwrite').objectStore('p').delete(d.dataset.d)); if (st().photoLast === d.dataset.d) { st().photoLast = ''; keep(); } draw(); return; }
+        const rec = await plReq(db.transaction('p').objectStore('p').get(c.dataset.id)); if (!rec) return;
+        await plLoad(rec); closeSub(); paint();
+      });
+    };
+    draw();
+  }
+  function tabRec() {
+    const g = st(), on = recOn();
+    return `<p class="gxlab">🎵 ${esc(T('背景音樂', 'Background music'))}</p>
+      ${bgmBlob ? `<p class="sm" style="margin:0 0 2px"><b>♪ ${esc(sc(bgmName))}</b></p>${bgmCredit ? hint(sc(bgmCredit)) : ''}` : hint(T('從詩歌庫或手機選一首，錄影時會混進去。', 'Pick a song from the hymn library or your phone; it is mixed into recordings.'))}
+      <button class="btn pri" style="width:100%;margin-top:8px" data-k="aim">${esc(T('🎼 用 AI 生成配樂（免費工具）', '🎼 Make music with AI (free tools)'))}</button>
+      <div class="row" style="margin-top:8px"><button class="btn" data-k="hymn">${esc(T('🎵 從詩歌庫選', '🎵 Hymn library'))}</button>
+        <button class="btn" data-k="bgmfile">${esc(bgmBlob ? T('換一首（從手機）', 'Change (from phone)') : T('從手機選音樂', 'Pick from phone'))}</button>
+        ${bgmBlob ? `<button class="btn xs2 danger" data-k="nobgm">${esc(T('不要配樂', 'No music'))}</button>` : ''}</div>
+      ${bgmBlob ? `<p class="gxlab">${esc(T('音量', 'Volume'))}</p>${chips([[0.12, T('小聲', 'Soft')], [0.22, T('適中', 'Medium')], [0.38, T('明顯', 'Strong')]], g.vol, 'vol')}` : ''}
+      <p class="gxlab">🎙 ${esc(T('錄製', 'Record'))}</p>
+      ${chips([['a', T('🎙 只有聲音', '🎙 Voice only')], ['c', T('🖼 卡片畫面', '🖼 Card video')], ['s', T('📷 自拍畫面', '📷 Selfie video')]], recMode, 'rmode')}
+      <div id="gxsSelfWrap" style="${recMode === 's' ? '' : 'display:none'}"><video id="gxsSelf" muted playsinline autoplay style="width:150px;height:150px;border-radius:50%;object-fit:cover;transform:scaleX(-1);display:block;margin:8px auto;background:#000;border:3px solid var(--brass)"></video></div>
+      <div class="gxrec"><span id="gxsRecSt">${on ? '<span class="recdot"></span>' + esc(recLabel) : esc(T('準備好了就按開始', 'Ready when you are'))}</span><b id="gxsRecTm">${mmss(recSec)}</b></div>
+      <button class="btn ${on ? 'danger' : 'pri'}" style="width:100%" data-k="rec">${on ? esc(T('■ 停止並完成', '■ Stop and finish')) : esc(T('● 開始錄製', '● Start recording'))}</button>
+      ${bgmBlob ? `<p class="gxlab">${esc(T('不錄音，只配音樂', 'Music only, no voice'))}</p>
+      ${chips([[15, T('15 秒', '15 s')], [30, T('30 秒', '30 s')], [60, T('1 分鐘', '1 min')], [0, T('整首', 'Whole song')]], g.mc, 'mc')}
+      <button class="btn" style="width:100%;margin-top:8px" data-k="mcrec">${on ? esc(T('■ 停止', '■ Stop')) : '🎵 ' + esc(T('製作音樂卡片', 'Make a music card'))}</button>` : ''}
+      ${hint(T('有配樂時，結尾一律淡出 5 秒；淡出中再按一次「停止」就立即停。製作時請讓 App 留在前景、螢幕亮著。', 'With music, the ending always fades out over 5 seconds; tap stop again to end at once. Keep the app open with the screen on.'))}
+      <button class="btn xs2" style="margin-top:8px" data-k="works">📂 ${esc(T('看我的作品', 'Open My works'))}</button>`;
+  }
+  function paint() {
+    if (!EL || !item) return;
+    const body = q1('#gxsBody', EL);
+    if (body) {
+      const fn = { look: tabLook, photo: tabPhoto, text: tabText, rec: tabRec }[tab];
+      body.innerHTML = fn();
+      qa('.gxtabs button', EL).forEach(b => b.classList.toggle('on', b.getAttribute('data-t') === tab));
+      bindText();
+      if (tab === 'photo') fillBuiltins();
+      if (tab === 'rec' && recMode === 's' && selfieStream) attachSelfie();
+    }
+    attachDrag();
+    renderCard();
+  }
+  function bindText() {
+    const on = (id, fn, slow) => {
+      const el = q1(id, EL); if (!el) return;
+      let tm = null;
+      el.oninput = () => { fn(el.value); clearTimeout(tm); tm = setTimeout(renderCard, slow ? 400 : 120); };
+    };
+    on('#gxsT', v => { item.t = v; });
+    on('#gxsR', v => { item.ref = v; });
+    on('#gxsTo', v => { st().to = v; keep(); }, 1);
+    on('#gxsN', v => { note = v; }, 1);
+    on('#gxsFB', v => { fullBless = v; }, 1);
+    on('#gxsGreet', v => { st().greet = v; keep(); }, 1);
+    on('#gxsTop', v => { st().top = v; keep(); }, 1);
+    on('#gxsSign', v => { st().sign = v; keep(); }, 1);
+    const own = q1('#gxsOwn', EL); if (own) own.oninput = () => { blessOwn = own.value; };
+    const ci = q1('#gxInkC', EL);
+    if (ci) { ci.oninput = () => { st().cardInk = ci.value; renderFast(); }; ci.onchange = () => { st().cardInk = ci.value; keep(); paint(); }; }
+    const fs = q1('#fSz', EL);
+    if (fs) {
+      fs.oninput = () => { fullScale = fs.value / 100; const lb = q1('#fSzV', EL); if (lb) lb.textContent = fs.value + '%'; renderFast(); };
+      fs.onchange = () => renderCard();
+    }
+  }
+  /* 拖動文字時用半尺寸 JPEG 快速重畫預覽；放開手指再畫完整的 */
+  let dragRaf = 0;
+  function renderFast() {
+    if (dragRaf) return;
+    dragRaf = requestAnimationFrame(() => {
+      dragRaf = 0;
+      const d = dims(), cv = document.createElement('canvas');
+      try { drawCard(cv, Math.round(d[0] / 2), Math.round(d[1] / 2)); } catch (e) { return; }
+      const img = q1('#gxsPv'); if (img) img.src = cv.toDataURL('image/jpeg', .8);
+    });
+  }
+  function origShift(dx, dy) {
+    if (origSplit && origTarget === 'n' && photoMode !== 'full') { origNX += dx; origNY += dy; }
+    else { origDX += dx; origDY += dy; if (!origSplit) { origNX = origDX; origNY = origDY; } }
+  }
+  function attachDrag() {
+    const box = q1('.gxspv', EL); if (!box) return;
+    const on = !!(photoImg && (photoMode === 'orig' || photoMode === 'full') && origMove);
+    box.style.touchAction = on ? 'none' : '';
+    box.style.outline = on ? '2px dashed var(--brass)' : '';
+    if (!on) { box.onpointerdown = box.onpointermove = box.onpointerup = box.onpointercancel = null; return; }
+    let sx = 0, sy = 0, b0 = [0, 0, 0, 0], act = false;
+    const pts = new Map(); let d0 = 0, s0 = 1;
+    const full = photoMode === 'full';
+    const dist = () => { const a = Array.from(pts.values()); return Math.hypot(a[0][0] - a[1][0], a[0][1] - a[1][1]) || 1; };
+    box.onpointerdown = e => {
+      const img = q1('img', box); if (!img) return;
+      pts.set(e.pointerId, [e.clientX, e.clientY]);
+      try { box.setPointerCapture(e.pointerId); } catch (_) {}
+      e.preventDefault();
+      if (full && pts.size === 2) { d0 = dist(); s0 = fullScale; act = false; return; }
+      act = true; sx = e.clientX; sy = e.clientY; b0 = [origDX, origDY, origNX, origNY];
+    };
+    box.onpointermove = e => {
+      if (pts.has(e.pointerId)) pts.set(e.pointerId, [e.clientX, e.clientY]);
+      if (full && pts.size >= 2) {
+        fullScale = Math.max(.5, Math.min(2.5, s0 * dist() / d0));
+        const sl = q1('#fSz', EL); if (sl) sl.value = Math.round(fullScale * 100);
+        const lb = q1('#fSzV', EL); if (lb) lb.textContent = Math.round(fullScale * 100) + '%';
+        renderFast(); return;
+      }
+      if (!act) return;
+      const img = q1('img', box); if (!img) return;
+      const r = img.getBoundingClientRect();
+      origDX = b0[0]; origDY = b0[1]; origNX = b0[2]; origNY = b0[3];
+      origShift((e.clientX - sx) / r.width, (e.clientY - sy) / r.height);
+      renderFast();
+    };
+    const end = e => {
+      const was = pts.size; pts.delete(e.pointerId);
+      if (was >= 2) { act = false; renderCard(); return; }
+      if (!act) return; act = false; renderCard();
+    };
+    box.onpointerup = end; box.onpointercancel = end;
+  }
+  function onClick(e) {
+    let t = e.target;
+    while (t && t !== EL && !(t.getAttribute && (t.getAttribute('data-k') || t.getAttribute('data-t')))) t = t.parentNode;
+    if (!t || t === EL) { if (e.target === EL) close(); return; }
+    const tb = t.getAttribute('data-t');
+    if (tb) { tab = tb; paint(); return; }
+    const k = t.getAttribute('data-k'), v = t.getAttribute('data-v'), g = st();
+    if (k === 'x') return close();
+    if (k === 'save') return saveImg();
+    if (k === 'share') return shareImg();
+    if (k === 'tpl' || k === 'size' || k === 'border') { g[k] = v; keep(); return paint(); }
+    if (k === 'fs' || k === 'vol') { g[k] = +v; keep(); return paint(); }
+    if (k === 'mc') { if (recOn()) return; g.mc = +v; keep(); return paint(); }
+    if (k === 'pmode') { photoMode = v; if (v !== 'orig' && v !== 'full') origMove = false; origDX = origDY = origNX = origNY = 0; if (v !== 'sticker') { g.photoMode = v; keep(); } return paint(); }
+    if (k === 'fk') { fullKind = v; return paint(); }
+    if (k === 'omTog') { origMove = !origMove; return paint(); }
+    if (k === 'omReset') { origDX = origDY = origNX = origNY = 0; return renderCard(); }
+    if (k === 'nudge') { const p = v.split(',').map(Number); origShift(p[0] * 0.025, p[1] * 0.025); return renderCard(); }
+    if (k === 'oSz') { origScale = +v; origDX = origDY = origNX = origNY = 0; return paint(); }
+    if (k === 'oLay') { origLay = v; origDX = origDY = origNX = origNY = 0; return paint(); }
+    if (k === 'oSp') { origSplit = v === '1'; if (origSplit) { origNX = origDX; origNY = origDY; } return paint(); }
+    if (k === 'oTg') { origTarget = v; return paint(); }
+    if (k === 'sShape') { stkShape = v; if (stkShape === 'w' && stkSize < .38) stkSize = .46; return paint(); }
+    if (k === 'sSize') { stkSize = +v; return paint(); }
+    if (k === 'sPos') { stkPos = v; return paint(); }
+    if (k === 'useBg') { stkImg = photoImg; stkBy = photoBy; photoImg = null; photoBy = ''; return paint(); }
+    if (k === 'bgcat') { g.bgCat = v; keep(); return fillBuiltins(); }
+    if (k === 'bgpick') { const it = bgList && bgList.list[+v]; if (it) setPhotoURL(SITE + it.f, ''); return; }
+    if (k === 'aig') return openAiGen();
+    if (k === 'aim') return openAiMusic();
+    if (k === 'cfont') { g.cardFont = v; ['IBKai', 'IBYuan'].forEach(n => { if (IBF[n] && IBF[n] !== 'loading' && IBF[n] !== 'ok') delete IBF[n]; }); keep(); return paint(); }
+    if (k === 'cink') { g.cardInk = v; keep(); return paint(); }
+    if (k === 'gal') return openGallery();
+    if (k === 'px') return openPexels();
+    if (k === 'plib') return openPhotoLib();
+    if (k === 'own') return pickOwn();
+    if (k === 'nophoto') {
+      if (photoMode === 'sticker') { stkImg = null; stkBy = ''; }
+      else { photoImg = null; photoBy = ''; origMove = false; g.photoLast = ''; keep(); }
+      return paint();
+    }
+    if (k === 'bless') return blessWrite();
+    if (k === 'tw') { const c = q1('#gxsTw', EL); if (c) c.style.display = c.style.display === 'none' ? 'flex' : 'none'; return; }
+    if (k === 'twp') return tweak(v);
+    if (k === 'fbClr') { fullBless = ''; return paint(); }
+    if (k === 'mine') { note = item.n0 || ''; return paint(); }
+    if (k === 'nonote') { note = ''; return paint(); }
+    if (k === 'hymn') return openHymns();
+    if (k === 'bgmfile') return pickBgmFile();
+    if (k === 'nobgm') { bgmBlob = null; bgmName = ''; bgmCredit = ''; return paint(); }
+    if (k === 'rmode') return setRecMode(v);
+    if (k === 'rec') return toggleRec();
+    if (k === 'mcrec') return musicRec();
+    if (k === 'works') { if (recOn()) return say(T('錄製中，先完成再去', 'Finish recording first')); close(); return go('me', 0, 'works'); }
+  }
+  async function saveImg() {
+    const b = await cardBlob(); if (!b) { say(T('請長按圖片儲存', 'Press and hold the picture to save')); return; }
+    const name = fileBase() + '.png';
+    if (isIOS()) {
+      const f = new File([b], name, { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [f] })) {
+        say(T('在分享面板選「儲存影像」就會存進相簿', 'Choose “Save Image” to put it in Photos'));
+        try { await navigator.share({ files: [f] }); return; } catch (e) { if (e && e.name === 'AbortError') return; }
+      }
+      say(T('請長按上面的圖片儲存', 'Press and hold the picture above to save'));
+      return;
+    }
+    const u = URL.createObjectURL(b), a = document.createElement('a');
+    a.href = u; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(u), 4000);
+    say(T('已儲存', 'Saved'));
+  }
+  async function shareImg() {
+    const b = await cardBlob();
+    if (!b) return saveImg();
+    const f = new File([b], fileBase() + '.png', { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [f] })) {
+      try { await navigator.share({ files: [f], text: sc(verseText() + (item.ref ? '\n—— ' + item.ref : '')) }); return; }
+      catch (e) { if (e && e.name === 'AbortError') return; }
+    }
+    saveImg();
+  }
+  /* 找出這段經文在創世記哪一章哪一節（畫線問小智、整段畫線…出處沒有節號時用） */
+  const PUN = /[\s，。、；：？！「」『』（）《》〈〉“”‘’—…·,.;:?!"'()\[\]\-–]/g;
+  function normV(x) {
+    let t = String(x || '');
+    if (EN) return t.toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (isSC() && typeof toSC === 'function') t = toSC(t);
+    return t.replace(PUN, '');
+  }
+  function findRef(text, hint) {
+    const q = normV(text);
+    if (q.length < 4 || !D || !D.txt) return null;
+    const head = q.slice(0, 30), tail = q.slice(-30);
+    const order = [];
+    const _ks = Object.keys(D.txt).map(Number).filter(n => n > 0).sort((a, b) => a - b);
+    if (_ks.indexOf(hint) >= 0) order.push(hint);
+    _ks.forEach(c => { if (c !== hint) order.push(c); });
+    for (const c of order) {
+      const vs = D.txt[c] || [];
+      let joined = '', starts = [];
+      vs.forEach(v => { starts.push(joined.length); joined += normV(v); });
+      const i = joined.indexOf(head);
+      if (i < 0) continue;
+      let j = joined.indexOf(tail, i);
+      if (j < 0) j = i + head.length - 1; else j = j + tail.length - 1;
+      let a = 0, b = 0;
+      for (let k = 0; k < starts.length; k++) { if (starts[k] <= i) a = k; if (starts[k] <= j) b = k; }
+      return { ch: c, v: a + 1, v2: b + 1 };
+    }
+    return null;
+  }
+  const fmtRef = f => T(`馬可福音 ${f.ch}:${f.v}${f.v2 > f.v ? '-' + f.v2 : ''}`, `Mark ${f.ch}:${f.v}${f.v2 > f.v ? '–' + f.v2 : ''}`);
+  function open(o) {
+    o = o || {};
+    const text = String(o.text || o.t || '').replace(/<[^>]+>/g, '').replace(/[ \t]+/g, ' ').trim();
+    if (!text) { say(T('沒有可以做圖的內容', 'Nothing to make a card from')); return false; }
+    stopTTS();
+    let ref = o.ref || '';
+    if (!o.plain && !/\d+\s*:\s*\d+/.test(ref)) {
+      const m = String(ref).match(/(\d+)/);
+      const f = findRef(text, m ? +m[1] : ((R && R.ch) || S.last || 0));
+      if (f) ref = fmtRef(f);
+    }
+    item = { t: text, ref, n0: String(o.note || o.n || '').trim(), plain: !!o.plain };
+    note = item.n0;
+    fullBless = ''; blessOwn = '';
+    photoMode = st().photoMode || 'full';
+    if (!EL) {
+      EL = document.createElement('div'); EL.id = 'gxs'; EL.className = 'gxsmask gxsmain';
+      EL.addEventListener('click', onClick);
+      document.body.appendChild(EL);
+    }
+    EL.innerHTML = `<div class="gxscard">
+      <div class="gxshead"><b>🖼 ${esc(T('美圖工作室', 'Card studio'))}</b><button class="ico" data-k="x" aria-label="close">✕</button></div>
+      <div class="gxspv"><img id="gxsPv" alt=""></div>
+      <p class="xs muted" style="text-align:center;margin:4px 0 8px">${esc(T('長按圖片也可以直接儲存', 'You can also press and hold the picture to save'))}</p>
+      <div class="gxacts"><button class="btn pri" data-k="share">↗ ${esc(T('分享', 'Share'))}</button><button class="btn" data-k="save">⬇ ${esc(T('存到手機', 'Save'))}</button></div>
+      <div class="gxtabs">${TABS.map(x => `<button data-t="${x[0]}">${esc(T(x[1][0], x[1][1]))}</button>`).join('')}</div>
+      <div id="gxsBody"></div></div>`;
+    EL.classList.add('on');
+    document.documentElement.setAttribute('data-gxs', '1');
+    paint();
+    plRestore().then(() => { if (photoImg) paint(); });
+    return true;
+  }
+  function close() {
+    if (recOn()) {
+      if (!confirm(T('正在錄製，關掉會停止錄製。確定嗎？', 'Recording in progress — closing will stop it. Close?'))) return;
+      recFading = true; try { mr.stop(); } catch (e) {}
+    }
+    hymnStop(); stopSelfie(); closeSub();
+    if (EL) EL.classList.remove('on');
+    document.documentElement.removeAttribute('data-gxs');
+  }
+  /* 小智回答做成美圖：從畫線來的提問帶著原句，就用原句當經文、回答摘要當內文；
+     否則回答摘要當主文（不加引號、不冒充經文），出處寫「小智」。 */
+  function excerpt(t, max) {
+    const p = (typeof SAGE321 !== 'undefined' && SAGE321.plainOf) ? SAGE321.plainOf(t) : String(t || '');
+    const s = p.replace(/\s+/g, ' ').trim();
+    if (s.length <= max) return s;
+    const re = EN ? /[^.!?]*[.!?]+["”’)]*\s*/g : /[^。！？]*[。！？]+[」』）]*/g;
+    let out = '', m;
+    while ((m = re.exec(s)) !== null) { if ((out + m[0]).length > max) break; out += m[0]; if (!m[0]) break; }
+    return (out || s.slice(0, max)).trim() + (out ? '' : '…');
+  }
+  function quoteOf(text) {
+    const m = String(text || '').match(/^\s*>\s?(.+)$/m);
+    if (!m) return '';
+    const x = m[1].replace(/\*\*/g, '').trim();
+    const max = EN ? 320 : 150;
+    return (x.length >= (EN ? 30 : 12) && x.length <= max + 60) ? x : '';
+  }
+  function fromAnswer(text, q) {
+    const m = String(q || '').match(EN ? /[“"]([^”"]{4,300})[”"]/ : /「([^」]{4,300})」/);
+    const n = (R && R.ch) || S.last || 1;
+    const qt = quoteOf(text);
+    if (m) return open({ text: m[1], ref: GX.chLabel(n), note: qt || excerpt(text, EN ? 320 : 140) });
+    return open({ text: qt || excerpt(text, EN ? 300 : 120), ref: T('小智 · ', 'Xiaozhi · ') + GX.chLabel(n), plain: true });
+  }
+
+  const CSS = `
+.gxsmask{position:fixed;inset:0;z-index:180;background:rgba(10,16,14,.5);display:flex;align-items:flex-end;justify-content:center}
+.gxsmain{display:none}.gxsmain.on{display:flex}
+#gxsSub,#gxsRv{z-index:190}
+.gxscard{background:var(--card);color:var(--ink);width:100%;max-width:640px;max-height:92vh;overflow-y:auto;border-radius:20px 20px 0 0;padding:14px 16px calc(18px + env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch}
+.gxshead{display:flex;align-items:center;gap:8px;margin-bottom:8px}.gxshead b{flex:1;font-family:var(--serif);font-size:17px}
+.gxspv{display:flex;justify-content:center;background:var(--paper);border-radius:14px;padding:10px}
+.gxspv img{display:block;max-width:100%;max-height:46vh;width:auto;height:auto;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.14);-webkit-touch-callout:default}
+.gxacts{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}.gxacts .btn{flex:1 1 auto}
+.gxtabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:10px 0 8px;overflow-x:auto}
+.gxtabs button{flex:1 0 auto;border:0;background:none;color:var(--dusk);font:inherit;font-size:14px;padding:8px 10px;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap}
+.gxtabs button.on{color:var(--pine);border-bottom-color:var(--pine);font-weight:700}
+.gxlab{font-size:12.5px;color:var(--dusk);margin:12px 0 6px;font-weight:600}
+.gxchips{display:flex;flex-wrap:wrap;gap:6px}
+.gxchips button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:5px 12px;font:inherit;font-size:13px;cursor:pointer;white-space:nowrap}
+.gxchips button.on{background:var(--pine);border-color:var(--pine);color:#fff}
+.gxtpl{display:inline-flex;align-items:center;gap:6px}.gxtpl i{display:inline-block;width:16px;height:16px;border-radius:50%;border:2px solid}
+.gxscard input,.gxscard textarea{width:100%;min-width:0;border:1px solid var(--line);border-radius:10px;padding:9px 11px;font:inherit;font-size:15px;background:var(--paper);color:var(--ink);box-sizing:border-box}
+.gxscard textarea{resize:vertical;line-height:1.7}
+.gxgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px;margin-top:10px}
+.gxcell{border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:0;overflow:hidden;cursor:pointer;color:var(--ink);font:inherit}
+.gxcell img{display:block;width:100%;aspect-ratio:9/16;object-fit:cover;background:var(--line)}
+.gxcell span{display:block;font-size:11px;padding:3px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gxbar{display:flex;gap:8px}.gxbar input{flex:1 1 0;width:0}.gxbar .btn{flex:0 0 auto;white-space:nowrap}
+.gxhrow{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.gxhp{width:38px;height:38px;border-radius:50%;border:1px solid var(--pine);background:var(--card);color:var(--pine);flex:0 0 auto;cursor:pointer;font-size:14px}
+.gxhn{flex:1;min-width:0}.gxhn b{display:block;font-weight:600;font-size:15px}.gxhn small{display:block;color:var(--dusk);font-size:12px}
+.gxrec{display:flex;justify-content:space-between;align-items:center;margin:10px 0 8px;font-size:14px;color:var(--dusk)}
+.gxrec b{font-family:var(--mono);color:var(--ink)}
+.recdot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#D23B3B;margin-right:6px;animation:gxblink 1s infinite}
+@keyframes gxblink{50%{opacity:.25}}
+.gxwork video,.gxwork audio{margin-top:4px}
+.gxstrip{display:flex;gap:8px;overflow-x:auto;padding:8px 0 4px;-webkit-overflow-scrolling:touch}
+.gxstrip .gxcell{flex:0 0 76px}
+.gxstrip .gxcell img{aspect-ratio:9/16}
+.pxdel{position:absolute;right:4px;top:4px;width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;text-align:center;line-height:24px;font-size:16px}
+`;
+  function css() {
+    if (document.getElementById('gxscss')) return;
+    const s = document.createElement('style'); s.id = 'gxscss'; s.textContent = CSS;
+    document.head.appendChild(s);
+  }
+  css();
+  GX.addRoute('me/works', vWorks);
+  function after(k) { if (k === 'me/works') paintWorks(); }
+
+  return {
+    open, close, fromAnswer, after,
+    workPlay, workShare, workDl, workDel,
+    thumbErr: img => {
+      const alt = String(img.getAttribute('data-alt') || '').split('|').filter(Boolean);
+      if (!alt.length) { const c = img.closest('.gxcell'); if (c) c.remove(); return; }
+      img.setAttribute('data-alt', alt.slice(1).join('|'));
+      img.src = alt[0];
+    },
+    _findRef: (t, h) => findRef(t, h),
+    isOpen: () => !!(EL && EL.classList.contains('on')),
+    recording: recOn,
+    _st: st, _draw: (w, h) => { const c = document.createElement('canvas'); drawCard(c, w, h); return c; },
+    _item: () => item, _setPhoto: (im, by) => { setPhoto(im, by); paint(); }, _state: () => ({ photoMode, fullScale, fullKind, fullBless, origDX, origDY }), _note: () => note
+  };
+})();
+
+
+/* ═══ GXB · 接進講義外殼：領受抽屜／小智回答／我的作品 ═══ */
+(function () {
+  'use strict';
+  const T = GX.T, EN = GX.EN;
+  const $1 = s => document.querySelector(s);
+  function refOf(k) {
+    const p = String(k || '').split('|');
+    let n = 0;
+    try {
+      if (p[0] === 'v' || p[0] === 'c' || p[0] === 'x') n = +String(p[1] || '').split(':')[0];
+      else if (p[0] === 'l') n = +p[1];
+    } catch (e) {}
+    return GX.chLabel(n > 0 ? n : (S.last || 1));
+  }
+  window.gxbCard = function (k) {
+    const ta = $1('#mkin');
+    const note = ta ? ta.value : (typeof mkNote === 'function' ? mkNote(k) : '');
+    let text = '';
+    try { text = mkText(k); } catch (e) {}
+    const sh = $1('#sheet'); if (sh) sh.classList.remove('on');
+    GXS.open({ text, note: String(note || '').trim(), ref: refOf(k) });
+  };
+  window.gxbAnswer = function (i) {
+    const m = XZ.msgs[i]; if (!m) return;
+    let q = '';
+    for (let p = i - 1; p >= 0; p--) if (XZ.msgs[p].role === 'user') { q = XZ.msgs[p].text; break; }
+    GXS.fromAnswer(m.text, q);
+  };
+  const btnLabel = () => '🖼 ' + T('做成美圖', 'Make a card');
+  /* 領受抽屜：問小智旁邊加「做成美圖」 */
+  if (typeof window.mkSheet === 'function') {
+    const _ms = window.mkSheet;
+    window.mkSheet = function (k) {
+      const r = _ms.apply(this, arguments);
+      try {
+        const box = document.getElementById('sbody') || document;
+        if (!box.querySelector('[data-gxb]')) {
+          const ask = box.querySelector('button[onclick^="askXz("]');
+          if (ask) {
+            const b = document.createElement('button');
+            b.className = 'btn'; b.setAttribute('data-gxb', '1'); b.textContent = btnLabel();
+            b.onclick = e => { e.stopPropagation(); window.gxbCard(k); };
+            ask.parentNode.insertBefore(b, ask.nextSibling);
+          }
+        }
+      } catch (e) {}
+      return r;
+    };
+  }
+  /* 小智回答：🔊 ☆ 刪除 旁邊加「🖼」 */
+  if (typeof window.drawXz === 'function') {
+    const _dx = window.drawXz;
+    window.drawXz = function () {
+      const r = _dx.apply(this, arguments);
+      try {
+        document.querySelectorAll('#xz .xzact').forEach(box => {
+          if (box.querySelector('[data-gxb]')) return;
+          const sv = Array.prototype.slice.call(box.querySelectorAll('button')).find(b => /xzSave\(\d+\)/.test(b.getAttribute('onclick') || ''));
+          if (!sv) return;
+          const i = +/xzSave\((\d+)\)/.exec(sv.getAttribute('onclick'))[1];
+          const b = document.createElement('button');
+          b.setAttribute('data-gxb', '1'); b.textContent = '🖼 ' + T('做成美圖', 'Card');
+          b.onclick = e => { e.stopPropagation(); window.gxbAnswer(i); };
+          sv.parentNode.insertBefore(b, sv.nextSibling);
+        });
+      } catch (e) {}
+      return r;
+    };
+  }
+  /* 「我的」頁：多一列「我的作品」 */
+  if (typeof window.vMe === 'function') {
+    const _vm = window.vMe;
+    const row = () => `<button class="chrow" onclick="go('me',0,'works')"><span class="chn">🖼</span>
+      <span style="flex:1"><b>${T('我的作品', 'My creations')}</b><span class="s">${T('美圖、配樂、錄音與影片都在這裡', 'Cards, music, recordings and videos live here')}</span></span></button>`;
+    window.vMe = function () {
+      let h = _vm.apply(this, arguments);
+      try {
+        const re = /(onclick="go\('me',\s*0,\s*'sage'\)"[\s\S]*?<\/button>)/;
+        if (re.test(h)) h = h.replace(re, m => m + row());
+        else if (h.indexOf('<div class="foot">') >= 0) h = h.replace('<div class="foot">', row() + '<div class="foot">');
+        else h += row();
+      } catch (e) {}
+      return h;
+    };
+  }
+  /* 路由：me/works */
+  const _r = window.render;
+  window.render = function () {
+    const k = R.tab + '/' + R.sub;
+    if (S.set && S.set.role && GX.routes[k]) {
+      try { window.__booted = true; } catch (e) {}
+      $1('#view').innerHTML = GX.routes[k]();
+      document.querySelectorAll('nav.tabs button').forEach(b => b.classList.toggle('on', b.dataset.t === R.tab));
+      const bk = $1('#back'); if (bk) bk.classList.remove('hide');
+      if (window.GXS && GXS.after) GXS.after(k);
+      return;
+    }
+    return _r.apply(this, arguments);
+  };
+  const bk = $1('#back');
+  if (bk) {
+    const ob = bk.onclick;
+    bk.onclick = function (e) {
+      if (R.tab === 'me' && R.sub === 'works') { go('me'); return; }
+      return ob ? ob.call(this, e) : undefined;
+    };
+  }
+  try { if (R.tab === 'me') render(); } catch (e) {}
+})();
+var GX_VER = "1.3.202610191930";
+</script>
+
 <script id="tri321">
 /* ═══ TRI321 · 繁／简／EN 三語切換（頁首一鍵切換；三個版本在同一個資料夾，用檔名互連） ═══ */
 (function () {
