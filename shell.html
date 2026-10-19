@@ -499,5 +499,267 @@ setTimeout(function(){
 <script id="BOOK" type="application/json">__BOOK__</script>
 <script id="DATA" type="application/json">__DATA__</script>
 <script>__APP__</script>
+<script id="k321meet">window.K321MEET_CFG={wrap:'vToday',marker:'<div class="foot">',rerender:function(){try{render()}catch(e){}}};
+/* 國度321空中團契 · 首頁「下一堂聚會／一鍵加入聚會／聚會時間與奉獻支持」 k321meet v1 */
+(function () {
+  if (window.K321MEET) return;
+  var CFG = window.K321MEET_CFG || {};
+  var MEET_TZ = 8;
+  var MEET_URL = 'https://zoom.us/j/8193972372?pwd=o3tuX9k87Lyhb3UEV7hgRtSUYVyI1Q.1';
+  var MEET_ID = '819 397 2372', MEET_PASS = '321';
+  var YT_URL = 'https://www.youtube.com/@kingdom321air';
+  var QR = 'https://spch321-sudo.github.io/bible/wxpay.jpg';
+  var MEETINGS = [
+    { t: ['晨讀', '晨读', 'Morning Reading'], days: [1, 2, 3, 4, 5, 6], s: '06:00', e: '07:00' },
+    { t: ['午修靈糧', '午修灵粮', 'Midday Manna'], days: [1, 2, 3, 4, 5], s: '12:10', e: '13:00' },
+    { t: ['晚禱', '晚祷', 'Evening Prayer'], days: [1, 2, 3, 4, 5], s: '21:00', e: '22:00' }
+  ];
+  var OFFERING = [
+    { c: ['台灣', '台湾', 'Taiwan'], holder: '社團法人中華活力全人關懷協會', bank: '新光商業銀行 新埔分行', acct: '(103) 0338101013000' },
+    { c: ['馬來西亞', '马来西亚', 'Malaysia'], holder: '馬來西亞安提阿教會', bank: 'Public Bank', acct: '3178557627' },
+    { c: ['紐西蘭', '纽西兰', 'New Zealand'], holder: 'Bin Lu', bank: 'ASB Bank Auckland Branch', acct: '12-3231-0055109-00' },
+    { c: ['新加坡', '新加坡', 'Singapore'], holder: 'LEE CHEW YONG', bank: 'DBS My Account', acct: '275-153637-9' },
+    { c: ['中國', '中国', 'China'], title: ['微信支付', '微信支付', 'WeChat Pay'], qr: QR, cap: '321祝福(**淑)' }
+  ];
+  var HOLDER_SC = { '社團法人中華活力全人關懷協會': '社团法人中华活力全人关怀协会', '新光商業銀行 新埔分行': '新光商业银行 新埔分行', '馬來西亞安提阿教會': '马来西亚安提阿教会' };
+
+  function lang() {
+    if (CFG.lang) { var l = typeof CFG.lang === 'function' ? CFG.lang() : CFG.lang; if (l) return l; }
+    var h = (document.documentElement.getAttribute('lang') || '').toLowerCase();
+    if (/^en/.test(h)) return 'en';
+    try { if (typeof window.isSC === 'function' && window.isSC()) return 'sc'; } catch (e) {}
+    if (/hans|zh-cn|zh-sg/.test(h)) return 'sc';
+    if (/(^|[\/_-])(sc|cn)(\.html|\/|$)/i.test(location.pathname) || /[?&]lang=sc/.test(location.search)) return 'sc';
+    return 'tc';
+  }
+  function L(tc, sc, en) { var g = lang(); return g === 'en' ? en : (g === 'sc' ? (sc == null ? tc : sc) : tc); }
+  function A(arr) { return L(arr[0], arr[1], arr[2]); }
+  function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  function pad2(n) { return (n < 10 ? '0' : '') + n; }
+  function hm(ts) { var d = new Date(ts); return pad2(d.getHours()) + ':' + pad2(d.getMinutes()); }
+  function wd(d) { return L('週' + '日一二三四五六'.charAt(d), '周' + '日一二三四五六'.charAt(d), ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d]); }
+
+  function occur(m, now) {
+    now = now || Date.now();
+    var sp = m.s.split(':'), ep = m.e.split(':');
+    var sh = new Date(now + MEET_TZ * 3600000);
+    var base = Date.UTC(sh.getUTCFullYear(), sh.getUTCMonth(), sh.getUTCDate());
+    for (var k = 0; k < 9; k++) {
+      var day = new Date(base + k * 86400000);
+      if (m.days.indexOf(day.getUTCDay()) < 0) continue;
+      var st = day.getTime() + (+sp[0] - MEET_TZ) * 3600000 + (+sp[1]) * 60000;
+      var en = day.getTime() + (+ep[0] - MEET_TZ) * 3600000 + (+ep[1]) * 60000;
+      if (en <= st) en += 86400000;
+      if (now < en) return { start: st, end: en, live: now >= st, m: m };
+    }
+    return null;
+  }
+  function next(now) {
+    var best = null;
+    for (var i = 0; i < MEETINGS.length; i++) {
+      var o = occur(MEETINGS[i], now);
+      if (!o) continue;
+      if (o.live) return o;
+      if (!best || o.start < best.start) best = o;
+    }
+    return best;
+  }
+  function until(ms) {
+    var mins = Math.round(ms / 60000);
+    if (mins < 1) return L('就要開始了', '就要开始了', 'Starting now');
+    if (mins < 60) return L('還有 ' + mins + ' 分鐘', '还有 ' + mins + ' 分钟', 'in ' + mins + ' min');
+    var h = Math.floor(mins / 60), m = mins % 60;
+    if (h < 24) return L('還有 ' + h + ' 小時' + (m ? ' ' + m + ' 分' : ''), '还有 ' + h + ' 小时' + (m ? ' ' + m + ' 分' : ''), 'in ' + h + ' hr' + (m ? ' ' + m + ' min' : ''));
+    var d = Math.floor(h / 24), hh = h % 24;
+    return L('還有 ' + d + ' 天' + (hh ? ' ' + hh + ' 小時' : ''), '还有 ' + d + ' 天' + (hh ? ' ' + hh + ' 小时' : ''), 'in ' + d + ' day' + (d > 1 ? 's' : '') + (hh ? ' ' + hh + ' hr' : ''));
+  }
+  function nextCard() {
+    var o = next();
+    if (!o) return '';
+    var sd = new Date(o.start), tp = new Date(o.start + MEET_TZ * 3600000);
+    var same = (-new Date().getTimezoneOffset() / 60) === MEET_TZ;
+    return '<div class="k3m-next">' +
+      '<span class="k3m-k">' + esc(o.live ? L('正在聚會', '正在聚会', 'Live now') : L('下一堂聚會', '下一堂聚会', 'Next meeting')) + '</span>' +
+      '<h4>' + esc(A(o.m.t)) + '</h4>' +
+      '<div class="k3m-t">' + esc(L('你的時間', '你的时间', 'Your time')) + '　' + esc(wd(sd.getDay())) + ' ' + hm(o.start) + '–' + hm(o.end) + '</div>' +
+      (same ? '' : '<div class="k3m-sub">' + esc(L('台北時間', '台北时间', 'Taipei')) + '　' + esc(wd(tp.getUTCDay())) + ' ' + o.m.s + '–' + o.m.e + '</div>') +
+      '<div class="k3m-cd">' + esc(o.live ? L('進行中', '进行中', 'In progress') : until(o.start - Date.now())) + '</div>' +
+      '<a class="k3m-join" href="' + esc(MEET_URL) + '" target="_blank" rel="noopener">' + esc(o.live ? L('立即加入', '立即加入', 'Join now') : L('一鍵加入聚會', '一键加入聚会', 'Join the meeting')) + '</a>' +
+      '</div>';
+  }
+  function card() {
+    return '<div class="k3m-wrap" data-k3m="1"><p class="k3m-eb">' + esc(L('國度321空中團契', '国度321空中团契', 'Kingdom 321 Online Fellowship')) + '</p>' +
+      '<p class="k3m-intro">' + esc(L(
+        '以「321理念」為核心的線上團契，連結台灣、馬來西亞、中國、印尼、新加坡、紐西蘭、澳洲、韓國、日本等多個國家敬虔愛神的人，每天透過線上聚會一同學習聖經真理，操練活出基督的生命。',
+        '以“321理念”为核心的线上团契，连结台湾、马来西亚、中国、印尼、新加坡、纽西兰、澳洲、韩国、日本等多个国家敬虔爱神的人，每天透过线上聚会一同学习圣经真理，操练活出基督的生命。',
+        'An online fellowship built on the 3-2-1 ideology, connecting godly believers in Taiwan, Malaysia, China, Indonesia, Singapore, New Zealand, Australia, Korea, Japan and many other countries. Every day we meet online to learn the truth of Scripture and practise living out the life of Christ.')) + '</p>' +
+      '<div class="k3m-slot">' + nextCard() + '</div>' +
+      '<button type="button" class="k3m-more" onclick="K321MEET.open()">' + esc(L('聚會時間與奉獻支持 ›', '聚会时间与奉献支持 ›', 'Meeting times & giving ›')) + '</button></div>';
+  }
+
+  function sheet() {
+    var rows = '';
+    for (var i = 0; i < MEETINGS.length; i++) {
+      var m = MEETINGS[i], o = occur(m); if (!o) continue;
+      var sd = new Date(o.start);
+      rows += '<div class="k3m-row"><div class="k3m-time"><b>' + hm(o.start) + '–' + hm(o.end) + '</b><small>' + esc(wd(sd.getDay())) + '　' + esc(L('你的時間', '你的时间', 'your time')) + '</small></div>' +
+        '<div class="k3m-mid"><div class="t">' + esc(A(m.t)) + '</div><div class="s">Zoom · ' + esc(L('台北', '台北', 'Taipei')) + ' ' + m.s + '–' + m.e + '</div><div class="cd">' + esc(o.live ? L('進行中', '进行中', 'In progress') : until(o.start - Date.now())) + '</div></div>' +
+        '<a class="k3m-btn sm" href="' + esc(MEET_URL) + '" target="_blank" rel="noopener">' + esc(L('加入', '加入', 'Join')) + '</a></div>';
+    }
+    var offs = '';
+    for (var j = 0; j < OFFERING.length; j++) {
+      var a = OFFERING[j];
+      if (a.qr) {
+        offs += '<div class="k3m-offer"><span class="oc">' + esc(A(a.c)) + '</span><div class="oh" style="text-align:center">' + esc(A(a.title)) + '</div>' +
+          '<img src="' + esc(a.qr) + '" alt="' + esc(a.cap) + '" style="display:block;width:100%;max-width:300px;margin:8px auto;border-radius:10px"><div class="od" style="text-align:center">' + esc(a.cap) + '</div></div>';
+      } else {
+        var holder = lang() === 'sc' && HOLDER_SC[a.holder] ? HOLDER_SC[a.holder] : a.holder;
+        var bank = lang() === 'sc' && HOLDER_SC[a.bank] ? HOLDER_SC[a.bank] : a.bank;
+        offs += '<div class="k3m-offer"><span class="oc">' + esc(A(a.c)) + '</span><div class="oh">' + esc(holder) + '</div><div class="od">' + esc(bank) + '</div><div class="oa">' + esc(a.acct) + '</div>' +
+          '<button type="button" class="k3m-btn sm" onclick="K321MEET.copy(' + j + ')">📋 ' + esc(L('複製帳號', '复制账号', 'Copy account number')) + '</button></div>';
+      }
+    }
+    return '<div class="k3m-head"><b>' + esc(L('聚會與奉獻', '聚会与奉献', 'Meetings & Giving')) + '</b><button type="button" class="k3m-x" onclick="K321MEET.close()" aria-label="close">✕</button></div>' +
+      '<div class="k3m-body">' +
+      '<p class="k3m-eb">' + esc(L('國度321空中團契', '国度321空中团契', 'Kingdom 321 Online Fellowship')) + '</p><h2 class="k3m-big">' + esc(L('同一個 Zoom，天天都在。', '同一个 Zoom，天天都在。', 'One Zoom, every day.')) + '</h2>' +
+      '<div class="k3m-slot">' + nextCard() + '</div>' +
+      '<div class="k3m-box"><p class="k3m-eb">🎥 ' + esc(L('線上聚會 Zoom', '线上聚会 Zoom', 'Online meeting · Zoom')) + '</p>' +
+      '<a class="k3m-btn pri" href="' + esc(MEET_URL) + '" target="_blank" rel="noopener">' + esc(L('一鍵加入聚會', '一键加入聚会', 'Join the meeting')) + '</a>' +
+      '<p class="k3m-muted">' + esc(L('會議 ID', '会议 ID', 'Meeting ID')) + ' <b>' + MEET_ID + '</b>　' + esc(L('密碼', '密码', 'Passcode')) + ' <b>' + MEET_PASS + '</b></p></div>' +
+      '<div class="k3m-box"><p class="k3m-eb">' + esc(L('聚會時間表', '聚会时间表', 'Meeting schedule')) + '</p>' + rows + '</div>' +
+      '<div class="k3m-box"><p class="k3m-eb">▶️ YouTube</p><a class="k3m-btn" href="' + esc(YT_URL) + '" target="_blank" rel="noopener">' + esc(L('前往 YouTube 頻道', '前往 YouTube 频道', 'Go to the YouTube channel')) + '</a></div>' +
+      '<div class="k3m-box"><p class="k3m-eb">🎁 ' + esc(L('奉獻支持', '奉献支持', 'Giving')) + '</p>' +
+      '<p class="k3m-muted" style="margin:0">' + esc(L('奉獻是回應神的供應，出於甘心樂意（林後九7）。凡事謝恩，把榮耀歸給神。', '奉献是回应神的供应，出于甘心乐意（林后九7）。凡事谢恩，把荣耀归给神。', 'Giving is our response to God’s provision, offered cheerfully (2 Corinthians 9:7). Give thanks in everything, and give the glory to God.')) + '</p>' +
+      offs + '</div></div>';
+  }
+
+  var CSS = '' +
+    '.k3m-wrap{background:var(--card,#fff);color:var(--ink,#1d2421);border:1px solid var(--line,#ddd8cc);border-radius:18px;padding:16px 18px;margin:14px 0;box-shadow:0 1px 3px rgba(0,0,0,.04);text-align:left;font-size:inherit;line-height:1.6}' +
+    '.k3m-eb{margin:0 0 8px;font-size:.78em;font-weight:700;letter-spacing:.18em;color:var(--dusk,#6b7770)}' +
+    '.k3m-intro{margin:0 0 8px;line-height:1.8;font-size:.95em}' +
+    '.k3m-next{background:linear-gradient(160deg,#1F4D3D,#0E2a20);color:#fff;border-radius:16px;padding:16px 18px;margin:10px 0 12px;text-align:left}' +
+    '.k3m-next .k3m-k{display:inline-block;background:rgba(255,255,255,.16);color:#E8C66A;border-radius:99px;padding:2px 12px;font-size:.8em;font-weight:700}' +
+    '.k3m-next h4{margin:8px 0 2px;font-size:1.3em;color:#fff;font-weight:700}' +
+    '.k3m-next .k3m-t{opacity:.95;font-size:.95em}.k3m-next .k3m-sub{font-size:.85em;opacity:.8}' +
+    '.k3m-next .k3m-cd{color:#E8C66A;font-weight:700;margin:6px 0 10px;font-size:.95em}' +
+    '.k3m-join,.k3m-btn{display:block;text-align:center;text-decoration:none;border-radius:12px;padding:11px 14px;font:inherit;font-size:.95em;font-weight:600;cursor:pointer;box-sizing:border-box;width:100%}' +
+    '.k3m-join{background:#9C6B18;border:1px solid #9C6B18;color:#fff!important}' +
+    '.k3m-btn{background:var(--card,#fff);border:1px solid var(--line,#ddd8cc);color:var(--ink,#1d2421)!important;margin-top:8px}' +
+    '.k3m-btn.pri{background:#1F4D3D;border-color:#1F4D3D;color:#fff!important}' +
+    '.k3m-btn.sm{display:inline-block;width:auto;padding:6px 12px;font-size:.85em;margin-top:6px}' +
+    '.k3m-more{display:block;width:100%;box-sizing:border-box;background:var(--card,#fff);color:var(--ink,#1d2421);border:1px solid var(--line,#ddd8cc);border-radius:12px;padding:11px 14px;font:inherit;font-size:.95em;cursor:pointer}' +
+    '#k3mSheet{position:fixed;inset:0;z-index:2147483000;display:none}#k3mSheet.on{display:block}' +
+    '#k3mSheet .k3m-mask{position:absolute;inset:0;background:rgba(0,0,0,.45)}' +
+    '#k3mSheet .k3m-panel{position:absolute;left:0;right:0;bottom:0;top:max(24px,env(safe-area-inset-top));max-width:640px;margin:0 auto;background:var(--paper,#f3f1ec);color:var(--ink,#1d2421);border-radius:18px 18px 0 0;display:flex;flex-direction:column;overflow:hidden;font-size:17px;line-height:1.6;text-align:left}' +
+    '#k3mSheet .k3m-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line,#ddd8cc);background:var(--card,#fff)}' +
+    '#k3mSheet .k3m-head b{font-size:1.05em}' +
+    '#k3mSheet .k3m-x{border:0;background:transparent;font-size:22px;line-height:1;color:inherit;cursor:pointer;padding:4px 8px}' +
+    '#k3mSheet .k3m-body{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px calc(28px + env(safe-area-inset-bottom))}' +
+    '#k3mSheet .k3m-big{margin:0 0 6px;font-size:1.35em;line-height:1.4}' +
+    '.k3m-box{background:var(--card,#fff);border:1px solid var(--line,#ddd8cc);border-radius:16px;padding:14px 16px;margin:12px 0}' +
+    '.k3m-muted{color:var(--dusk,#6b7770);font-size:.9em;margin:10px 0 0}' +
+    '.k3m-row{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line,#ddd8cc)}.k3m-row:last-child{border-bottom:none}' +
+    '.k3m-row .k3m-btn.sm{margin-top:0}' +
+    '.k3m-time{flex:0 0 auto;min-width:96px;background:var(--paper,#f3f1ec);border-radius:12px;padding:6px 10px;text-align:center;font-size:.88em;line-height:1.5}.k3m-time b,.k3m-time small{display:block}.k3m-time small{color:var(--dusk,#6b7770);font-size:.82em}' +
+    '.k3m-mid{flex:1;min-width:0}.k3m-mid .t{font-weight:700}.k3m-mid .s{font-size:.82em;color:var(--dusk,#6b7770)}.k3m-mid .cd{font-size:.82em;color:#1F4D3D;font-weight:700}' +
+    '.k3m-offer{border:1px solid var(--line,#ddd8cc);border-radius:12px;padding:12px 14px;margin-top:10px}' +
+    '.k3m-offer .oc{display:inline-block;background:#1F4D3D;color:#fff;border-radius:8px;padding:2px 10px;font-size:.8em;font-weight:700}' +
+    '.k3m-offer .oh{font-weight:700;margin:8px 0 2px;overflow-wrap:anywhere}.k3m-offer .od{color:var(--dusk,#6b7770);font-size:.9em}' +
+    '.k3m-offer .oa{font-family:ui-monospace,Menlo,monospace;font-size:1.02em;margin:6px 0 4px;overflow-wrap:anywhere}' +
+    '#k3mToast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:rgba(20,28,24,.92);color:#fff;padding:9px 16px;border-radius:99px;font-size:14px;z-index:2147483001;pointer-events:none}';
+  function css() {
+    if (document.getElementById('k3mcss')) return;
+    var s = document.createElement('style'); s.id = 'k3mcss'; s.textContent = CSS;
+    (document.head || document.documentElement).appendChild(s);
+  }
+  function toast(t) {
+    var el = document.getElementById('k3mToast');
+    if (!el) { el = document.createElement('div'); el.id = 'k3mToast'; document.body.appendChild(el); }
+    el.textContent = t; el.style.display = 'block';
+    clearTimeout(toast._t); toast._t = setTimeout(function () { el.style.display = 'none'; }, 1800);
+  }
+  function copy(i) {
+    var a = OFFERING[i].acct, ok = L('已複製帳號', '已复制账号', 'Account number copied');
+    function fb() {
+      var ta = document.createElement('textarea'); ta.value = a; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); toast(ok); } catch (e) { toast(a); }
+      document.body.removeChild(ta);
+    }
+    try { navigator.clipboard.writeText(a).then(function () { toast(ok); }, fb); } catch (e) { fb(); }
+  }
+  function open() {
+    css();
+    var el = document.getElementById('k3mSheet');
+    if (!el) { el = document.createElement('div'); el.id = 'k3mSheet'; document.body.appendChild(el); }
+    el.innerHTML = '<div class="k3m-mask" onclick="K321MEET.close()"></div><div class="k3m-panel">' + sheet() + '</div>';
+    el.className = 'on';
+    try { document.documentElement.style.overflow = 'hidden'; } catch (e) {}
+  }
+  function close() {
+    var el = document.getElementById('k3mSheet'); if (el) el.className = '';
+    try { document.documentElement.style.overflow = ''; } catch (e) {}
+  }
+  function tick() {
+    var slots = document.querySelectorAll('.k3m-slot');
+    if (!slots.length) return;
+    var h = nextCard();
+    for (var i = 0; i < slots.length; i++) slots[i].innerHTML = h;
+  }
+
+  /* ── 掛到首頁 ── */
+  function place() {
+    var hook = CFG.hook;
+    if (!hook || !hook.sel) return;
+    var host = document.querySelector(hook.sel);
+    if (!host) return;
+    if (host.querySelector('[data-k3m]')) return;
+    if (hook.need && !hook.need(host)) return;
+    var tmp = document.createElement('div'); tmp.innerHTML = card();
+    var node = tmp.firstChild;
+    var ref = hook.before ? host.querySelector(hook.before) : null;
+    if (ref && ref.parentNode) ref.parentNode.insertBefore(node, ref);
+    else if (hook.where === 'start') host.insertBefore(node, host.firstChild);
+    else if (hook.after && host.querySelector(hook.after)) { var a = host.querySelector(hook.after); a.parentNode.insertBefore(node, a.nextSibling); }
+    else host.appendChild(node);
+  }
+  var pend = 0;
+  function watch() {
+    if (!CFG.hook || !CFG.hook.sel) return;
+    place();
+    try {
+      new MutationObserver(function () {
+        if (pend) return;
+        pend = setTimeout(function () { pend = 0; place(); }, 60);
+      }).observe(document.body, { childList: true, subtree: true });
+    } catch (e) {}
+  }
+  function wrapFn(name, marker) {
+    var orig = window[name];
+    if (typeof orig !== 'function' || orig.__k3m) return false;
+    var w = function () {
+      var h = orig.apply(this, arguments);
+      if (typeof h !== 'string' || h.indexOf('data-k3m') >= 0) return h;
+      var cut = marker ? h.lastIndexOf(marker) : -1;
+      return cut > 0 ? h.slice(0, cut) + card() + h.slice(cut) : h + card();
+    };
+    w.__k3m = 1;
+    window[name] = w;
+    return true;
+  }
+
+  window.K321MEET = { open: open, close: close, copy: copy, card: card, nextCard: nextCard, place: place, tick: tick };
+  css();
+  function boot() {
+    css();
+    if (CFG.wrap) {
+      if (wrapFn(CFG.wrap, CFG.marker || '') && CFG.rerender) { try { CFG.rerender(); } catch (e) {} }
+    }
+    watch();
+    setInterval(tick, 30000);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+</script>
 </body>
 </html>
