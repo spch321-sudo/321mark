@@ -3,7 +3,7 @@
    策略：App 殼採 network-first（確保更新拿得到），失敗時回退快取；
          圖示等靜態檔採 cache-first。 */
 
-const V = 'fdba6660ca83-tri10171929-gxs1019-meet1020';
+const V = 'fdba6660ca83-tri10171929-gxs1019-meet1020-gx1021b';
 const CACHE = '321bible-' + VERSION;
 
 /* 由 src/build.py 依 books.json 自動產生 —— 不要手改 */
