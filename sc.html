@@ -6592,5 +6592,102 @@ try { GX.boot(); } catch (e) { try { console.error("GX boot", e); } catch (_) {}
   addBtn();
 })();
 </script>
+<script id="HLC8">
+/* ═══ 畫線八色（金＋七色，與馬太福音講義同一組；2026-10-21） ═══ */
+(function () {
+  if (window.__hlc8 || typeof S === 'undefined' || !S.mk) return; window.__hlc8 = 1;
+  var LG = (document.documentElement.getAttribute('lang') || '').toLowerCase();
+  var EN = LG.indexOf('en') === 0, SC = LG.indexOf('hans') > 0;
+  function T(tc, sc, en) { return EN ? en : (SC ? sc : tc); }
+  var COLORS = [
+    { k: '',         l: T('金', '金', 'Gold'),          v: 'gold' },
+    { k: 'green',    l: T('翠綠', '翠绿', 'Green'),      v: 'green' },
+    { k: 'blue',     l: T('湛藍', '湛蓝', 'Blue'),       v: 'blue' },
+    { k: 'pink',     l: T('粉紅', '粉红', 'Pink'),       v: 'pink' },
+    { k: 'purple',   l: T('紫羅蘭', '紫罗兰', 'Violet'),  v: 'purple' },
+    { k: 'maroon',   l: T('酒紅', '酒红', 'Maroon'),     v: 'maroon' },
+    { k: 'brown',    l: T('土褐', '土褐', 'Brown'),      v: 'brown' },
+    { k: 'charcoal', l: T('炭灰', '炭灰', 'Charcoal'),   v: 'charcoal' }
+  ];
+  window.HL_COLORS = window.HL_COLORS || COLORS.slice(1).map(function (c) { return { k: c.k, label: c.l }; });
+
+  /* 樣式：顏色變數（亮／暗）＋各種畫線元素＋選色圓鈕 */
+  var css = ':root{--hl-gold:rgba(156,107,24,.32);--hl-green:#CFE6CC;--hl-blue:#CFDFF4;--hl-pink:#F7D3DC;--hl-purple:#E3D5F1;--hl-maroon:#EBD0D0;--hl-brown:#E9D9BF;--hl-charcoal:#DBDAD4}' +
+    'html[data-dark="1"]{--hl-gold:rgba(214,162,80,.34);--hl-green:#22402A;--hl-blue:#1F3350;--hl-pink:#45222E;--hl-purple:#332A48;--hl-maroon:#3D2525;--hl-brown:#3B3020;--hl-charcoal:#34342F}' +
+    '.hc8row{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:2px 0 12px}' +
+    '.hc8row .lb{font-size:12.5px;color:var(--dusk);white-space:nowrap}' +
+    '.hc8sw{width:27px;height:27px;flex:0 0 auto;border-radius:50%;border:2px solid transparent;padding:0;cursor:pointer;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}' +
+    '.hc8sw.on{border-color:var(--ink)}';
+  COLORS.slice(1).forEach(function (c) {
+    var v = 'var(--hl-' + c.v + ')';
+    css += '.mks.hl[data-c="' + c.k + '"]{background:linear-gradient(transparent 60%,' + v + ' 60%)}' +
+           '.mkp.hl[data-c="' + c.k + '"]{background:linear-gradient(transparent 62%,' + v + ' 62%)}' +
+           '.vs.hl[data-c="' + c.k + '"] .vt{background:linear-gradient(transparent 58%,' + v + ' 58%)}';
+  });
+  var st = document.createElement('style'); st.id = 'hlc8css'; st.textContent = css; document.head.appendChild(st);
+
+  var has = function (k) { return Object.prototype.hasOwnProperty.call(S.mk, k); };
+  var colorOf = function (k) { return (S.mk[k] && S.mk[k].c) || ''; };
+  if (typeof window.mkColor !== 'function') window.mkColor = colorOf;
+
+  /* 把顏色畫到畫面上（自己的那一句；多句範圍交給 mkPaintSpans） */
+  function paint() {
+    document.querySelectorAll('[data-k]').forEach(function (e) {
+      var k = e.getAttribute('data-k');
+      if (!has(k)) return;
+      var c = colorOf(k);
+      if (c) e.setAttribute('data-c', c); else e.removeAttribute('data-c');
+    });
+    try { if (typeof window.mkPaintSpans === 'function') window.mkPaintSpans(); } catch (e) {}
+  }
+  var R0 = window.render;
+  if (typeof R0 === 'function') window.render = function () { var r = R0.apply(this, arguments); try { paint(); } catch (e) {} return r; };
+
+  window.mkSetColor = function (k, c) {
+    if (!has(k)) S.mk[k] = { n: '', at: Date.now() };
+    S.mk[k].c = c; S.set.hlc = c; save();
+    var box = document.getElementById('sheet');
+    if (box) box.querySelectorAll('.hc8sw').forEach(function (b) { b.classList.toggle('on', (b.getAttribute('data-hc') || '') === c); });
+    document.querySelectorAll('[data-k="' + k + '"]').forEach(function (e) { e.classList.add('hl'); });
+    paint();
+  };
+
+  /* 新畫的線用上次選的顏色 */
+  var TAP0 = window.mkTap;
+  window.mkTap = function (k, el) {
+    var was = has(k);
+    var r = TAP0.apply(this, arguments);
+    if (!was && has(k) && S.set.hlc) { S.mk[k].c = S.set.hlc; save(); paint(); }
+    return r;
+  };
+  /* 存領受時保留顏色 */
+  var SAVE0 = window.mkSave;
+  window.mkSave = function (k) {
+    var c = colorOf(k);
+    var r = SAVE0.apply(this, arguments);
+    if (c && has(k) && !S.mk[k].c) { S.mk[k].c = c; save(); paint(); }
+    return r;
+  };
+  /* 面板：在經文下面加選色列（範圍列之前） */
+  var SHEET0 = window.mkSheet;
+  window.mkSheet = function (k) {
+    var r = SHEET0.apply(this, arguments);
+    var box = document.getElementById('sheet'); if (!box || box.querySelector('.hc8row')) return r;
+    var q = box.querySelector('#mkq') || box.querySelector('.mkq'); if (!q) return r;
+    var cur = colorOf(k);
+    var html = '<div class="hc8row"><span class="lb">' + T('畫線顏色', '画线颜色', 'Colour') + '</span>' +
+      COLORS.map(function (c) {
+        return '<button class="hc8sw' + (cur === c.k ? ' on' : '') + '" data-hc="' + c.k + '" title="' + c.l +
+          '" aria-label="' + c.l + '" style="background:var(--hl-' + c.v + ')"></button>';
+      }).join('') + '</div>';
+    q.insertAdjacentHTML('afterend', html);
+    box.querySelectorAll('.hc8sw').forEach(function (b) {
+      b.onclick = function (e) { e.stopPropagation(); window.mkSetColor(k, b.getAttribute('data-hc') || ''); };
+    });
+    return r;
+  };
+  paint();
+})();
+</script>
 </body>
 </html>
