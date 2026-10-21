@@ -6549,7 +6549,7 @@ try { GX.boot(); } catch (e) { try { console.error("GX boot", e); } catch (_) {}
 
 </script>
 <script id="GXFS">
-/* ═══ 小智全螢幕＋字級跟著內文（2026-10-21）═══
+/* ═══ 小智全螢幕＋字級跟著內文（2026-10-21b：回答滿版）═══
    ① 小智面板佔滿整個畫面（原本是下方抽屜，上面還露出一截頁首）
    ② 小智回答的字級＝內文字級（--fs），面板頂端多一顆「A」可直接調整，整個 App 一起變 */
 (function () {
@@ -6562,7 +6562,10 @@ try { GX.boot(); } catch (e) { try { console.error("GX boot", e); } catch (_) {}
     '#xz .xzm,#xz .xzhi,#xz .xzsv{font-size:var(--fs,17px)!important}' +
     '#xz .xzm .xzt{font-size:1em!important}' +
     '#xz .xzq button{font-size:calc(var(--fs,17px)*.9)!important}' +
-    '#xz .xzfs{font-family:var(--serif,serif);font-weight:700;min-width:40px}';
+    '#xz .xzfs{font-family:var(--serif,serif);font-weight:700;min-width:40px}' +
+    '#xz .xzb{padding:12px 10px!important}' +
+    '#xz .xzm.assistant{max-width:100%!important;width:100%;box-sizing:border-box}' +
+    '#xz .xzm.user{max-width:92%!important}';
   document.head.appendChild(st);
   function bump() {
     try {
