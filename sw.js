@@ -4,7 +4,9 @@
          圖示等靜態檔採 cache-first。 */
 
 const V = 'fdba6660ca83-tri10171929-gxs1019-meet1020-gx1021c-hl8-vp1023-co1';
-const CACHE = '321bible-' + VERSION;
+const SLUG = location.pathname.split('/')[1] || 'app';   /* 同一個 github.io 網域底下有很多 App，快取名稱與清理範圍都限定在自己這一個 */
+const PFX = '321bible-' + SLUG + '-';
+const CACHE = PFX + V;
 
 /* 由 src/build.py 依 books.json 自動產生 —— 不要手改 */
 const SHELL = ["./", "./index.html", "./sc.html", "./icon-512.png", "./coread.js", "./peerjs.min.js"];
@@ -21,7 +23,7 @@ self.addEventListener('install', e => {
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+      .then(keys => Promise.all(keys.filter(k => k.indexOf(PFX) === 0 && k !== CACHE).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
