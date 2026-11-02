@@ -6103,6 +6103,7 @@ window.drawXz = () => SAGE321.draw();
     const ks = keysOf(k), a = ks[0].split('|')[1].split(':'), z = ks[ks.length - 1].split('|')[1].split(':');
     return (GX.BK ? TT(GX.BK.zh, GX.BK.en) : (GX.BOOK || '')) + ' ' + a[0] + ':' + a[1] + (z[1] !== a[1] ? '-' + z[1] : '');
   }
+  window.mkRefOf = refOf;
   window.mkText = function (k) {
     if (!S.mk[k] || sp(k) < 2) return MKS_TEXT(k);
     /* 中文直接接；英文（前後都是英數標點）中間補一個空格 */
@@ -6817,5 +6818,176 @@ try { GX.boot(); } catch (e) { try { console.error("GX boot", e); } catch (_) {}
 })();
 </script>
 <script src="coread.js?v=co1" data-pfx="mk321-"></script>
+<script id="GXP">
+/* ═══════════════════════════════════════════════════════════════════
+   GXP 掛件 v1（2026-11-03）：畫線面板補齊《321互動聖經》的標準
+   · 「儲存領受」「🖼 做成美圖」「🔊 朗讀這句」「📋 複製」「↗ 分享」「🗑 刪除畫線」「關閉」
+   · 範圍（↑前一句／－／＋／整節／整段）原本就有（gxa1019），這裡不動
+   · 不改任何既有函式：用 MutationObserver 看 #sheet，畫線面板一出現就補按鈕
+   ═══════════════════════════════════════════════════════════════════ */
+(function () {
+  if (window.__gxp) return; window.__gxp = 1;
+  var root = document.documentElement;
+  var EN = /^en/i.test(root.getAttribute('lang') || '');
+  function g(f) { try { return f(); } catch (e) { return undefined; } }
+  function scNow() { return !EN && !!(g(function () { return S.set.sc; }) || /Hans|CN/i.test(root.getAttribute('lang') || '')); }
+  function T(zh, en) {
+    if (EN) return en;
+    if (scNow() && typeof toSC === 'function') { var r = g(function () { return toSC(zh); }); if (r) return r; }
+    return zh;
+  }
+  function say(m) { g(function () { toast(m); }); }
+
+  if (!document.getElementById('gxpCss')) {
+    var st = document.createElement('style'); st.id = 'gxpCss';
+    st.textContent = '.gxp-acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}' +
+      '.gxp-acts .btn{flex:1 1 auto;min-width:88px}' +
+      '#sheet .gxp-close{flex:0 0 auto}';
+    document.head.appendChild(st);
+  }
+
+  /* 從「儲存」鈕的 onclick 取出這一條畫線的 key（講義各代範本寫法不同：MK321.save('k')／mkSave('k')） */
+  function findSave(box) {
+    var bs = box.querySelectorAll('button');
+    for (var i = 0; i < bs.length; i++) {
+      var m = /(?:mkSave|MK321\.save)\('((?:[^'\\]|\\.)*)'\)/.exec(bs[i].getAttribute('onclick') || '');
+      if (m) return { btn: bs[i], key: m[1].replace(/\\'/g, "'") };
+    }
+    return null;
+  }
+  function txt(box) { var q = box.querySelector('#mkq,.mkq'); return q ? String(q.textContent || '').trim() : ''; }
+  function note(box) { var t = box.querySelector('#mkin'); return t ? String(t.value || '').trim() : ''; }
+  function refOf(k) {
+    var r = g(function () { return window.mkRefOf(k); });
+    return r ? String(r) : '';
+  }
+  function pack(box, k) {
+    var t = txt(box), n = note(box), r = refOf(k);
+    var s = t + (r ? '\n—— ' + r : '');
+    if (n) s += '\n\n' + T('我的領受：', 'My reflection: ') + n;
+    return s;
+  }
+  /* 先把打在框裡的領受存下來，再去做別的事，才不會白寫 */
+  function keepNote(box, k) {
+    var n = note(box);
+    g(function () { if (S.mk[k] && n !== (S.mk[k].n || '')) { S.mk[k].n = n; save(); } });
+  }
+  function copyText(s) {
+    return new Promise(function (ok, no) {
+      function legacy() {
+        try {
+          var ta = document.createElement('textarea'); ta.value = s; ta.setAttribute('readonly', '');
+          ta.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0';
+          document.body.appendChild(ta); ta.select(); var done = document.execCommand('copy'); document.body.removeChild(ta);
+          done ? ok() : no();
+        } catch (e) { no(e); }
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(s).then(ok, legacy); else legacy();
+    });
+  }
+  function title() {
+    return g(function () { return GX.BK ? GX.T(GX.BK.zh, GX.BK.en) : GX.BOOK; }) || g(function () { return window.GX_BOOK[EN ? 'en' : 'zh']; }) || document.title;
+  }
+  function readAloud(box, k) {
+    var t = txt(box); if (!t) return;
+    keepNote(box, k);
+    box.classList.remove('on');
+    if (window.TTS321 && TTS321.play && TTS321.chunks) {
+      g(function () { if (TTS321.isOn()) TTS321.stop(); });
+      var ref = refOf(k);
+      TTS321.play(TTS321.chunks(t).map(function (x) { return { t: x }; }), { title: ref || title() });
+    } else if (typeof speak === 'function') {
+      /* 前兩代範本：串流播放器（Azure 真人語音、換聲音／語速、鎖屏控制、失敗改內建語音）在全域 speak(text, title) */
+      g(function () { if (typeof SPK !== 'undefined' && SPK.on && typeof stopSpeak === 'function') stopSpeak(); });
+      speak(t, refOf(k) || title());
+    } else if (window.speechSynthesis) {
+      var u = new SpeechSynthesisUtterance(t); u.lang = EN ? 'en-US' : (scNow() ? 'zh-CN' : 'zh-TW');
+      speechSynthesis.cancel(); speechSynthesis.speak(u);
+    } else say(T('這個瀏覽器不支援朗讀', 'Reading aloud is not supported here'));
+  }
+  function doCopy(box, k) {
+    var s = pack(box, k);
+    copyText(s).then(function () { say(T('已複製', 'Copied')); }, function () { say(T('複製失敗，請長按文字手動複製', 'Copy failed — press and hold the text to copy')); });
+  }
+  function doShare(box, k) {
+    var s = pack(box, k), url = g(function () { return location.href.split('#')[0]; }) || '';
+    if (navigator.share) {
+      navigator.share({ title: refOf(k) || title(), text: s, url: url }).catch(function () {});
+    } else {
+      copyText(s + '\n' + url).then(function () { say(T('已複製，可貼到 LINE／訊息分享', 'Copied — paste it into a message to share')); },
+        function () { say(T('這個瀏覽器不能分享', 'Sharing is not available here')); });
+    }
+  }
+
+  function enhance(box) {
+    if (!box || box.querySelector('.gxp-acts')) return;
+    var sv = findSave(box); if (!sv) return;           // 不是畫線面板（例如別的底部面板）就略過
+    var k = sv.key;
+    sv.btn.textContent = T('儲存領受', 'Save reflection');
+    var bs = box.querySelectorAll('button'), del = null;
+    for (var i = 0; i < bs.length; i++) {
+      var b = bs[i], oc = b.getAttribute('onclick') || '', tx = b.textContent || '';
+      if (/🖼/.test(tx)) b.textContent = '🖼 ' + T('做成美圖', 'Make a card');
+      if (/(?:mkDel|MK321\.del)\(/.test(oc)) del = b;
+    }
+    var row = document.createElement('div'); row.className = 'row gxp-acts';
+    row.innerHTML = '<button class="btn" data-gxp="say">🔊 ' + T('朗讀這句', 'Read aloud') + '</button>' +
+      '<button class="btn" data-gxp="copy">📋 ' + T('複製', 'Copy') + '</button>' +
+      '<button class="btn" data-gxp="share">↗ ' + T('分享', 'Share') + '</button>';
+    var svRow = sv.btn.parentNode;
+    svRow.parentNode.insertBefore(row, svRow.nextSibling);
+    var cl = document.createElement('button'); cl.className = 'btn gxp-close'; cl.setAttribute('data-gxp', 'close');
+    cl.textContent = T('關閉', 'Close');
+    if (del && del.parentNode) del.parentNode.appendChild(cl); else row.appendChild(cl);
+    box.querySelectorAll('[data-gxp]').forEach(function (b) {
+      b.onclick = function (e) {
+        e.stopPropagation(); var a = b.getAttribute('data-gxp');
+        if (a === 'say') readAloud(box, k); else if (a === 'copy') doCopy(box, k);
+        else if (a === 'share') doShare(box, k); else { keepNote(box, k); box.classList.remove('on'); }
+      };
+    });
+  }
+
+  /* ── 第一代範本（馬可、羅馬書、啟示錄）的朗讀沒有鎖屏／耳機／車機的播放控制：補上 Media Session ──
+        （第二、三代已有 mediaSetup／TTS321 自己處理，這裡偵測到就不動） */
+  function lockScreen() {
+    if (typeof mediaSetup === 'function' || window.TTS321 || !navigator.mediaSession || !window.MediaMetadata) return;
+    if (typeof speak !== 'function' || typeof audioEl !== 'function' || typeof stopSpeak !== 'function' || typeof togglePause !== 'function') return;
+    var S0 = window.speak, wired = false;
+    function icon() { var l = document.querySelector('link[rel="apple-touch-icon"], link[rel="icon"]'); return (l && l.getAttribute('href')) || ''; }
+    function wire() {
+      if (wired) return; wired = true;
+      var a = audioEl();
+      a.addEventListener('play', function () { g(function () { navigator.mediaSession.playbackState = 'playing'; }); });
+      a.addEventListener('pause', function () { g(function () { navigator.mediaSession.playbackState = (typeof SPK !== 'undefined' && SPK.on) ? 'paused' : 'none'; }); });
+      var ms = navigator.mediaSession;
+      g(function () { ms.setActionHandler('play', function () { if (SPK.pause) togglePause(); }); });
+      g(function () { ms.setActionHandler('pause', function () { if (!SPK.pause) togglePause(); }); });
+      g(function () { ms.setActionHandler('stop', function () { stopSpeak(); }); });
+    }
+    window.speak = function (text, ttl) {
+      var r = S0.apply(this, arguments);
+      g(function () {
+        wire(); var ic = icon();
+        navigator.mediaSession.metadata = new MediaMetadata({ title: ttl || title(), artist: document.title, album: T('國度321空中團契', 'Kingdom 321 Online Fellowship'),
+          artwork: ic ? [{ src: ic, sizes: '180x180', type: 'image/png' }] : [] });
+      });
+      return r;
+    };
+  }
+
+  function boot() {
+    try { lockScreen(); } catch (e) {}
+    var box = document.getElementById('sheet'); if (!box) return;
+    var busy = false;
+    new MutationObserver(function () {
+      if (busy) return; busy = true;
+      setTimeout(function () { busy = false; try { enhance(box); } catch (e) { try { console.error('GXP', e); } catch (_) {} } }, 0);
+    }).observe(box, { childList: true, subtree: true });
+    try { enhance(box); } catch (e) {}
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+</script>
 </body>
 </html>
