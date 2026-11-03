@@ -1390,9 +1390,11 @@ var SAGE321 = (function () {
     XZ.open = false;
     var el = document.getElementById(C.el);
     if (el) el.className = el.className.replace(/\bon\b/g, '').replace(/\s+/g, ' ');
+    after();
   }
   function push(role, text, extra) {
-    var m = { role: role, text: text };
+    var m = { role: role, text: text, id: 'a' + (new Date()).getTime().toString(36) + Math.floor(Math.random() * 1296).toString(36), at: (new Date()).getTime() };
+    if (C && C.chapter) { try { m.ch = C.chapter() || 0; } catch (e) {} }
     if (extra) ext(m, extra);
     XZ.msgs.push(m);
     return m;
@@ -1641,7 +1643,7 @@ var SAGE321 = (function () {
     var col = long && m.col !== false;
     var sav = savedIdx(i) >= 0;
     return '<div class="xzm assistant" id="xzm' + i + '">' +
-      '<div class="xzt ' + (col ? 'clip' : '') + '">' + link(body(m.text)) + '</div>' +
+      '<div class="xzt ' + (col ? 'clip' : '') + '">' + dec(link(body(m.text)), m, i) + '</div>' +
       (long ? '<button class="xzmore" onclick="SAGE321.fold(' + i + ')">' +
         esc(col ? L('more') : L('less')) + '</button>' : '') +
       (m.ok ? '<div class="xzact">' +
@@ -1676,6 +1678,7 @@ var SAGE321 = (function () {
   }
   function speak(i) {
     var m = XZ.msgs[i];
+    if (m && m.ok && typeof XZM !== 'undefined' && XZM.speak) { try { if (XZM.speak(i, m)) return; } catch (e) {} }
     if (m && C.onSpeak) C.onSpeak(toSpeech(m.text), C.name);
   }
 
@@ -1687,7 +1690,7 @@ var SAGE321 = (function () {
       document.body.appendChild(el);
     }
     el.className = ('xz ' + (XZ.open ? 'on' : '')).replace(/\s+$/, '');
-    if (!XZ.open) return;
+    if (!XZ.open) { after(); return; }
     var oldB = document.getElementById('xzb'), oldTop = oldB ? oldB.scrollTop : 0;
     var inp = document.getElementById('xzin'), typed = inp ? inp.value : '';
 
@@ -1742,9 +1745,24 @@ var SAGE321 = (function () {
       if (!b) return;
       b.scrollTop = keepScroll ? oldTop : b.scrollHeight;
     }, 30);
+    after();
   }
 
   function clear() { XZ.msgs = []; draw(); }
+  /* XZM（小智句子：跟讀、畫線、保存）的接點；沒有 XZM 時全部無作用 */
+  function dec(html, m, i) {
+    if (typeof XZM !== 'undefined' && XZM.tag) { try { return XZM.tag(html, m, i); } catch (e) {} }
+    return html;
+  }
+  function after() {
+    if (typeof XZM !== 'undefined' && XZM.afterDraw) { try { XZM.afterDraw(); } catch (e) {} }
+  }
+  function restore(list) {
+    if (XZ.busy || XZ.msgs.length) return;
+    XZ.msgs = (list || []).slice();
+    foldOld();
+    draw();
+  }
 
   function init(cfg) {
     C = ext(ext({}, DEF), cfg || {});
@@ -1763,6 +1781,8 @@ var SAGE321 = (function () {
     exportMd: exportMd,
     saved: saved,
     msgs: function () { return XZ.msgs; },
+    restore: restore,
+    speechClean: function (t) { if (C && C.speechClean) { try { t = C.speechClean(t); } catch (e) {} } return t; },
     isOpen: function () { return !!XZ.open; },
     speechOf: toSpeech,
     plainOf: plainOf,
@@ -9246,6 +9266,668 @@ try { GX.boot(); } catch (e) { try { console.error("GX boot", e); } catch (_) {}
     try { enhance(box); } catch (e) {}
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+</script>
+<script id="XZM">
+/* ═══════════════════════════════════════════════════════════════════
+   XZM 掛件 v1（xzm1103）：小智的回答也是「可以跟讀、可以畫線、可以再點」的句子
+   · 回答完成後，每一句包成 <span class="mks xzs" data-k="z|訊息id|區塊序|句序">，
+     點一下畫線（與正文同一套 S.mk、顏色、領受），再點開正文的畫線面板（mkSheet，GXP 照常補按鈕）
+   · 🔊 朗讀整則回答：逐句高亮（.spk-now）、畫面自動捲到那一句，使用者自己捲動後 6 秒內不搶畫面
+   · 朗讀單元與畫面句子一對一（句子 → 單元），NAR321 的口語帶入詞（標題、條列「第一…」、引言）
+     掛在該區塊的第一句；表格是整張改寫成口語，所以整張表一起高亮
+   · 小智訊息存進 S.xzlog（最近 60 則），重新整理後還原；畫線文字另存 S.xzs（訊息被刪也看得到）
+   · 我的畫線／匯出多一個「小智」類別
+   不改任何正文函式：用 window.* 外包一層（outermost），朗讀引擎只觀察不介入
+   ═══════════════════════════════════════════════════════════════════ */
+(function () {
+  if (window.__xzm) return; window.__xzm = 1;   /* 注意：<script id="XZM"> 本身就是 window.XZM（具名元素），不能拿 window.XZM 當守門 */
+  var root = document.documentElement;
+  var EN = /^en/i.test(root.getAttribute('lang') || '');
+  var PERSIST = true;          /* 小智訊息跟著 S 存起來（核心原本不存），關掉就回到重新整理即清空 */
+  var KEEP = 60;               /* 最多存幾則 */
+  var ASK_AUTOSEND = false;    /* 面板的「問小智」：false = 把這句帶進輸入欄讓使用者再按送出；true = 直接送出 */
+  var HOLD_MS = 6000;          /* 使用者自己捲動之後，幾毫秒內不搶畫面（同正文 holdScroll） */
+  var ST = { reading: null, hold: 0, last: [], timer: 0, own: false, sheetKey: '', sig: '', cache: {} };
+
+  function g(f, d) { try { var r = f(); return r === undefined ? d : r; } catch (e) { return d; } }
+  function scNow() { return !EN && !!(g(function () { return S.set.sc; }, false) || /Hans|CN/i.test(root.getAttribute('lang') || '')); }
+  function T(zh, en) {
+    if (EN) return en;
+    if (scNow() && typeof toSC === 'function') { var r = g(function () { return toSC(zh); }); if (r) return r; }
+    return zh;
+  }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  function $1(s, r) { return (r || document).querySelector(s); }
+  function say(m) { g(function () { toast(m); }); }
+  function arr(l) { return Array.prototype.slice.call(l || []); }
+
+  /* ── 小工具：畫線資料 ─────────────────────────────────────────── */
+  function mk() { return (typeof S !== 'undefined' && S.mk) ? S.mk : {}; }
+  function has(k) { return Object.prototype.hasOwnProperty.call(mk(), k); }
+  function noteOf(k) { return (mk()[k] && mk()[k].n) || ''; }
+  function colorOf(k) { return (mk()[k] && mk()[k].c) || ''; }
+  function isZ(k) { return typeof k === 'string' && k.charAt(0) === 'z' && k.charAt(1) === '|'; }
+  function parse(k) { var p = String(k).split('|'); return { id: p[1] || '', b: +p[2] || 0, s: +p[3] || 0 }; }
+  function zKeys() { return Object.keys(mk()).filter(isZ); }
+  function snaps() { if (!S.xzs) S.xzs = {}; return S.xzs; }
+  function persistSave() { g(function () { save(); }); }
+
+  /* ── 小智訊息 ─────────────────────────────────────────────────── */
+  function msgs() { return g(function () { return SAGE321.msgs(); }, []) || []; }
+  function msgIdx(id) { var a = msgs(), i; for (i = 0; i < a.length; i++) if (a[i].id === id) return i; return -1; }
+  function msgById(id) { var i = msgIdx(id); return i < 0 ? null : msgs()[i]; }
+
+  /* ── 切句（句子界線：。！？ 與英文 .!?；收尾引號括號跟著前一句；標籤與實體不切）─── */
+  var TOKRE = /<[^>]*>|&#?\w+;|[\s\S]/g;
+  var CLOSERS = '」』）)】》〉”’"\'］]»';
+  var ENT = { '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'", '&nbsp;': ' ', '&rdquo;': '”', '&rsquo;': '’' };
+  var BOOKS = /^(gen|exod|ex|lev|num|deut|josh|judg|sam|kgs|chr|neh|esth|ps|prov|eccl|isa|jer|lam|ezek|dan|hos|obad|mic|nah|hab|zeph|hag|zech|mal|matt|mk|lk|jn|rom|cor|gal|eph|phil|col|thess|tim|tit|phlm|heb|jas|pet|rev|ch|chs|vv|v)$/i;
+  var REAL = /[\p{L}\p{N}]/u;
+  function pc(t) { return t.length === 1 ? t : (ENT[t] !== undefined ? ENT[t] : 'x'); }
+  function isTag(t) { return t.charAt(0) === '<'; }
+  function isSp(t) { return !isTag(t) && /^\s$/.test(pc(t)); }
+  function isCloser(t) { return !isTag(t) && CLOSERS.indexOf(pc(t)) >= 0; }
+  function afterOk(toks, i) {            /* 後面（略過收尾符號）是空白、結尾或標籤才算句尾 */
+    var j = i + 1, nx;
+    while (j < toks.length && (isCloser(toks[j]) || toks[j] === '.' || toks[j] === '!' || toks[j] === '?')) j++;
+    nx = toks[j];
+    if (nx === undefined || isTag(nx) || isSp(nx)) return { ok: true, j: j };
+    return { ok: false, j: j, cjk: pc(nx).charCodeAt(0) > 0x2E7F };
+  }
+  function isEndMark(toks, i, ch) {
+    if (ch === '。' || ch === '！' || ch === '？') return true;
+    if (ch === '!' || ch === '?') { var a = afterOk(toks, i); return a.ok || a.cjk; }
+    if (ch === '.') {
+      var r = afterOk(toks, i);
+      if (!r.ok) return false;
+      var w = '', p = i - 1, k;
+      while (p >= 0 && !isTag(toks[p]) && /^[A-Za-z]$/.test(toks[p])) { w = toks[p] + w; p--; }
+      if (w) {
+        if (/^(mr|mrs|ms|dr|st|vs|prof|fig|vol|no|nos|jr|sr)$/i.test(w)) return false;
+        k = r.j;
+        while (k < toks.length && isSp(toks[k])) k++;
+        if (BOOKS.test(w) && toks[k] && /^[0-9]$/.test(toks[k])) return false;
+        if (w.length === 1 && /[A-Z]/.test(w) && toks[k] && /^[A-Z]$/.test(toks[k])) return false;
+      }
+      return true;
+    }
+    return false;
+  }
+  function splitSent(html) {
+    var toks = String(html).match(TOKRE) || [], out = [], cur = [], depth = 0, pend = false, i, t, ch, a;
+    function flush() { if (cur.length) { out.push({ k: 's', h: cur.join('') }); cur = []; } pend = false; }
+    for (i = 0; i < toks.length; i++) {
+      t = toks[i];
+      if (isTag(t)) {
+        if (/^<br\b/i.test(t)) { flush(); out.push({ k: 'x', h: t }); continue; }
+        cur.push(t);
+        if (t.charAt(1) === '/') { depth = Math.max(0, depth - 1); if (depth === 0 && pend) flush(); }
+        else if (!/\/>$/.test(t) && !/^<(img|hr|wbr|input)\b/i.test(t)) depth++;
+        continue;
+      }
+      cur.push(t);
+      ch = pc(t);
+      if (isEndMark(toks, i, ch)) {
+        while (i + 1 < toks.length && !isTag(toks[i + 1]) && (CLOSERS.indexOf(pc(toks[i + 1])) >= 0 || '。！？!?'.indexOf(pc(toks[i + 1])) >= 0)) cur.push(toks[++i]);
+        if (depth === 0) flush(); else pend = true;
+      } else if (pend && !/^\s$/.test(ch) && CLOSERS.indexOf(ch) < 0) pend = false;
+    }
+    flush();
+    /* 沒有文字的碎片（標點、空白）併進前一句；前面沒有就併進下一句 */
+    var res = [], carry = '';
+    out.forEach(function (it) {
+      if (it.k !== 's') { if (carry) { res.push({ k: 'x', h: carry }); carry = ''; } res.push(it); return; }
+      if (REAL.test(it.h.replace(/<[^>]*>|&#?\w+;/g, ''))) { res.push({ k: 's', h: carry + it.h }); carry = ''; }
+      else { var last = res[res.length - 1]; if (last && last.k === 's') last.h += it.h; else carry += it.h; }
+    });
+    if (carry) res.push({ k: 'x', h: carry });
+    return res;
+  }
+
+  /* ── 把回答的 HTML 變成可點的句子 ─────────────────────────────── */
+  function noteBar(k) {
+    var n = noteOf(k);
+    if (!n) return '';
+    return '<span class="mknote xzn" data-nk="' + esc(k) + '" data-nt="' + esc(n) + '"><b>' + esc(T('領受', 'Reflection')) + '</b>　' + esc(n) +
+      '<button class="mkask" onclick="event.stopPropagation();XZM.askKey(\'' + k + '\')">✨ ' + esc(T('問小智', 'Ask Xiaozhi')) + '</button></span>';
+  }
+  function containers(el) {
+    var c = el.querySelectorAll('li,th,td');
+    return c.length ? arr(c) : [el];
+  }
+  function tagCore(html, id) {
+    var tpl = document.createElement('template');
+    tpl.innerHTML = html;
+    var kids = arr(tpl.content.children), list = [];
+    kids.forEach(function (el, b) {
+      var n = 0;
+      containers(el).forEach(function (c) {
+        var items = splitSent(c.innerHTML), out = '';
+        items.forEach(function (it) {
+          if (it.k === 'x') { out += it.h; return; }
+          var m = /^(\s*)([\s\S]*?)(\s*)$/.exec(it.h), k = 'z|' + id + '|' + b + '|' + (n++), cc = colorOf(k), on = has(k);
+          out += m[1] + '<span class="mks xzs' + (on ? ' hl' : '') + '" data-k="' + k + '"' + (on && cc ? ' data-c="' + cc + '"' : '') +
+            ' onclick="XZM.tap(event,\'' + k + '\',this)">' + m[2] + '</span>' + (on ? noteBar(k) : '') + m[3];
+          list.push({ k: k, b: b, s: n - 1, t: m[2].replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim() });
+        });
+        c.innerHTML = out;
+      });
+    });
+    return { html: tpl.innerHTML, list: list };
+  }
+  function anyZ() { return zKeys().length > 0; }
+  function tag(html, m, i) {
+    if (!m || !m.id || !m.ok || m.cont) return html;
+    var r = tagCore(html, m.id);
+    ST.cache[m.id] = { n: String(m.text || '').length, list: r.list };
+    var h = r.html;
+    if (r.list.length && i === msgs().length - 1 && !anyZ()) {
+      h += '<div class="xzhint">' + esc(T('💡 點一下任何一句畫線；再點一下可換色、寫領受、做成美圖或問小智。',
+        '💡 Tap any sentence to highlight it; tap again to change colour, write a reflection, make a card or ask Xiaozhi.')) + '</div>';
+    }
+    return h;
+  }
+  /* 沒有畫面也算得出每一句（畫線文字、範圍、匯出用） */
+  function liveList(m) {
+    var c = ST.cache[m.id];
+    if (c && c.n === String(m.text || '').length) return c.list;
+    var h = g(function () { return NAR321.html(m.text); }, null);
+    if (h == null) h = esc(m.text).split('\n').join('<br>');
+    h = g(function () { return SAGE321.linkify(h); }, h);
+    var r = tagCore(h, m.id);
+    ST.cache[m.id] = { n: String(m.text || '').length, list: r.list };
+    return r.list;
+  }
+  function oneText(k) {
+    var z = S.xzs && S.xzs[k];
+    if (z && z.t) return z.t;
+    var m = msgById(parse(k).id), L, i;
+    if (!m) return '';
+    L = liveList(m);
+    for (i = 0; i < L.length; i++) if (L[i].k === k) return L[i].t;
+    return '';
+  }
+  function textOf(k) {
+    var sp = Math.max(1, +((mk()[k] || {}).sp) || 1);
+    if (sp < 2) return oneText(k);
+    var m = msgById(parse(k).id), L, i, j, parts = [], s;
+    if (!m) return oneText(k);
+    L = liveList(m);
+    for (i = 0; i < L.length; i++) if (L[i].k === k) break;
+    if (i >= L.length) return oneText(k);
+    for (j = i; j < L.length && parts.length < sp && L[j].b === L[i].b; j++) parts.push(L[j].t);
+    return parts.reduce(function (a, x) { return !a ? x : (/[\x21-\x7E”’]$/.test(a) && /^[\x21-\x7E“‘]/.test(x) ? a + ' ' + x : a + x); }, '');
+  }
+  function chOf(k) {
+    var z = S.xzs && S.xzs[k], m = msgById(parse(k).id);
+    return (z && z.ch) || (m && m.ch) || 0;
+  }
+  function refLabel(k) {
+    var n = chOf(k), c = n ? g(function () { return GX.chLabel(n); }, '') : '';
+    return T('小智 · ', 'Xiaozhi · ') + (c || g(function () { return GX.T(GX.BK.zh, GX.BK.en); }, ''));
+  }
+  function atOf(k) {
+    var z = S.xzs && S.xzs[k], m = msgById(parse(k).id);
+    return (z && z.at) || (m && m.at) || (mk()[k] && mk()[k].at) || 0;
+  }
+  function dateStr(t) { return t ? g(function () { return new Date(t).toLocaleDateString(); }, '') : ''; }
+
+  /* ── 點一下畫線、再點開面板 ───────────────────────────────────── */
+  function selecting() { return g(function () { return String(window.getSelection()).replace(/\s/g, '').length > 0; }, false); }
+  function tap(ev, k, el) {
+    try {
+      if (ev) {
+        ev.stopPropagation();
+        var t = ev.target;
+        if (t && t.closest && t.closest('a,button,.mknote')) return;
+      }
+    } catch (e) {}
+    if (selecting()) return;
+    var own = el && el.dataset && el.dataset.own;
+    if (!has(k) && !(own && has(own))) {
+      var m = msgById(parse(k).id);
+      snaps()[k] = { t: String((el && el.textContent) || oneText(k)).replace(/\s+/g, ' ').trim().slice(0, 600), ch: (m && m.ch) || 0, at: (m && m.at) || Date.now() };
+    }
+    if (typeof window.mkTap === 'function') window.mkTap(k, el); else say('?');
+  }
+
+  /* 重畫之後（或別處改了畫線）：把 hl／顏色／領受條對齊 S.mk */
+  function paint() {
+    var xz = document.getElementById('xz');
+    if (!xz) return;
+    arr(xz.querySelectorAll('.xzs')).forEach(function (el) {
+      var k = el.getAttribute('data-k'), on = has(k), c = colorOf(k);
+      if (on) { el.classList.add('hl'); if (c) el.setAttribute('data-c', c); else el.removeAttribute('data-c'); }
+      else if (!el.hasAttribute('data-own')) { el.classList.remove('hl'); el.removeAttribute('data-c'); }
+      var nx = el.nextElementSibling, bar = (nx && nx.classList && nx.classList.contains('xzn') && nx.getAttribute('data-nk') === k) ? nx : null;
+      var want = on ? noteOf(k) : '';
+      if (want && !bar) el.insertAdjacentHTML('afterend', noteBar(k));
+      else if (!want && bar) bar.parentNode.removeChild(bar);
+      else if (bar && bar.getAttribute('data-nt') !== want) bar.outerHTML = noteBar(k);
+    });
+    g(function () { if (typeof window.mkPaintSpans === 'function') window.mkPaintSpans(); });
+  }
+
+  /* ── 畫線面板（沿用正文的 mkSheet；只補三件事）──────────────────
+     ① 面板要疊在滿版小智上面 ② 原句、問小智、做成美圖指向小智的這一句 ③ 朗讀這句要跟讀 */
+  function closeSheet() { var s = document.getElementById('sheet'); if (s) s.classList.remove('on'); }
+  function askText(q, n) {
+    return EN ? 'I came to this sentence from your answer: “' + q + '” ' + (n ? 'My reflection: ' + n + ' ' : '') + 'Please help me understand it better, and help me live it out.'
+              : '我讀到你回答裡的這一句：「' + q + '」' + (n ? '我的領受：' + n + '。' : '') + '請幫我更明白這句話，並幫助我活出來。';
+  }
+  function prefill(q) {
+    if (ASK_AUTOSEND) { if (g(function () { return SAGE321.isBusy(); }, false)) { say(T('小智還在回答，等一下再問', 'Xiaozhi is still answering — try again in a moment')); return; } g(function () { SAGE321.ask(q, '', function (s) { return s; }); }); return; }
+    if (!g(function () { return SAGE321.isOpen(); }, false)) g(function () { SAGE321.open(); });
+    var inp = document.getElementById('xzin');
+    if (!inp) return;
+    inp.value = inp.value ? inp.value.replace(/\s+$/, '') + ' ' + q : q;
+    g(function () { inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); });
+  }
+  function askKey(k) { closeSheet(); prefill(askText(textOf(k), noteOf(k))); }
+  function askFromSheet(k) {
+    var n = (document.getElementById('mkin') || {}).value;
+    if (n == null) n = noteOf(k);
+    closeSheet(); prefill(askText(textOf(k), String(n).trim()));
+  }
+  function cardFromSheet(k) {
+    var n = (document.getElementById('mkin') || {}).value;
+    if (n == null) n = noteOf(k);
+    closeSheet();
+    if (window.GXS && GXS.open) GXS.open({ text: textOf(k), note: String(n).trim(), ref: refLabel(k), plain: true });
+    else say(T('美圖工作室還沒準備好', 'The card studio is not ready yet'));
+  }
+  function fixSheet(k) {
+    var box = document.getElementById('sheet');
+    if (!box) return;
+    ST.sheetKey = k;
+    var q = box.querySelector('#mkq') || box.querySelector('.mkq');
+    if (q) q.textContent = textOf(k).slice(0, 300);
+    arr(box.querySelectorAll('button')).forEach(function (b) {
+      var oc = b.getAttribute('onclick') || '';
+      if (/askXz\(|\.askOn\(/.test(oc)) b.onclick = function (e) { e.stopPropagation(); askFromSheet(k); };
+      else if (/🖼/.test(b.textContent || '')) b.onclick = function (e) { e.stopPropagation(); cardFromSheet(k); };
+    });
+  }
+  function installWraps() {
+    var SH0 = window.mkSheet;
+    if (typeof SH0 === 'function') {
+      window.mkSheet = function (k) {
+        var r = SH0.apply(this, arguments);
+        if (isZ(k)) g(function () { fixSheet(k); }); else ST.sheetKey = '';
+        return r;
+      };
+      if (window.MK321 && MK321.sheet === SH0) MK321.sheet = window.mkSheet;
+    }
+    var TX0 = window.mkText;
+    window.mkText = function (k) { return isZ(k) ? textOf(k) : (typeof TX0 === 'function' ? TX0.apply(this, arguments) : ''); };
+    if (window.MK321 && MK321.text === TX0) MK321.text = window.mkText;
+    var RF0 = window.mkRefOf;
+    window.mkRefOf = function (k) { return isZ(k) ? refLabel(k) : (typeof RF0 === 'function' ? RF0.apply(this, arguments) : ''); };
+    var R0 = window.render;
+    if (typeof R0 === 'function') window.render = function () { var r = R0.apply(this, arguments); g(paint); return r; };
+    var VM0 = window.vMarks;
+    if (typeof VM0 === 'function') window.vMarks = function () { return zVMarks(VM0, this, arguments); };
+    var EX0 = window.exportMarks;
+    if (typeof EX0 === 'function') window.exportMarks = function () { return zExport(EX0, this, arguments); };
+    /* 面板上的「朗讀這句」（GXP 的按鈕）：小智的句子要在小智頁上逐句高亮，攔在 GXP 之前 */
+    document.addEventListener('click', function (e) {
+      var b = e.target && e.target.closest ? e.target.closest('#sheet [data-gxp="say"]') : null;
+      if (!b || !isZ(ST.sheetKey)) return;
+      e.stopPropagation(); e.preventDefault();
+      var k = ST.sheetKey;
+      g(function () { var n = (document.getElementById('mkin') || {}).value; if (mk()[k] && n != null && n !== noteOf(k)) { mk()[k].n = String(n).trim(); persistSave(); } });
+      sayKey(k);
+    }, true);
+  }
+
+  /* ── 朗讀：句子 ↔ 單元一對一 ──────────────────────────────────── */
+  function eng() {
+    if (window.TTS321 && typeof TTS321.play === 'function' && typeof TTS321.chunks === 'function' && typeof TTS321.index === 'function') return 'c';
+    if (typeof playSegs === 'function' && typeof ttsChunks === 'function' && typeof SPK !== 'undefined') return 'a';
+    return '';
+  }
+  function chunksOf(t, e) {
+    var r = e === 'c' ? g(function () { return TTS321.chunks(t); }, null) : g(function () { return ttsChunks(t); }, null);
+    return r && r.length ? r : [];
+  }
+  function cleanSp(t) { return g(function () { return SAGE321.speechClean(t); }, t); }
+  function spText(el) { return String(el.textContent || '').replace(/\s+/g, ' ').trim(); }
+  function endP(t) { return /[。！？；：、，,.:;!?」』）)”"…]$/.test(t) ? t : t + (EN ? '.' : '。'); }
+  function blockMd(blk) {
+    if (blk.k === 'h') return new Array(blk.n + 1).join('#') + ' ' + blk.t;
+    if (blk.k === 'table') {
+      var hd = blk.head, hh = '| ' + hd.join(' | ') + ' |\n|' + hd.map(function () { return '---'; }).join('|') + '|';
+      return hh + '\n' + blk.rows.map(function (r) { return '| ' + r.join(' | ') + ' |'; }).join('\n');
+    }
+    return '';
+  }
+  /* 條列：用哨兵字把每一項前面的「第一、」與後面的補句讀分離出來 */
+  function listHeads(blk, bi) {
+    var n = blk.items.length, j, mk1 = [], mk2 = [], p1, p2, heads = [], ends = [], pre = blk.ord ? function (x) { return (x + 1) + '. '; } : function () { return '- '; };
+    for (j = 0; j < n; j++) { mk1.push(pre(j) + 'ǂ' + j + 'ǂ'); mk2.push(pre(j) + 'ǂ' + j + 'ǂ。'); }
+    p1 = NAR321.speech(mk1.join('\n'), { i: bi }).split(/ǂ\d+ǂ/);
+    p2 = NAR321.speech(mk2.join('\n'), { i: bi }).split(/ǂ\d+ǂ。/);
+    if (p1.length !== n + 1 || p2.length !== n + 1) return null;
+    for (j = 0; j < n; j++) {
+      heads.push(j === 0 ? p1[0] : p2[j]);
+      var a = p1[j + 1], b = p2[j + 1];
+      ends.push(j < n - 1 ? (a.length >= b.length && a.slice(a.length - b.length) === b ? a.slice(0, a.length - b.length) : '') : a);
+    }
+    return { heads: heads, ends: ends };
+  }
+  function speechUnits(node) {
+    var m = msgs()[+String(node.id).replace('xzm', '')];
+    var root = node.querySelector('.xzt'), kids = arr(root ? root.children : []).filter(function (x) { return !x.classList.contains('xzhint'); });
+    var bl = m ? g(function () { return NAR321.blocks(m.text); }, null) : null, ok = !!(bl && bl.length === kids.length), us = [];
+    function U(t, spans, whole) {
+      t = cleanSp(t);
+      if (!t || !String(t).replace(/\s+/g, '')) return;
+      us.push({ t: t, keys: spans.map(function (s) { return s.getAttribute('data-k'); }), whole: !!whole });
+    }
+    kids.forEach(function (el, b) {
+      var spans = arr(el.querySelectorAll('.xzs')), blk = ok ? bl[b] : null, done = false, n0 = us.length;
+      if (!spans.length) return;
+      try {
+        if (blk && blk.k === 'h') { U(NAR321.speech(blockMd(blk), { i: b }), spans); done = true; }
+        else if (blk && blk.k === 'table') { U(NAR321.speech(blockMd(blk), { i: b }), spans, true); done = true; }
+        else if (blk && blk.k === 'quote') {
+          var lead = NAR321.speech('> ǂ', { i: b }).replace('ǂ', '');
+          spans.forEach(function (s, j) { U((j === 0 ? lead : '') + endP(spText(s)), [s]); }); done = true;
+        } else if (blk && blk.k === 'list') {
+          var lh = listHeads(blk, b), lis = arr(el.querySelectorAll('li'));
+          if (lh && lis.length === blk.items.length) {
+            lis.forEach(function (li, j) {
+              var ss = arr(li.querySelectorAll('.xzs'));
+              ss.forEach(function (s, q) {
+                var tx = spText(s), last = q === ss.length - 1;
+                U((q === 0 ? lh.heads[j] : '') + tx + (last && !/[。！？.!?]$/.test(tx) ? lh.ends[j] : ''), [s]);
+              });
+            });
+            done = true;
+          }
+        }
+      } catch (e) { done = false; us.length = n0; }
+      if (!done) spans.forEach(function (s) { U(endP(spText(s)), [s]); });
+    });
+    return us;
+  }
+
+  function resolve(u) {
+    var els = u.keys.map(function (k) { return $1('#xz .xzs[data-k="' + k + '"]'); }).filter(Boolean);
+    if (u.whole && els[0]) {
+      var p = els[0];
+      while (p.parentNode && !(p.parentNode.classList && p.parentNode.classList.contains('xzt'))) p = p.parentNode;
+      if (p && p.parentNode) return [p];
+    }
+    return els;
+  }
+  function clearMarks() {
+    ST.last.forEach(function (e) { g(function () { e.classList.remove('spk-now'); }); });
+    ST.last = [];
+    arr(document.querySelectorAll('#xz .spk-now')).forEach(function (e) { e.classList.remove('spk-now'); });
+  }
+  function scrollToEl(el) {
+    var box = document.getElementById('xzb');
+    if (!box || !el) return;
+    var r = el.getBoundingClientRect(), br = box.getBoundingClientRect();
+    var top = box.scrollTop + (r.top - br.top) - (r.height > br.height * 0.8 ? 24 : (br.height - r.height) / 2);
+    top = Math.max(0, top);
+    if (Math.abs(top - box.scrollTop) < 8) return;
+    try { box.scrollTo({ top: top, behavior: 'smooth' }); } catch (e) { box.scrollTop = top; }
+  }
+  function mark(u) {
+    clearMarks();
+    var els = resolve(u);
+    if (!els.length) return;
+    var node = els[0].closest ? els[0].closest('.xzm') : null;
+    if (node && els[0].closest('.xzt.clip')) { g(function () { SAGE321.fold(+node.id.replace('xzm', '')); }); }
+    els.forEach(function (e) { e.classList.add('spk-now'); });
+    ST.last = els;
+    if (g(function () { return S.set.follow; }, 1) === 0) return;
+    if (Date.now() < ST.hold) return;
+    scrollToEl(els[0]);
+  }
+  function engState(rd) {
+    if (rd.eng === 'c') return { on: g(function () { return TTS321.isOn(); }, false), i: g(function () { return TTS321.index(); }, -1) };
+    return { on: g(function () { return SPK.on; }, false), i: g(function () { return SPK.i; }, -1) };
+  }
+  function tick() {
+    var rd = ST.reading;
+    if (!rd) { stopTimer(); return; }
+    var s = engState(rd);
+    if (!s.on) { endReading(); return; }
+    if (s.i !== rd.last) { rd.last = s.i; if (rd.units[s.i]) mark(rd.units[s.i]); }
+  }
+  function stopTimer() { if (ST.timer) { clearInterval(ST.timer); ST.timer = 0; } }
+  function endReading() {
+    ST.reading = null; stopTimer(); clearMarks(); syncBtn();
+  }
+  function stopEngine() {
+    g(function () { if (typeof stopSpeak === 'function') stopSpeak(); else if (window.TTS321) TTS321.stop(); });
+    endReading();
+  }
+  function begin(units, title, meta) {
+    var e = eng(), us = [];
+    if (!e || !units.length) return false;
+    units.forEach(function (u) { chunksOf(u.t, e).forEach(function (c) { us.push({ t: c, src: u }); }); });
+    if (!us.length) return false;
+    ST.hold = 0;
+    endReading();
+    ST.own = true;
+    try {
+      if (e === 'c') TTS321.play(us.map(function (x) { return { t: x.t }; }), { title: title });
+      else playSegs(us.map(function (x) { return { t: x.t }; }), title);
+    } catch (err) { ST.own = false; return false; }
+    ST.own = false;
+    ST.reading = { eng: e, mid: meta.mid, kind: meta.kind, units: us.map(function (x) { return x.src; }), last: -1 };
+    ST.timer = setInterval(tick, 120);
+    tick();
+    syncBtn();
+    return true;
+  }
+  function speakMsg(i, m) {
+    if (!m || !m.id || !m.ok || !eng()) return false;
+    var rd = ST.reading;
+    if (rd && rd.mid === m.id && rd.kind === 'msg' && engState(rd).on) { stopEngine(); return true; }
+    var node = document.getElementById('xzm' + i);
+    if (!node || !node.querySelector('.xzs')) return false;
+    if (node.querySelector('.xzt.clip')) g(function () { SAGE321.fold(i); });
+    var units = speechUnits(node);
+    if (!units.length) return false;
+    return begin(units, T('小智', 'Xiaozhi'), { mid: m.id, kind: 'msg' });
+  }
+  function sayKey(k) {
+    closeSheet();
+    var t = textOf(k);
+    if (!t) return;
+    if (!begin([{ t: endP(t), keys: [k], whole: false }], T('小智', 'Xiaozhi'), { mid: parse(k).id, kind: 'one' })) {
+      if (typeof speak === 'function') g(function () { speak(t, T('小智', 'Xiaozhi')); });
+    }
+  }
+  function syncBtn() {
+    var rd = ST.reading;
+    arr(document.querySelectorAll('#xz .xzm.assistant')).forEach(function (node) {
+      var i = +node.id.replace('xzm', ''), m = msgs()[i];
+      arr(node.querySelectorAll('.xzact button')).forEach(function (b) {
+        if ((b.getAttribute('onclick') || '').indexOf('SAGE321.speak(') < 0) return;
+        var on = !!(rd && m && rd.mid === m.id && rd.kind === 'msg');
+        b.textContent = on ? '⏹' : '🔊';
+        b.classList.toggle('on', on);
+        b.setAttribute('aria-label', on ? T('停止朗讀', 'Stop reading') : T('朗讀', 'Read aloud'));
+      });
+    });
+  }
+  function wrapEngine() {
+    function wrap(o, n) {
+      if (!o || typeof o[n] !== 'function' || o[n].__xzm) return;
+      var f = o[n];
+      o[n] = function () { if (!ST.own) endReading(); return f.apply(this, arguments); };
+      o[n].__xzm = 1;
+    }
+    if (window.TTS321) { wrap(TTS321, 'play'); wrap(TTS321, 'playFrom'); }
+    wrap(window, 'playSegs');
+  }
+  /* 使用者自己捲動 → 六秒內不搶畫面（同正文；朗讀開始那一刻歸零，見 begin） */
+  ['wheel', 'touchstart', 'touchmove', 'pointerdown'].forEach(function (ev) {
+    window.addEventListener(ev, function () { if (ST.reading) ST.hold = Date.now() + HOLD_MS; }, { passive: true });
+  });
+  window.addEventListener('keydown', function (e) {
+    if (ST.reading && /^(Arrow|Page)|^(Home|End)$|^ $/.test(e.key || '')) ST.hold = Date.now() + HOLD_MS;
+  });
+
+  /* ── 小智訊息的保存／還原 ─────────────────────────────────────── */
+  function persist() {
+    if (!PERSIST) return;
+    try {
+      var a = msgs(), out = [], i, m;
+      for (i = 0; i < a.length; i++) {
+        m = a[i];
+        if (!m || m.cont || !m.id) continue;
+        if (m.role === 'assistant' && !m.ok) continue;
+        out.push({ id: m.id, role: m.role, text: m.text, ch: +m.ch || 0, at: +m.at || 0 });
+      }
+      if (out.length && out[out.length - 1].role === 'user' && g(function () { return SAGE321.isBusy(); }, false)) out.pop();
+      out = out.slice(-KEEP);
+      var sig = out.map(function (x) { return x.id + x.text.length; }).join(',');
+      /* 孤兒的畫線文字快照清掉 */
+      var sn = S.xzs, dirty = false;
+      if (sn) Object.keys(sn).forEach(function (k) { if (!has(k)) { delete sn[k]; dirty = true; } });
+      if (sig === ST.sig && !dirty) return;
+      ST.sig = sig;
+      S.xzlog = out;
+      persistSave();
+    } catch (e) {}
+  }
+  function restore() {
+    if (!PERSIST || !Array.isArray(S.xzlog) || !S.xzlog.length || msgs().length) return;
+    var list = S.xzlog.filter(function (x) { return x && x.id && x.text && (x.role === 'user' || x.role === 'assistant'); }).map(function (x) {
+      var m = { id: x.id, role: x.role, text: x.text, ch: +x.ch || 0, at: +x.at || 0 };
+      if (x.role === 'assistant') m.ok = true;
+      return m;
+    });
+    g(function () { SAGE321.restore(list); });
+    ST.sig = list.map(function (x) { return x.id + x.text.length; }).join(',');
+  }
+  function afterDraw() {
+    persist();
+    var xz = document.getElementById('xz'), on = !!(xz && /(^|\s)on(\s|$)/.test(xz.className));
+    if (document.body) document.body.classList.toggle('xzopen', on);
+    if (!on) return;
+    paint(); syncBtn();
+    var rd = ST.reading;
+    if (rd && rd.units[rd.last]) { var h = ST.hold; ST.hold = Date.now() + 1500; mark(rd.units[rd.last]); ST.hold = h; }
+  }
+
+  /* ── 我的畫線／匯出：多一個「小智」類別 ───────────────────────── */
+  function stash() { var o = {}, m = mk(); zKeys().forEach(function (k) { o[k] = m[k]; delete m[k]; }); return o; }
+  function unstash(o) { Object.keys(o).forEach(function (k) { mk()[k] = o[k]; }); }
+  function byTime(a, b) {
+    var pa = parse(a), pb = parse(b), ta = atOf(a), tb = atOf(b);
+    if (pa.id !== pb.id) return tb - ta;
+    return pa.b - pb.b || pa.s - pb.s;
+  }
+  function zCard(k) {
+    var orphan = !msgById(parse(k).id), t = textOf(k), n = noteOf(k), ch = chOf(k), cl = ch ? g(function () { return GX.chLabel(ch); }, '') : '';
+    return '<div class="card" style="padding:13px"><p class="xs muted" style="margin:0 0 6px">' + esc(T('小智回答', 'Xiaozhi answer')) +
+      (cl ? '　·　' + esc(cl) : '') + (atOf(k) ? '　·　' + esc(dateStr(atOf(k))) : '') + '</p>' +
+      '<p class="hlq"' + (orphan ? ' data-orphan="1"' : ' onclick="XZM.jump(\'' + k + '\')"') + '>' + esc(t.slice(0, 160)) + '</p>' +
+      (orphan ? '<p class="xs muted" style="margin:6px 0 0">' + esc(T('（原回答已不在對話中）', '(the original answer is no longer in the chat)')) + '</p>' : '') +
+      (n ? '<div class="mknote"' + (colorOf(k) ? ' data-c="' + esc(colorOf(k)) + '"' : '') + ' style="margin-top:8px"><b>' + esc(T('領受', 'Reflection')) + '</b>　' + esc(n) + '</div>' : '') +
+      '<div class="row" style="margin-top:9px"><button class="btn xs2" onclick="mkSheet(\'' + k + '\')">' + esc(n ? T('修改領受', 'Edit reflection') : T('寫領受', 'Write a reflection')) + '</button>' +
+      '<button class="btn xs2" onclick="XZM.askKey(\'' + k + '\')">✨ ' + esc(T('問小智', 'Ask Xiaozhi')) + '</button>' +
+      '<button class="btn xs2" onclick="XZM.del(\'' + k + '\')">' + esc(T('刪除', 'Delete')) + '</button></div></div>';
+  }
+  function zVMarks(VM0, self, args) {
+    var zk = zKeys();
+    if (!zk.length) return VM0.apply(self, args);
+    var st = stash(), h;
+    try { h = VM0.apply(self, args); } finally { unstash(st); }
+    var cnt = zk.length, nts = zk.filter(noteOf).length;
+    var sec = '<h3 class="sec">✨ ' + esc(T('小智', 'Xiaozhi')) + '　' + cnt + '</h3>' + zk.sort(byTime).map(zCard).join('');
+    var m = /<div class="hr"><\/div>\s*<button class="btn" onclick="exportMarks\(\)">/.exec(h);
+    if (!m) {
+      return '<div class="sect"><p class="eyebrow">' + esc(T('我的畫線與領受', 'My highlights & reflections')) + '</p><h2 class="big">' +
+        cnt + ' ' + esc(T('處畫線', 'highlights')) + '　·　' + nts + ' ' + esc(T('則領受', 'reflections')) + '</h2></div>' + sec +
+        '<div class="hr"></div><button class="btn" onclick="exportMarks()">' + esc(T('匯出畫線與領受', 'Export highlights & reflections')) + '</button>';
+    }
+    h = h.replace(/(<h2 class="big">)(\d+)([^<]*?)(\d+)([^<]*<\/h2>)/, function (all, a, n1, mid, n2, z) { return a + (+n1 + cnt) + mid + (+n2 + nts) + z; });
+    m = /<div class="hr"><\/div>\s*<button class="btn" onclick="exportMarks\(\)">/.exec(h);
+    return h.slice(0, m.index) + sec + h.slice(m.index);
+  }
+  function zExportMd() {
+    var ks = zKeys().sort(byTime), t = '';
+    ks.forEach(function (k) {
+      t += '## ✨ ' + T('小智回答', 'Xiaozhi answer') + ' · ' + refLabel(k).replace(/^[^·]*·\s*/, '') + (atOf(k) ? ' · ' + dateStr(atOf(k)) : '') + '\n\n> ' + textOf(k) + '\n\n';
+      if (noteOf(k)) t += '**' + T('領受', 'Reflection') + (EN ? ':** ' : '：**') + noteOf(k) + '\n\n';
+    });
+    return t;
+  }
+  function zExport(EX0, self, args) {
+    if (!zKeys().length) return EX0.apply(self, args);
+    var st = stash(), blob = null, name = '', cO = URL.createObjectURL, aC = HTMLAnchorElement.prototype.click;
+    URL.createObjectURL = function (b) { blob = b; return 'blob:xzm-hold'; };
+    HTMLAnchorElement.prototype.click = function () { name = this.download || name; };
+    try { EX0.apply(self, args); } catch (e) {} finally { URL.createObjectURL = cO; HTMLAnchorElement.prototype.click = aC; unstash(st); }
+    function out(base) {
+      var t = String(base || '').replace(/\s*$/, '\n\n') + zExportMd();
+      var b = new Blob([t], { type: 'text/markdown' }), a = document.createElement('a');
+      a.href = URL.createObjectURL(b); a.download = name || (EN ? 'my-highlights-and-reflections.md' : '我的畫線與領受.md');
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      window.__xzmExport = t;
+    }
+    if (blob && typeof FileReader !== 'undefined') {
+      var fr = new FileReader();
+      fr.onload = function () { out(fr.result); };
+      fr.onerror = function () { out(''); };
+      fr.readAsText(blob);
+    } else out('# ' + (EN ? 'My Highlights & Reflections' : '我的畫線與領受') + '\n\n');
+  }
+  function del(k) {
+    if (has(k)) { delete mk()[k]; persistSave(); }
+    g(function () { render(); });
+    say(T('已取消畫線', 'Highlight removed'));
+  }
+  function jump(k) {
+    var m = msgById(parse(k).id);
+    if (!m) { say(T('原回答已不在對話中', 'The original answer is no longer in the chat')); return; }
+    g(function () { SAGE321.open(); });
+    setTimeout(function () {
+      var el = $1('#xz .xzs[data-k="' + k + '"]');
+      if (!el) return;
+      if (el.closest('.xzt.clip')) { var nd = el.closest('.xzm'); g(function () { SAGE321.fold(+nd.id.replace('xzm', '')); }); }
+      scrollToEl(el);
+      el.classList.add('xzflash');
+      setTimeout(function () { el.classList.remove('xzflash'); }, 1800);
+    }, 80);
+  }
+
+  /* ── 樣式 ───────────────────────────────────────────────────── */
+  function css() {
+    if (document.getElementById('xzmcss')) return;
+    var st = document.createElement('style'); st.id = 'xzmcss';
+    st.textContent =
+      '#xz .xzs{cursor:pointer;border-radius:4px}' +
+      '#xz .xzs.spk-now{border-radius:4px}' +
+      '#xz .xzn.mknote{font-size:calc(var(--fs,17px)*.86);margin:6px 0 8px}' +
+      '#xz .xzhint{font-size:calc(var(--fs,17px)*.78);line-height:1.6;color:var(--dusk,#6b6b6b);background:rgba(156,107,24,.1);border-radius:10px;padding:7px 11px;margin-top:8px}' +
+      '#xz .xzs.xzflash{animation:xzfl 1.7s ease}' +
+      '@keyframes xzfl{0%,60%{background:var(--spk-now,#FFE9A8)}100%{background:transparent}}' +
+      'html[data-dark="1"] #xz .xzs.spk-now,html[data-dark="1"] #xz .xzs.spk-now *{color:var(--ink,#F0EEE6)!important}' +
+      'body.xzopen #sheet{z-index:160}' +
+      'body.xzopen .toast{z-index:400}' +
+      'body.xzopen .spkbar{z-index:170!important;bottom:calc(env(safe-area-inset-bottom,0px) + 78px)!important;--spk-bar-gap-right:0px}';
+    document.head.appendChild(st);
+  }
+
+  window.XZM = { version: 'xzm1103', tag: tag, tap: tap, speak: speakMsg, afterDraw: afterDraw, askKey: askKey, jump: jump, del: del, text: textOf, paint: paint, persist: persist, isZ: isZ, splitSent: splitSent, state: function () { return ST; } };
+  css();
+  wrapEngine();
+  installWraps();
+  restore();
+  afterDraw();
 })();
 </script>
 <script id="AU">
