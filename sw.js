@@ -3,7 +3,7 @@
    策略：App 殼採 network-first（確保更新拿得到），失敗時回退快取；
          圖示等靜態檔採 cache-first。 */
 
-const V = 'fdba6660ca83-tri10171929-gxs1019-meet1020-gx1021c-hl8-vp1023-co1-gp1103-tts1103-au1103-xz1103-ls1103';
+const V = 'fdba6660ca83-tri10171929-gxs1019-meet1020-gx1021c-hl8-vp1023-co1-gp1103-tts1103-au1103-xz1103-ls1103-xf1103';
 const SLUG = location.pathname.split('/')[1] || 'app';   /* 同一個 github.io 網域底下有很多 App，快取名稱與清理範圍都限定在自己這一個 */
 const PFX = '321bible-' + SLUG + '-';
 const CACHE = PFX + V;
