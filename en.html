@@ -9424,5 +9424,102 @@ try { GX.boot(); } catch (e) { try { console.error("GX boot", e); } catch (_) {}
   window.AU321 = { why: why, tick: tick, check: check, pending: pending, state: function () { return { idleN: idleN, base: base, need: need, shell: SHELL, ss: ss() }; } };
 })();
 </script>
+<script id="VPK">
+/* VPK321 v1（2026-11-03）：講義「經文」分頁改成 章 → 節 → 那一節經文
+   點章數→出現這一章的節數格子；點節數→打開整章並捲到那一節（暫時亮起）。
+   上方「章｜節」分頁可切回重選；「‹」逐步退回：經文→節→章。 */
+(function () {
+  if (window.VPK321 || typeof window.vText !== 'function' || typeof go !== 'function') return;
+  var LN = (typeof LANG_NOW !== 'undefined') ? LANG_NOW : 'tc';
+  function lang() {
+    if (LN === 'en') return 'en';
+    try { if (LN === 'sc' || (S && S.set && S.set.sc)) return 'sc'; } catch (e) {}
+    return 'tc';
+  }
+  var STR = {
+    tc: { ch: '章', vs: '節', vsN: function (n) { return n + ' 節'; }, chHint: '點章數，再選節，就會打開那一節經文。',
+          vHint: '點節數，直接打開經文並跳到那一節。', whole: '整章閱讀 ›', chSub: function (n) { return '第 ' + n + ' 章'; } },
+    sc: { ch: '章', vs: '节', vsN: function (n) { return n + ' 节'; }, chHint: '点章数，再选节，就会打开那一节经文。',
+          vHint: '点节数，直接打开经文并跳到那一节。', whole: '整章阅读 ›', chSub: function (n) { return '第 ' + n + ' 章'; } },
+    en: { ch: 'Chapter', vs: 'Verse', vsN: function (n) { return n + (n === 1 ? ' verse' : ' verses'); }, chHint: 'Tap a chapter, then a verse, to open that verse.',
+          vHint: 'Tap a verse to open the passage right there.', whole: 'Read the whole chapter ›', chSub: function (n) { return 'Chapter ' + n; } }
+  };
+  function T() { return STR[lang()]; }
+  function css() {
+    if (document.getElementById('vpkCss')) return;
+    var st = document.createElement('style'); st.id = 'vpkCss';
+    st.textContent = '.vpk-tabs{display:flex;border-bottom:1px solid var(--line);margin:4px 0 12px}'
+      + '.vpk-tabs button{flex:1;border:none;background:none;padding:10px 0 8px;font:inherit;font-size:15.5px;font-weight:700;color:var(--dusk);border-bottom:3px solid transparent;margin-bottom:-1px;cursor:pointer}'
+      + '.vpk-tabs button.on{color:var(--pine);border-bottom-color:var(--pine)}'
+      + '.vpk-tabs small{display:block;font-size:11.5px;font-weight:600;opacity:.8;margin-top:1px}'
+      + '.vpk-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin:12px 0}'
+      + '.vpk-grid button{border:1px solid var(--line);background:var(--card);color:inherit;border-radius:10px;padding:11px 0;font:inherit;font-size:15px;font-weight:600;cursor:pointer}'
+      + '.vpk-grid button:active,.vpk-grid button.on{background:var(--pine);border-color:var(--pine);color:#fff}'
+      + '.vs.vpk-flash{background:rgba(201,162,39,.30);border-radius:6px;transition:background 1.2s}';
+    document.head.appendChild(st);
+  }
+  function tabs(cur, ch) {
+    var t = T();
+    return '<div class="vpk-tabs">'
+      + '<button class="' + (cur === 'c' ? 'on' : '') + '" onclick="VPK321.toCh()">' + t.ch + '<small>' + (ch ? t.chSub(ch) : '&nbsp;') + '</small></button>'
+      + '<button class="' + (cur === 'v' ? 'on' : '') + '" ' + (ch ? 'onclick="VPK321.toV(' + ch + ')"' : 'disabled style="opacity:.35"') + '>' + t.vs + '<small>&nbsp;</small></button>'
+      + '</div>';
+  }
+  var last = 0;
+  var _vText = window.vText;
+  window.vText = function () {
+    css();
+    var t = T();
+    if (R.tab === 'text' && !R.ch) {
+      var h = _vText();
+      /* 章按鈕：先到「選節」；提示改寫；上方加「章｜節」分頁 */
+      h = h.replace(/onclick="go\('text',(\d+)\)"/g, 'onclick="go(\'text\',$1,\'vpk\')"');
+      h = h.replace(/(<p class="sm muted">)[^<]*(<\/p>\s*<div class="row")/, '$1' + t.chHint + '$2');
+      h = h.replace('<div class="row"', tabs('c', last) + '<div class="row"');
+      return h;
+    }
+    if (R.tab === 'text' && R.ch && R.sub === 'vpk') {
+      var ch = R.ch; last = ch;
+      _vText();                               /* 讓原程式設好標題（例如「利未記 3」） */
+      var n = ((D.txt || {})[ch] || []).length, g = '';
+      for (var i = 1; i <= n; i++) g += '<button onclick="VPK321.open(' + ch + ',' + i + ')">' + i + '</button>';
+      var ttl = (document.getElementById('ttl') || {}).textContent || '';
+      return '<div class="sect"><h2 class="big" style="margin:0 0 6px">' + String(ttl).replace(/[<&]/g, '') + '</h2>' + tabs('v', ch)
+        + '<p class="sm muted">' + t.vHint + '　<b>' + t.vsN(n) + '</b></p>'
+        + '<div class="vpk-grid">' + g + '</div>'
+        + '<button class="btn" onclick="go(\'text\',' + ch + ')">' + t.whole + '</button></div>';
+    }
+    if (R.tab === 'text' && R.ch) last = R.ch;
+    return _vText();
+  };
+  function flash(ch, v) {
+    var el = document.querySelector('.vs[data-v="' + ch + ':' + v + '"]');
+    if (!el) return;
+    el.scrollIntoView({ block: 'center', behavior: 'auto' });
+    el.classList.add('vpk-flash');
+    setTimeout(function () { el.classList.remove('vpk-flash'); }, 2600);
+  }
+  window.VPK321 = {
+    toCh: function () { go('text'); },
+    toV: function (ch) { go('text', ch, 'vpk'); },
+    open: function (ch, v) {
+      go('text', ch, 'v' + v);
+      setTimeout(function () { flash(ch, v); }, 60);
+      setTimeout(function () { var el = document.querySelector('.vs[data-v="' + ch + ':' + v + '"]'); if (el && Math.abs(el.getBoundingClientRect().top - innerHeight / 2) > innerHeight / 3) el.scrollIntoView({ block: 'center' }); }, 450);
+    }
+  };
+  /* 「‹」：經文（從選節進來的）→ 節 → 章 */
+  var bk = document.getElementById('back');
+  if (bk) {
+    var old = bk.onclick;
+    bk.onclick = function (e) {
+      if (R.tab === 'text' && R.ch && /^v\d+$/.test(R.sub || '')) return go('text', R.ch, 'vpk');
+      if (R.tab === 'text' && R.ch && R.sub === 'vpk') return go('text');
+      return old && old.call(this, e);
+    };
+  }
+  try { if (R.tab === 'text') render(); } catch (e) {}
+})();
+</script>
 </body>
 </html>
