@@ -313,6 +313,176 @@ mark{background:rgba(156,107,24,.3);color:inherit;padding:0 2px;border-radius:3p
 .spkbar b{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:44vw}
 .spkbar .dot{width:7px;height:7px;border-radius:50%;background:var(--brass);animation:pulse 1.4s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+/* ═══ 朗讀（TTS321 核心 · tts.css）：顏色與位置照這本講義原本的樣子覆寫 ═══ */
+/* ============================================================================
+ * 321 App Core — 朗讀模組樣式  tts.css  v1.1.0
+ *
+ * 只有兩樣東西：正在朗讀的那一句（.spk-now），和底部的控制列（.spkbar）。
+ * 顏色一律走 CSS 變數，宿主 App 想換色只要覆寫變數，不必改這一份。
+ * ==========================================================================*/
+
+:root {
+  --spk-now: #FFE9A8;          /* 正在讀的那一句的底色 */
+  --spk-bar-bg: #12305E;       /* 控制列底色 */
+  --spk-bar-fg: #FFFFFF;
+  --spk-bar-on: #F0C462;       /* 「自動捲動」開著時的顏色 */
+  --spk-bar-bottom: 64px;      /* 底部分頁列的高度，宿主自己調（可以整段 calc，含 env(safe-area-inset-bottom)）*/
+  --spk-bar-gap-right: 0px;    /* 右下角有浮動鈕（例如「小智」）的 App 設它的寬度＋邊距 */
+  --spk-bar-z: 60;             /* 宿主若有更高的浮動層（小智 fab…），把它疊上去 */
+
+  /* 按鈕外觀：宿主本來就有自己一套樣子的，覆寫這四個就能長得一模一樣，
+     不必為了換基座而改變使用者看慣的畫面 */
+  --spk-btn-bg: transparent;
+  --spk-btn-size: 32px;
+  --spk-btn-radius: 8px;
+  --spk-btn-font: 16px;
+}
+
+/* ── 主題 ────────────────────────────────────────────────────────
+ * 淺色是底色。宿主用什麼機制標深色，核心都跟得上：
+ *   data-dark="1"（321 這一家 App 的慣例）／data-theme="dark"／class="dark"
+ * 只有在宿主完全沒有自己的主題開關時，才去聽作業系統——否則會出現
+ * 「App 是淺色的，標示卻是深色的」這種不一致。
+ * -------------------------------------------------------------- */
+:root[data-dark="1"],
+:root[data-theme="dark"],
+:root.dark {
+  --spk-now: #6B5A22;
+  --spk-bar-bg: #0B1D3A;
+}
+
+:root[data-dark="0"],
+:root[data-theme="light"],
+:root.light {
+  --spk-now: #FFE9A8;
+  --spk-bar-bg: #12305E;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-dark]):not([data-theme]):not(.dark):not(.light) {
+    --spk-now: #6B5A22;
+    --spk-bar-bg: #0B1D3A;
+  }
+}
+
+/* ── 正在朗讀的那一句 ──────────────────────────────────────────────
+ * 用 box-shadow 把底色往外撐，而不是加 padding——加 padding 會讓整段文字
+ * 在朗讀時跳動。box-decoration-break 讓跨行的句子兩行都有底。
+ * ------------------------------------------------------------------ */
+.spk-now {
+  background: var(--spk-now) !important;
+  border-radius: 4px;
+  box-shadow: 0 0 0 3px var(--spk-now);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  transition: background .18s ease;
+}
+
+/* ── 底部控制列 ────────────────────────────────────────────────── */
+.spkbar {
+  position: fixed;
+  left: 50%;
+  /* 右下角若有浮動鈕，整條往左讓一半的距離，兩邊看起來仍然平衡 */
+  transform: translateX(calc(-50% - var(--spk-bar-gap-right) / 2));
+  bottom: calc(var(--spk-bar-bottom) + 10px);
+  z-index: var(--spk-bar-z);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: calc(100vw - 24px - var(--spk-bar-gap-right));
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: var(--spk-bar-bg);
+  color: var(--spk-bar-fg);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, .34);
+  font-size: 14px;
+  line-height: 1;
+}
+
+.spkbar b {
+  font-weight: 600;
+  /* 標題讓給按鈕，但至少留得下幾個字，不要被擠成一個字加句點 */
+  flex: 1 1 auto;
+  min-width: 4.5em;
+  max-width: 34vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 「3/14」這種進度字：跟著控制列自己的字色走再調暗，
+   不要寫死成白色——有些 App 的控制列在深色模式反而是淺底深字。 */
+.spkbar .pv {
+  color: inherit;
+  opacity: .7;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.spkbar button {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  background: var(--spk-btn-bg);
+  color: var(--spk-bar-fg);
+  font-size: var(--spk-btn-font);
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+  border-radius: var(--spk-btn-radius);
+  min-width: var(--spk-btn-size);
+  height: var(--spk-btn-size);
+  flex: 0 0 auto;
+}
+
+.spkbar button:active { background: rgba(255, 255, 255, .16); }
+.spkbar button.on { color: var(--spk-bar-on); }
+
+/* 正在播的小圓點 */
+.spkbar .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--spk-bar-on);
+  flex: 0 0 auto;
+  animation: spk-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes spk-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .35; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spkbar .dot { animation: none; }
+  .spk-now { transition: none; }
+}
+
+/* 窄螢幕：標題讓位給按鈕 */
+@media (max-width: 380px) {
+  .spkbar { gap: 4px; padding: 7px 9px; }
+  .spkbar b { max-width: 24vw; }
+  .spkbar button { min-width: 28px; height: 28px; font-size: 15px; }
+}
+
+:root, :root[data-dark="0"], :root[data-dark="1"]{
+  --spk-bar-bg:var(--ink); --spk-bar-fg:var(--paper); --spk-bar-on:var(--brass);
+  --spk-bar-bottom:calc(64px + env(safe-area-inset-bottom));
+  --spk-bar-gap-right:104px; --spk-bar-z:110;
+  --spk-btn-bg:rgba(255,255,255,.16); --spk-btn-size:30px; --spk-btn-radius:50%; --spk-btn-font:13px;
+}
+.spkbar b{max-width:34vw}
+@media (max-width:520px){   /* 手機：右下角有「小智」浮動鈕，控制列整條抬到它上面，才不會被蓋住 */
+  :root, :root[data-dark="0"], :root[data-dark="1"]{ --spk-bar-gap-right:0px; --spk-bar-bottom:calc(136px + env(safe-area-inset-bottom)); }
+}
+@media (max-width:380px){ .spkbar button{min-width:30px;height:30px;font-size:13px} }
+@media (max-width:359px){   /* 頂列放不下（書架▦＋共讀📡＋🔊＋繁简EN＋Ａ）：320px 不可以橫向捲動，按鈕與語言切換稍微縮一點 */
+  header .bar{gap:4px;padding:0 8px}
+  header .bar .ico{width:36px;min-width:0}
+  .tri321 button{padding:0 7px;min-width:26px}
+}
+
 .spkbar button{
   border:0;background:rgba(255,255,255,.16);color:inherit;width:30px;height:30px;
   border-radius:50%;font-size:13px;cursor:pointer;flex:0 0 auto
@@ -4274,6 +4444,1478 @@ function mx_strBytes(s){const a=new Uint8Array(s.length);for(let i=0;i<s.length;
 
 var GX_VER = "1.3.202610191930";
 </script>
+<script id="TTS321CORE">
+/* ============================================================================
+ * 321 App Core — 聖經書卷表  books.js
+ *
+ * 這一份是 mk_books.py 從 books.tc.json 機械產生的，**不要手改**。
+ * 要加簡稱就加在 books.tc.json，再重跑 mk_books.py。
+ *
+ * 簡體表由繁體表經 ICU Traditional-Simplified 鏡射而來，不是手寫——
+ * 手寫一份 66 卷的表，漏掉是遲早的事，而且是靜默失效。
+ * ==========================================================================*/
+
+var BOOKS321 = {"tc":[{"n":1,"t":"創世記","a":["創","創世紀"],"c":50,"u":"章"},{"n":2,"t":"出埃及記","a":["出"],"c":40,"u":"章"},{"n":3,"t":"利未記","a":["利"],"c":27,"u":"章"},{"n":4,"t":"民數記","a":["民"],"c":36,"u":"章"},{"n":5,"t":"申命記","a":["申"],"c":34,"u":"章"},{"n":6,"t":"約書亞記","a":["書","約書亞"],"c":24,"u":"章"},{"n":7,"t":"士師記","a":["士"],"c":21,"u":"章"},{"n":8,"t":"路得記","a":["得"],"c":4,"u":"章"},{"n":9,"t":"撒母耳記上","a":["撒上","撒母耳上","撒母耳記上卷"],"c":31,"u":"章"},{"n":10,"t":"撒母耳記下","a":["撒下","撒母耳下"],"c":24,"u":"章"},{"n":11,"t":"列王紀上","a":["王上","列王記上","列王紀上卷"],"c":22,"u":"章"},{"n":12,"t":"列王紀下","a":["王下","列王記下"],"c":25,"u":"章"},{"n":13,"t":"歷代志上","a":["代上","歷代上"],"c":29,"u":"章"},{"n":14,"t":"歷代志下","a":["代下","歷代下"],"c":36,"u":"章"},{"n":15,"t":"以斯拉記","a":["拉","以斯拉"],"c":10,"u":"章"},{"n":16,"t":"尼希米記","a":["尼","尼希米"],"c":13,"u":"章"},{"n":17,"t":"以斯帖記","a":["斯","以斯帖"],"c":10,"u":"章"},{"n":18,"t":"約伯記","a":["伯","約伯"],"c":42,"u":"章"},{"n":19,"t":"詩篇","a":["詩"],"c":150,"u":"篇"},{"n":20,"t":"箴言","a":["箴"],"c":31,"u":"章"},{"n":21,"t":"傳道書","a":["傳"],"c":12,"u":"章"},{"n":22,"t":"雅歌","a":["歌"],"c":8,"u":"章"},{"n":23,"t":"以賽亞書","a":["賽","以賽亞"],"c":66,"u":"章"},{"n":24,"t":"耶利米書","a":["耶","耶利米"],"c":52,"u":"章"},{"n":25,"t":"耶利米哀歌","a":["哀"],"c":5,"u":"章"},{"n":26,"t":"以西結書","a":["結","以西結"],"c":48,"u":"章"},{"n":27,"t":"但以理書","a":["但","但以理"],"c":12,"u":"章"},{"n":28,"t":"何西阿書","a":["何","何西阿"],"c":14,"u":"章"},{"n":29,"t":"約珥書","a":["珥","約珥"],"c":3,"u":"章"},{"n":30,"t":"阿摩司書","a":["摩","阿摩司"],"c":9,"u":"章"},{"n":31,"t":"俄巴底亞書","a":["俄","俄巴底亞"],"c":1,"u":"章"},{"n":32,"t":"約拿書","a":["拿","約拿"],"c":4,"u":"章"},{"n":33,"t":"彌迦書","a":["彌","彌迦"],"c":7,"u":"章"},{"n":34,"t":"那鴻書","a":["鴻","那鴻"],"c":3,"u":"章"},{"n":35,"t":"哈巴谷書","a":["哈","哈巴谷"],"c":3,"u":"章"},{"n":36,"t":"西番雅書","a":["番","西番雅"],"c":3,"u":"章"},{"n":37,"t":"哈該書","a":["該","哈該"],"c":2,"u":"章"},{"n":38,"t":"撒迦利亞書","a":["亞","撒迦利亞"],"c":14,"u":"章"},{"n":39,"t":"瑪拉基書","a":["瑪","瑪拉基"],"c":4,"u":"章"},{"n":40,"t":"馬太福音","a":["太","馬太"],"c":28,"u":"章"},{"n":41,"t":"馬可福音","a":["可","馬可"],"c":16,"u":"章"},{"n":42,"t":"路加福音","a":["路","路加"],"c":24,"u":"章"},{"n":43,"t":"約翰福音","a":["約","約翰"],"c":21,"u":"章"},{"n":44,"t":"使徒行傳","a":["徒","行傳"],"c":28,"u":"章"},{"n":45,"t":"羅馬書","a":["羅","羅馬"],"c":16,"u":"章"},{"n":46,"t":"哥林多前書","a":["林前","哥前"],"c":16,"u":"章"},{"n":47,"t":"哥林多後書","a":["林後","哥後"],"c":13,"u":"章"},{"n":48,"t":"加拉太書","a":["加","加拉太"],"c":6,"u":"章"},{"n":49,"t":"以弗所書","a":["弗","以弗所"],"c":6,"u":"章"},{"n":50,"t":"腓立比書","a":["腓","腓立比"],"c":4,"u":"章"},{"n":51,"t":"歌羅西書","a":["西","歌羅西"],"c":4,"u":"章"},{"n":52,"t":"帖撒羅尼迦前書","a":["帖前"],"c":5,"u":"章"},{"n":53,"t":"帖撒羅尼迦後書","a":["帖後"],"c":3,"u":"章"},{"n":54,"t":"提摩太前書","a":["提前"],"c":6,"u":"章"},{"n":55,"t":"提摩太後書","a":["提後"],"c":4,"u":"章"},{"n":56,"t":"提多書","a":["多","提多"],"c":3,"u":"章"},{"n":57,"t":"腓利門書","a":["門","腓利門"],"c":1,"u":"章"},{"n":58,"t":"希伯來書","a":["來","希伯來"],"c":13,"u":"章"},{"n":59,"t":"雅各書","a":["雅","雅各"],"c":5,"u":"章"},{"n":60,"t":"彼得前書","a":["彼前"],"c":5,"u":"章"},{"n":61,"t":"彼得後書","a":["彼後"],"c":3,"u":"章"},{"n":62,"t":"約翰一書","a":["約一","約壹"],"c":5,"u":"章"},{"n":63,"t":"約翰二書","a":["約二","約貳"],"c":1,"u":"章"},{"n":64,"t":"約翰三書","a":["約三","約參"],"c":1,"u":"章"},{"n":65,"t":"猶大書","a":["猶","猶大"],"c":1,"u":"章"},{"n":66,"t":"啟示錄","a":["啟","啟示"],"c":22,"u":"章"}],"sc":[{"n":1,"t":"创世记","a":["创","创世纪"],"c":50,"u":"章"},{"n":2,"t":"出埃及记","a":["出"],"c":40,"u":"章"},{"n":3,"t":"利未记","a":["利"],"c":27,"u":"章"},{"n":4,"t":"民数记","a":["民"],"c":36,"u":"章"},{"n":5,"t":"申命记","a":["申"],"c":34,"u":"章"},{"n":6,"t":"约书亚记","a":["书","约书亚"],"c":24,"u":"章"},{"n":7,"t":"士师记","a":["士"],"c":21,"u":"章"},{"n":8,"t":"路得记","a":["得"],"c":4,"u":"章"},{"n":9,"t":"撒母耳记上","a":["撒上","撒母耳上","撒母耳记上卷"],"c":31,"u":"章"},{"n":10,"t":"撒母耳记下","a":["撒下","撒母耳下"],"c":24,"u":"章"},{"n":11,"t":"列王纪上","a":["王上","列王记上","列王纪上卷"],"c":22,"u":"章"},{"n":12,"t":"列王纪下","a":["王下","列王记下"],"c":25,"u":"章"},{"n":13,"t":"历代志上","a":["代上","历代上"],"c":29,"u":"章"},{"n":14,"t":"历代志下","a":["代下","历代下"],"c":36,"u":"章"},{"n":15,"t":"以斯拉记","a":["拉","以斯拉"],"c":10,"u":"章"},{"n":16,"t":"尼希米记","a":["尼","尼希米"],"c":13,"u":"章"},{"n":17,"t":"以斯帖记","a":["斯","以斯帖"],"c":10,"u":"章"},{"n":18,"t":"约伯记","a":["伯","约伯"],"c":42,"u":"章"},{"n":19,"t":"诗篇","a":["诗"],"c":150,"u":"篇"},{"n":20,"t":"箴言","a":["箴"],"c":31,"u":"章"},{"n":21,"t":"传道书","a":["传"],"c":12,"u":"章"},{"n":22,"t":"雅歌","a":["歌"],"c":8,"u":"章"},{"n":23,"t":"以赛亚书","a":["赛","以赛亚"],"c":66,"u":"章"},{"n":24,"t":"耶利米书","a":["耶","耶利米"],"c":52,"u":"章"},{"n":25,"t":"耶利米哀歌","a":["哀"],"c":5,"u":"章"},{"n":26,"t":"以西结书","a":["结","以西结"],"c":48,"u":"章"},{"n":27,"t":"但以理书","a":["但","但以理"],"c":12,"u":"章"},{"n":28,"t":"何西阿书","a":["何","何西阿"],"c":14,"u":"章"},{"n":29,"t":"约珥书","a":["珥","约珥"],"c":3,"u":"章"},{"n":30,"t":"阿摩司书","a":["摩","阿摩司"],"c":9,"u":"章"},{"n":31,"t":"俄巴底亚书","a":["俄","俄巴底亚"],"c":1,"u":"章"},{"n":32,"t":"约拿书","a":["拿","约拿"],"c":4,"u":"章"},{"n":33,"t":"弥迦书","a":["弥","弥迦"],"c":7,"u":"章"},{"n":34,"t":"那鸿书","a":["鸿","那鸿"],"c":3,"u":"章"},{"n":35,"t":"哈巴谷书","a":["哈","哈巴谷"],"c":3,"u":"章"},{"n":36,"t":"西番雅书","a":["番","西番雅"],"c":3,"u":"章"},{"n":37,"t":"哈该书","a":["该","哈该"],"c":2,"u":"章"},{"n":38,"t":"撒迦利亚书","a":["亚","撒迦利亚"],"c":14,"u":"章"},{"n":39,"t":"玛拉基书","a":["玛","玛拉基"],"c":4,"u":"章"},{"n":40,"t":"马太福音","a":["太","马太"],"c":28,"u":"章"},{"n":41,"t":"马可福音","a":["可","马可"],"c":16,"u":"章"},{"n":42,"t":"路加福音","a":["路","路加"],"c":24,"u":"章"},{"n":43,"t":"约翰福音","a":["约","约翰"],"c":21,"u":"章"},{"n":44,"t":"使徒行传","a":["徒","行传"],"c":28,"u":"章"},{"n":45,"t":"罗马书","a":["罗","罗马"],"c":16,"u":"章"},{"n":46,"t":"哥林多前书","a":["林前","哥前"],"c":16,"u":"章"},{"n":47,"t":"哥林多后书","a":["林后","哥后"],"c":13,"u":"章"},{"n":48,"t":"加拉太书","a":["加","加拉太"],"c":6,"u":"章"},{"n":49,"t":"以弗所书","a":["弗","以弗所"],"c":6,"u":"章"},{"n":50,"t":"腓立比书","a":["腓","腓立比"],"c":4,"u":"章"},{"n":51,"t":"歌罗西书","a":["西","歌罗西"],"c":4,"u":"章"},{"n":52,"t":"帖撒罗尼迦前书","a":["帖前"],"c":5,"u":"章"},{"n":53,"t":"帖撒罗尼迦后书","a":["帖后"],"c":3,"u":"章"},{"n":54,"t":"提摩太前书","a":["提前"],"c":6,"u":"章"},{"n":55,"t":"提摩太后书","a":["提后"],"c":4,"u":"章"},{"n":56,"t":"提多书","a":["多","提多"],"c":3,"u":"章"},{"n":57,"t":"腓利门书","a":["门","腓利门"],"c":1,"u":"章"},{"n":58,"t":"希伯来书","a":["来","希伯来"],"c":13,"u":"章"},{"n":59,"t":"雅各书","a":["雅","雅各"],"c":5,"u":"章"},{"n":60,"t":"彼得前书","a":["彼前"],"c":5,"u":"章"},{"n":61,"t":"彼得后书","a":["彼后"],"c":3,"u":"章"},{"n":62,"t":"约翰一书","a":["约一","约壹"],"c":5,"u":"章"},{"n":63,"t":"约翰二书","a":["约二","约贰"],"c":1,"u":"章"},{"n":64,"t":"约翰三书","a":["约三","约参"],"c":1,"u":"章"},{"n":65,"t":"犹大书","a":["犹","犹大"],"c":1,"u":"章"},{"n":66,"t":"启示录","a":["启","启示"],"c":22,"u":"章"}],"en":[{"n":1,"t":"Genesis","a":["Gen","Ge","Gn"],"c":50,"u":"chapter"},{"n":2,"t":"Exodus","a":["Exod","Ex","Exo"],"c":40,"u":"chapter"},{"n":3,"t":"Leviticus","a":["Lev","Lv"],"c":27,"u":"chapter"},{"n":4,"t":"Numbers","a":["Num","Nm","Nu"],"c":36,"u":"chapter"},{"n":5,"t":"Deuteronomy","a":["Deut","Dt","De"],"c":34,"u":"chapter"},{"n":6,"t":"Joshua","a":["Josh","Jos"],"c":24,"u":"chapter"},{"n":7,"t":"Judges","a":["Judg","Jdg","Jg"],"c":21,"u":"chapter"},{"n":8,"t":"Ruth","a":["Ruth","Ru","Rth"],"c":4,"u":"chapter"},{"n":9,"t":"1 Samuel","a":["1Sam","1 Sam","1Sa","I Sam"],"c":31,"u":"chapter"},{"n":10,"t":"2 Samuel","a":["2Sam","2 Sam","2Sa","II Sam"],"c":24,"u":"chapter"},{"n":11,"t":"1 Kings","a":["1Kgs","1 Kgs","1Ki","I Kgs"],"c":22,"u":"chapter"},{"n":12,"t":"2 Kings","a":["2Kgs","2 Kgs","2Ki","II Kgs"],"c":25,"u":"chapter"},{"n":13,"t":"1 Chronicles","a":["1Chr","1 Chr","1Ch"],"c":29,"u":"chapter"},{"n":14,"t":"2 Chronicles","a":["2Chr","2 Chr","2Ch"],"c":36,"u":"chapter"},{"n":15,"t":"Ezra","a":["Ezra","Ezr"],"c":10,"u":"chapter"},{"n":16,"t":"Nehemiah","a":["Neh","Ne"],"c":13,"u":"chapter"},{"n":17,"t":"Esther","a":["Esth","Est"],"c":10,"u":"chapter"},{"n":18,"t":"Job","a":["Job","Jb"],"c":42,"u":"chapter"},{"n":19,"t":"Psalms","a":["Ps","Psa","Psalm"],"c":150,"u":"Psalm"},{"n":20,"t":"Proverbs","a":["Prov","Pr","Pro"],"c":31,"u":"chapter"},{"n":21,"t":"Ecclesiastes","a":["Eccl","Ecc","Ec"],"c":12,"u":"chapter"},{"n":22,"t":"Song of Songs","a":["Song","SS","Sng"],"c":8,"u":"chapter"},{"n":23,"t":"Isaiah","a":["Isa","Is"],"c":66,"u":"chapter"},{"n":24,"t":"Jeremiah","a":["Jer","Je"],"c":52,"u":"chapter"},{"n":25,"t":"Lamentations","a":["Lam","La"],"c":5,"u":"chapter"},{"n":26,"t":"Ezekiel","a":["Ezek","Eze","Ezk"],"c":48,"u":"chapter"},{"n":27,"t":"Daniel","a":["Dan","Da","Dn"],"c":12,"u":"chapter"},{"n":28,"t":"Hosea","a":["Hos","Ho"],"c":14,"u":"chapter"},{"n":29,"t":"Joel","a":["Joel","Jl"],"c":3,"u":"chapter"},{"n":30,"t":"Amos","a":["Amos","Am"],"c":9,"u":"chapter"},{"n":31,"t":"Obadiah","a":["Obad","Ob"],"c":1,"u":"chapter"},{"n":32,"t":"Jonah","a":["Jonah","Jon"],"c":4,"u":"chapter"},{"n":33,"t":"Micah","a":["Mic","Mi"],"c":7,"u":"chapter"},{"n":34,"t":"Nahum","a":["Nah","Na"],"c":3,"u":"chapter"},{"n":35,"t":"Habakkuk","a":["Hab"],"c":3,"u":"chapter"},{"n":36,"t":"Zephaniah","a":["Zeph","Zep"],"c":3,"u":"chapter"},{"n":37,"t":"Haggai","a":["Hag","Hg"],"c":2,"u":"chapter"},{"n":38,"t":"Zechariah","a":["Zech","Zec"],"c":14,"u":"chapter"},{"n":39,"t":"Malachi","a":["Mal","Ml"],"c":4,"u":"chapter"},{"n":40,"t":"Matthew","a":["Matt","Mt"],"c":28,"u":"chapter"},{"n":41,"t":"Mark","a":["Mark","Mk","Mr"],"c":16,"u":"chapter"},{"n":42,"t":"Luke","a":["Luke","Lk","Lu"],"c":24,"u":"chapter"},{"n":43,"t":"John","a":["John","Jn","Joh"],"c":21,"u":"chapter"},{"n":44,"t":"Acts","a":["Acts","Ac"],"c":28,"u":"chapter"},{"n":45,"t":"Romans","a":["Rom","Ro","Rm"],"c":16,"u":"chapter"},{"n":46,"t":"1 Corinthians","a":["1Cor","1 Cor","1Co"],"c":16,"u":"chapter"},{"n":47,"t":"2 Corinthians","a":["2Cor","2 Cor","2Co"],"c":13,"u":"chapter"},{"n":48,"t":"Galatians","a":["Gal","Ga"],"c":6,"u":"chapter"},{"n":49,"t":"Ephesians","a":["Eph","Ep"],"c":6,"u":"chapter"},{"n":50,"t":"Philippians","a":["Phil","Php"],"c":4,"u":"chapter"},{"n":51,"t":"Colossians","a":["Col","Co"],"c":4,"u":"chapter"},{"n":52,"t":"1 Thessalonians","a":["1Thess","1 Thess","1Th"],"c":5,"u":"chapter"},{"n":53,"t":"2 Thessalonians","a":["2Thess","2 Thess","2Th"],"c":3,"u":"chapter"},{"n":54,"t":"1 Timothy","a":["1Tim","1 Tim","1Ti"],"c":6,"u":"chapter"},{"n":55,"t":"2 Timothy","a":["2Tim","2 Tim","2Ti"],"c":4,"u":"chapter"},{"n":56,"t":"Titus","a":["Titus","Tit"],"c":3,"u":"chapter"},{"n":57,"t":"Philemon","a":["Phlm","Phm"],"c":1,"u":"chapter"},{"n":58,"t":"Hebrews","a":["Heb","Hbr"],"c":13,"u":"chapter"},{"n":59,"t":"James","a":["Jas","Jam"],"c":5,"u":"chapter"},{"n":60,"t":"1 Peter","a":["1Pet","1 Pet","1Pe"],"c":5,"u":"chapter"},{"n":61,"t":"2 Peter","a":["2Pet","2 Pet","2Pe"],"c":3,"u":"chapter"},{"n":62,"t":"1 John","a":["1John","1 John","1Jn"],"c":5,"u":"chapter"},{"n":63,"t":"2 John","a":["2John","2 John","2Jn"],"c":1,"u":"chapter"},{"n":64,"t":"3 John","a":["3John","3 John","3Jn"],"c":1,"u":"chapter"},{"n":65,"t":"Jude","a":["Jude","Jud"],"c":1,"u":"chapter"},{"n":66,"t":"Revelation","a":["Rev","Re","Rv"],"c":22,"u":"chapter"}],"w":{"tc":{"v":"節","to":"到"},"sc":{"v":"节","to":"到"},"en":{"v":"","to":"-"}},"order":{"tc":[["帖撒羅尼迦前書",52],["帖撒羅尼迦後書",53],["撒母耳記上卷",9],["俄巴底亞書",31],["列王紀上卷",11],["哥林多前書",46],["哥林多後書",47],["提摩太前書",54],["提摩太後書",55],["撒母耳記上",9],["撒母耳記下",10],["撒迦利亞書",38],["耶利米哀歌",25],["以弗所書",49],["以斯帖記",17],["以斯拉記",15],["以西結書",26],["以賽亞書",23],["但以理書",27],["何西阿書",28],["使徒行傳",44],["俄巴底亞",31],["出埃及記",2],["列王紀上",11],["列王紀下",12],["列王記上",11],["列王記下",12],["加拉太書",48],["哈巴谷書",35],["尼希米記",16],["希伯來書",58],["彼得前書",60],["彼得後書",61],["撒母耳上",9],["撒母耳下",10],["撒迦利亞",38],["歌羅西書",51],["歷代志上",13],["歷代志下",14],["瑪拉基書",39],["約書亞記",6],["約翰一書",62],["約翰三書",64],["約翰二書",63],["約翰福音",43],["耶利米書",24],["腓利門書",57],["腓立比書",50],["西番雅書",36],["路加福音",42],["阿摩司書",30],["馬可福音",41],["馬太福音",40],["以弗所",49],["以斯帖",17],["以斯拉",15],["以西結",26],["以賽亞",23],["但以理",27],["何西阿",28],["傳道書",21],["利未記",3],["創世紀",1],["創世記",1],["加拉太",48],["哈巴谷",35],["哈該書",37],["啟示錄",66],["士師記",7],["尼希米",16],["希伯來",58],["彌迦書",33],["提多書",56],["歌羅西",51],["歷代上",13],["歷代下",14],["民數記",4],["猶大書",65],["瑪拉基",39],["申命記",5],["約伯記",18],["約拿書",32],["約書亞",6],["約珥書",29],["羅馬書",45],["耶利米",24],["腓利門",57],["腓立比",50],["西番雅",36],["路得記",8],["那鴻書",34],["阿摩司",30],["雅各書",59],["代上",13],["代下",14],["哈該",37],["哥前",46],["哥後",47],["啟示",66],["帖前",52],["帖後",53],["彌迦",33],["彼前",60],["彼後",61],["提前",54],["提多",56],["提後",55],["撒上",9],["撒下",10],["林前",46],["林後",47],["猶大",65],["王上",11],["王下",12],["箴言",20],["約一",62],["約三",64],["約二",63],["約伯",18],["約參",64],["約壹",62],["約拿",32],["約珥",29],["約翰",43],["約貳",63],["羅馬",45],["行傳",44],["詩篇",19],["路加",42],["那鴻",34],["雅各",59],["雅歌",22],["馬可",41],["馬太",40],["亞",38],["伯",18],["但",27],["何",28],["來",58],["俄",31],["傳",21],["出",2],["利",3],["創",1],["加",48],["可",41],["哀",25],["哈",35],["啟",66],["士",7],["多",56],["太",40],["尼",16],["弗",49],["彌",33],["徒",44],["得",8],["拉",15],["拿",32],["摩",30],["斯",17],["書",6],["歌",22],["民",4],["猶",65],["珥",29],["瑪",39],["申",5],["番",36],["箴",20],["約",43],["結",26],["羅",45],["耶",24],["腓",50],["西",51],["詩",19],["該",37],["賽",23],["路",42],["門",57],["雅",59],["鴻",34]],"sc":[["帖撒罗尼迦前书",52],["帖撒罗尼迦后书",53],["撒母耳记上卷",9],["俄巴底亚书",31],["列王纪上卷",11],["哥林多前书",46],["哥林多后书",47],["提摩太前书",54],["提摩太后书",55],["撒母耳记上",9],["撒母耳记下",10],["撒迦利亚书",38],["耶利米哀歌",25],["以弗所书",49],["以斯帖记",17],["以斯拉记",15],["以西结书",26],["以赛亚书",23],["但以理书",27],["何西阿书",28],["使徒行传",44],["俄巴底亚",31],["出埃及记",2],["列王纪上",11],["列王纪下",12],["列王记上",11],["列王记下",12],["加拉太书",48],["历代志上",13],["历代志下",14],["哈巴谷书",35],["尼希米记",16],["希伯来书",58],["彼得前书",60],["彼得后书",61],["撒母耳上",9],["撒母耳下",10],["撒迦利亚",38],["歌罗西书",51],["玛拉基书",39],["约书亚记",6],["约翰一书",62],["约翰三书",64],["约翰二书",63],["约翰福音",43],["耶利米书",24],["腓利门书",57],["腓立比书",50],["西番雅书",36],["路加福音",42],["阿摩司书",30],["马可福音",41],["马太福音",40],["以弗所",49],["以斯帖",17],["以斯拉",15],["以西结",26],["以赛亚",23],["传道书",21],["但以理",27],["何西阿",28],["创世纪",1],["创世记",1],["利未记",3],["加拉太",48],["历代上",13],["历代下",14],["启示录",66],["哈巴谷",35],["哈该书",37],["士师记",7],["尼希米",16],["希伯来",58],["弥迦书",33],["提多书",56],["歌罗西",51],["民数记",4],["犹大书",65],["玛拉基",39],["申命记",5],["约书亚",6],["约伯记",18],["约拿书",32],["约珥书",29],["罗马书",45],["耶利米",24],["腓利门",57],["腓立比",50],["西番雅",36],["路得记",8],["那鸿书",34],["阿摩司",30],["雅各书",59],["代上",13],["代下",14],["启示",66],["哈该",37],["哥前",46],["哥后",47],["帖前",52],["帖后",53],["弥迦",33],["彼前",60],["彼后",61],["提前",54],["提后",55],["提多",56],["撒上",9],["撒下",10],["林前",46],["林后",47],["犹大",65],["王上",11],["王下",12],["箴言",20],["约一",62],["约三",64],["约二",63],["约伯",18],["约参",64],["约壹",62],["约拿",32],["约珥",29],["约翰",43],["约贰",63],["罗马",45],["行传",44],["诗篇",19],["路加",42],["那鸿",34],["雅各",59],["雅歌",22],["马可",41],["马太",40],["书",6],["亚",38],["传",21],["伯",18],["但",27],["何",28],["俄",31],["出",2],["创",1],["利",3],["加",48],["可",41],["启",66],["哀",25],["哈",35],["士",7],["多",56],["太",40],["尼",16],["弗",49],["弥",33],["徒",44],["得",8],["拉",15],["拿",32],["摩",30],["斯",17],["来",58],["歌",22],["民",4],["犹",65],["玛",39],["珥",29],["申",5],["番",36],["箴",20],["约",43],["结",26],["罗",45],["耶",24],["腓",50],["西",51],["诗",19],["该",37],["赛",23],["路",42],["门",57],["雅",59],["鸿",34]],"en":[["1 Thessalonians",52],["2 Thessalonians",53],["1 Corinthians",46],["2 Corinthians",47],["Song of Songs",22],["1 Chronicles",13],["2 Chronicles",14],["Ecclesiastes",21],["Lamentations",25],["Deuteronomy",5],["Philippians",50],["Colossians",51],["Revelation",66],["1 Timothy",54],["2 Timothy",55],["Ephesians",49],["Galatians",48],["Leviticus",3],["Zechariah",38],["Zephaniah",36],["1 Samuel",9],["2 Samuel",10],["Habakkuk",35],["Jeremiah",24],["Nehemiah",16],["Philemon",57],["Proverbs",20],["1 Kings",11],["1 Peter",60],["1 Thess",52],["2 Kings",12],["2 Peter",61],["2 Thess",53],["Ezekiel",26],["Genesis",1],["Hebrews",58],["Malachi",39],["Matthew",40],["Numbers",4],["Obadiah",31],["1 John",62],["1 John",62],["1Thess",52],["2 John",63],["2 John",63],["2Thess",53],["3 John",64],["3 John",64],["Daniel",27],["Esther",17],["Exodus",2],["Haggai",37],["II Kgs",12],["II Sam",10],["Isaiah",23],["Joshua",6],["Judges",7],["Psalms",19],["Romans",45],["1 Chr",13],["1 Cor",46],["1 Kgs",11],["1 Pet",60],["1 Sam",9],["1 Tim",54],["1John",62],["2 Chr",14],["2 Cor",47],["2 Kgs",12],["2 Pet",61],["2 Sam",10],["2 Tim",55],["2John",63],["3John",64],["Hosea",28],["I Kgs",11],["I Sam",9],["James",59],["Jonah",32],["Jonah",32],["Micah",33],["Nahum",34],["Psalm",19],["Titus",56],["Titus",56],["1Chr",13],["1Cor",46],["1Kgs",11],["1Pet",60],["1Sam",9],["1Tim",54],["2Chr",14],["2Cor",47],["2Kgs",12],["2Pet",61],["2Sam",10],["2Tim",55],["Acts",44],["Acts",44],["Amos",30],["Amos",30],["Deut",5],["Eccl",21],["Esth",17],["Exod",2],["Ezek",26],["Ezra",15],["Ezra",15],["Joel",29],["Joel",29],["John",43],["John",43],["Josh",6],["Jude",65],["Jude",65],["Judg",7],["Luke",42],["Luke",42],["Mark",41],["Mark",41],["Matt",40],["Obad",31],["Phil",50],["Phlm",57],["Prov",20],["Ruth",8],["Ruth",8],["Song",22],["Zech",38],["Zeph",36],["1Ch",13],["1Co",46],["1Jn",62],["1Ki",11],["1Pe",60],["1Sa",9],["1Th",52],["1Ti",54],["2Ch",14],["2Co",47],["2Jn",63],["2Ki",12],["2Pe",61],["2Sa",10],["2Th",53],["2Ti",55],["3Jn",64],["Col",51],["Dan",27],["Ecc",21],["Eph",49],["Est",17],["Exo",2],["Eze",26],["Ezk",26],["Ezr",15],["Gal",48],["Gen",1],["Hab",35],["Hag",37],["Hbr",58],["Heb",58],["Hos",28],["Isa",23],["Jam",59],["Jas",59],["Jdg",7],["Jer",24],["Job",18],["Job",18],["Joh",43],["Jon",32],["Jos",6],["Jud",65],["Lam",25],["Lev",3],["Mal",39],["Mic",33],["Nah",34],["Neh",16],["Num",4],["Phm",57],["Php",50],["Pro",20],["Psa",19],["Rev",66],["Rom",45],["Rth",8],["Sng",22],["Tit",56],["Zec",38],["Zep",36],["Ac",44],["Am",30],["Co",51],["Da",27],["De",5],["Dn",27],["Dt",5],["Ec",21],["Ep",49],["Ex",2],["Ga",48],["Ge",1],["Gn",1],["Hg",37],["Ho",28],["Is",23],["Jb",18],["Je",24],["Jg",7],["Jl",29],["Jn",43],["La",25],["Lk",42],["Lu",42],["Lv",3],["Mi",33],["Mk",41],["Ml",39],["Mr",41],["Mt",40],["Na",34],["Ne",16],["Nm",4],["Nu",4],["Ob",31],["Pr",20],["Ps",19],["Re",66],["Rm",45],["Ro",45],["Ru",8],["Rv",66],["SS",22]]}};
+
+if (typeof module !== 'undefined' && module.exports) module.exports = BOOKS321;
+
+/* ============================================================================
+ * 321 App Core — 經文出處  scripture.js  v1.0.0
+ * ----------------------------------------------------------------------------
+ * 把文字裡的經文出處認出來：變成可點的連結，或展開成口語唸法。
+ *
+ * 抽出來的理由，是這一組最容易**靜默失效**。
+ * 領導力 App 的簡體書卷表是手寫的，漏了路加福音與大約 30 個簡稱——
+ * 簡體讀者看到的出處就是不會變成連結，畫面上沒有任何異常，沒有人會回報。
+ * 表一手寫，漏掉是遲早的事；所以這裡的表是 mk_books.py 機械產生的（books.js）。
+ *
+ * 需要 books.js 先載入。
+ *
+ * 認得出來的寫法
+ *   約3:16        約 3:16        約翰福音3:16
+ *   太28:19-20    太28:19–20（連接號、破折號、波浪號都認）
+ *   創1:1-2:3     跨章
+ *   詩23篇        羅8章          約壹3:1
+ *   John 3:16     1 Cor 13:4-7（英文版）
+ *
+ * 三道保險
+ *   · 名字由長到短比對——否則「約拿1:1」會被當成約翰福音
+ *   · 章數超出該卷範圍就**不當作出處**（「多 5:100」不是提多書）
+ *   · HTML 標籤內、已經是連結的地方，一概不動
+ * ==========================================================================*/
+
+var REF321 = (function () {
+  'use strict';
+
+  var DEF = {
+    lang: 'tc',            // tc / sc / en
+    /* class 用 ref321，不用 vs——創世記與啟示錄的 .vs 是「經文那一列」，
+       display:flex。核心若佔用同一個名字，出處連結會整條被撐成一整行，
+       而且完全不會報錯。核心的 class 一律帶自己的前綴。 */
+    cls: 'ref321',
+    attr: 'data-ref',      // 連結帶的屬性
+    onOpen: null,          // fn(ref)  點下去要做什麼（不給就不掛 onclick）
+    inApp: null,           // fn(n, ch) -> bool  這個 App 自己開得了嗎
+    only: null,            // 只認這幾卷（例如講義 App 只想連本卷）；給 n 的陣列
+    speakUnit: true,       // 唸出來時要不要說「章」「節」
+    maxChapter: true,      // 章數超出範圍就不算出處
+    /* 單字簡稱＋章範圍（創2-4）算不算出處。
+       算（預設）：主耀要的「創2～4 要唸出完整書卷名」就成立。
+       不算：更保守，但「創2-4」會原封不動唸成「創二減四」。
+       兩種都有道理，所以留成設定。 */
+    rangeNoColon: true,
+    /* 單字簡稱（約、書、多、來…）在中文裡最容易誤判，因為中文沒有詞界：
+         「很多5個」「後來3年」——「多」「來」都是書卷簡稱。
+       所以單字簡稱**一定要是冒號式**（約3:16）才算出處；
+       「多5」「來3章」不算。這一條擋掉絕大多數誤判，又不必為每個字
+       維護一張「哪些字不算」的表——那種表跟手寫書卷表一樣，一定會漏。 */
+    shortNeedsColon: true,
+    /* 再嚴一級：單字簡稱前面不可以是中文字。
+       可以擋掉「大約3:1的比例」這種比例寫法，代價是「請讀太28:19」也不認了
+       （要寫成「請讀 太28:19」）。預設關著，怕誤判的 App 再打開。 */
+    strictShort: false,
+    /* 還要認哪幾個語版的書名（不給就用預設：繁簡互通，英文只認英文）*/
+    alsoLang: null
+  };
+
+  var C = null, T = null, ORDER = null, BY_N = null, W = null;
+
+  function ext(a, b) { for (var k in b) if (b.hasOwnProperty(k)) a[k] = b[k]; return a; }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  /* ── 書卷表 ───────────────────────────────────────────────────────── */
+
+  /* 認得的語版：預設繁簡互通。
+     小智的回答是模型寫的，簡體版的 App 也可能收到一句繁體——
+     只認一邊的話，那一句裡的出處就整排不會變成連結，而且沒有任何錯誤訊息。
+     顯示與唸法仍然照 C.lang 走。 */
+  var ALSO = { tc: ['sc'], sc: ['tc'], en: [] };
+
+  function load(lang) {
+    if (typeof BOOKS321 === 'undefined') throw new Error('scripture.js 需要先載入 books.js');
+    T = BOOKS321[lang] || BOOKS321.tc;
+    W = (BOOKS321.w && (BOOKS321.w[lang] || BOOKS321.w.tc)) || { v: '節', to: '到' };
+    BY_N = {};
+    for (var i = 0; i < T.length; i++) BY_N[T[i].n] = T[i];
+
+    var langs = [lang].concat(C.alsoLang || ALSO[lang] || []);
+    var seen = {}, all = [];
+    for (var L = 0; L < langs.length; L++) {
+      var o = BOOKS321.order[langs[L]];
+      if (!o) continue;
+      for (var j = 0; j < o.length; j++) {
+        var k = o[j][0];
+        if (seen[k]) continue;
+        seen[k] = 1; all.push(o[j]);
+      }
+    }
+    all.sort(function (a, b) { return b[0].length - a[0].length; });
+    ORDER = all;
+  }
+
+  function book(x) {
+    if (typeof x === 'number') return BY_N[x] || null;
+    var s = String(x || '').replace(/^\s+|\s+$/g, '');
+    for (var i = 0; i < ORDER.length; i++) if (ORDER[i][0] === s) return BY_N[ORDER[i][1]];
+    /* 英文：大小寫與空白無關 */
+    var k = s.toLowerCase().replace(/[\s.]/g, '');
+    for (i = 0; i < ORDER.length; i++) {
+      if (String(ORDER[i][0]).toLowerCase().replace(/[\s.]/g, '') === k) return BY_N[ORDER[i][1]];
+    }
+    return null;
+  }
+
+  /* ── 認出處 ──────────────────────────────────────────────────────── */
+
+  var DASH = '[-\u2010\u2011\u2012\u2013\u2014\uFF0D~\uFF5E]';
+  var NUM = '\\d{1,3}';
+
+  /* 名字後面接的數字部分：
+       3:16        3:16-18       3:16-4:2       3        3章／3篇 */
+  var TAIL = new RegExp(
+    '^\\s*(' + NUM + ')' +
+    '(?:\\s*([:\uFF1A\u7ae0\u7bc7])\\s*(' + NUM + ')?)?' +
+    '(?:\\s*' + DASH + '\\s*(' + NUM + ')(?:\\s*[:\uFF1A]\\s*(' + NUM + '))?)?' +
+    '\\s*[\u7bc0\u7ae0\u7bc7]?'
+  );
+
+  /* 量詞。單字簡稱＋範圍（多2-3）後面若跟著這些字，那是日常中文不是出處。 */
+  var UNIT = /[個天年月日次人位間本張塊條頁週歲元倍成分秒點度斤台件場句字項步層遍回%％、]/;
+
+  function isLetter(ch) { return /[A-Za-z]/.test(ch || ''); }
+  function isHan(ch) { return /[\u3400-\u4dbf\u4e00-\u9fff]/.test(ch || ''); }
+
+  /* 從 pos 開始，看看是不是一筆出處。是的話回傳 {…, end}，不是就 null */
+  function at(text, pos) {
+    for (var i = 0; i < ORDER.length; i++) {
+      var name = ORDER[i][0], n = ORDER[i][1];
+      if (text.substr(pos, name.length) !== name) continue;
+      if (C.only && C.only.indexOf(n) < 0) continue;
+      /* 英文書名前後不能黏著別的字母（"Job" 不可以從 "Jobs" 裡切出來）*/
+      if (isLetter(name.charAt(0))) {
+        if (isLetter(text.charAt(pos - 1))) continue;
+        if (isLetter(text.charAt(pos + name.length))) continue;
+      } else if (name.length === 1 && C.strictShort && isHan(text.charAt(pos - 1))) {
+        continue;                                    // 「大約3:1」不是約翰福音
+      }
+      var rest = text.slice(pos + name.length);
+      var m = TAIL.exec(rest);
+      if (!m || !m[1]) continue;
+      /* 單字簡稱要有明確標記才算：冒號式（約3:16）或帶單位詞（羅8章）。
+         沒有標記的「很多5個」「後來3年」一律不算。
+
+         一個例外：帶範圍的寫法（創2-4、創2～4）。
+         「多5」可能是「很多五個」，但「多2-3」幾乎一定是提多書——
+         範圍符號本身就是很強的訊號。
+
+         不過還是要擋一種：後面跟著量詞的。
+         「約2-3個」「來3-5次」「多2-3天」都是日常中文，不是出處。 */
+      var sep = m[2] || '';
+      if (name.length === 1 && C.shortNeedsColon && !isLetter(name.charAt(0)) && !sep) {
+        var isRange = m[4] != null && m[3] == null;
+        if (!isRange || !C.rangeNoColon) continue;
+        var tail = m[0].replace(/\s+$/, '');
+        if (UNIT.test(text.charAt(pos + name.length + tail.length))) continue;
+      }
+
+      var b = BY_N[n];
+      var ch = +m[1];
+      if (C.maxChapter && (ch < 1 || ch > b.c)) continue;   // 超出範圍就不是出處
+
+      var v = m[3] ? +m[3] : 0;
+      var ch2 = 0, v2 = 0;
+      if (m[4] != null) {
+        if (m[5] != null) { ch2 = +m[4]; v2 = +m[5]; }      // 1:1-2:3 跨章
+        else if (v) { v2 = +m[4]; }                          // 3:16-18
+        else { ch2 = +m[4]; }                                // 3-4 章
+      }
+      if (ch2 && C.maxChapter && ch2 > b.c) continue;
+
+      var raw = text.substr(pos, name.length + m[0].length);
+      /* 結尾若只是空白，不要吃進去 */
+      raw = raw.replace(/\s+$/, '');
+      return {
+        n: n, book: b, name: name, ch: ch, v: v, ch2: ch2, v2: v2,
+        raw: raw, start: pos, end: pos + raw.length,
+        id: n + '|' + ch + (v ? ':' + v : '')
+      };
+    }
+    return null;
+  }
+
+  /* 掃一整段純文字，回傳所有出處 */
+  function find(text) {
+    text = String(text == null ? '' : text);
+    var out = [], i = 0;
+    while (i < text.length) {
+      var r = at(text, i);
+      if (r) { out.push(r); i = r.end; } else { i++; }
+    }
+    return out;
+  }
+
+  /* 只認一筆（整個字串就是一個出處）*/
+  function parse(s) {
+    var a = find(s);
+    return (a.length === 1 && a[0].raw.length === String(s).replace(/^\s+|\s+$/g, '').length)
+      ? a[0] : (a[0] || null);
+  }
+
+  /* ── 變成連結 ────────────────────────────────────────────────────
+   * HTML 標籤裡面、已經是 <a> 的地方一概不動——否則會把 href 裡的
+   * 「創1:1」也換掉，整個連結就壞了。
+   * ------------------------------------------------------------------ */
+
+  function linkify(html, opt) {
+    opt = opt || {};
+    html = String(html == null ? '' : html);
+    var out = '', i = 0, inTag = false, depthA = 0, buf = '';
+
+    function flush() {
+      if (!buf) return;
+      out += mark(buf, opt);
+      buf = '';
+    }
+
+    while (i < html.length) {
+      var ch = html.charAt(i);
+      if (!inTag && ch === '<') {
+        flush();
+        inTag = true;
+        var close = html.indexOf('>', i);
+        var tag = close < 0 ? html.slice(i) : html.slice(i, close + 1);
+        if (/^<a\b/i.test(tag)) depthA++;
+        else if (/^<\/a\b/i.test(tag)) depthA = Math.max(0, depthA - 1);
+        out += tag;
+        i += tag.length;
+        inTag = false;
+        continue;
+      }
+      if (depthA > 0) { out += ch; i++; continue; }          // 連結裡面不動
+      buf += ch; i++;
+    }
+    flush();
+    return out;
+  }
+
+  function mark(text, opt) {
+    var refs = find(text);
+    if (!refs.length) return text;
+    var out = '', last = 0;
+    for (var i = 0; i < refs.length; i++) {
+      var r = refs[i];
+      out += text.slice(last, r.start) + anchor(r, opt);
+      last = r.end;
+    }
+    return out + text.slice(last);
+  }
+
+  function anchor(r, opt) {
+    opt = opt || {};
+    var here = C.inApp ? !!C.inApp(r.n, r.ch) : false;
+    var a = '<a class="' + C.cls + (here ? ' ' + C.cls + '-here' : '') + '"' +
+      ' ' + C.attr + '="' + esc(r.id) + '"' +
+      ' title="' + esc(full(r)) + '"';
+    if (C.onOpen) a += ' onclick="event.stopPropagation();REF321.open(\'' + esc(r.id) + '\')"';
+    return a + '>' + esc(r.raw) + '</a>';
+  }
+
+  function open(id) {
+    if (!C.onOpen) return;
+    var p = String(id).split('|'), n = +p[0], cv = (p[1] || '').split(':');
+    var r = { n: n, book: BY_N[n], ch: +cv[0] || 0, v: +cv[1] || 0, id: id };
+    C.onOpen(r);
+  }
+
+  /* ── 唸出來 ──────────────────────────────────────────────────────
+   * 「太28:19-20」語音引擎會唸成「太二十八冒號十九減二十」。
+   * 展開成「馬太福音二十八章十九到二十節」才唸得對。
+   * 詩篇的單位詞是「篇」不是「章」——這一條各 App 都踩過。
+   * ------------------------------------------------------------------ */
+
+  function cn(n) {
+    n = parseInt(n, 10);
+    var d = '零一二三四五六七八九';
+    if (isNaN(n)) return '';
+    if (n < 10) return d.charAt(n);
+    if (n < 20) return '十' + (n % 10 ? d.charAt(n % 10) : '');
+    if (n < 100) return d.charAt(Math.floor(n / 10)) + '十' + (n % 10 ? d.charAt(n % 10) : '');
+    if (n < 1000) {
+      var h = d.charAt(Math.floor(n / 100)) + '百', r = n % 100;
+      if (!r) return h;
+      if (r < 10) return h + '零' + d.charAt(r);
+      /* 一百一十九，不是一百十九——十位數在百位後面要把「一」唸出來 */
+      return h + d.charAt(Math.floor(r / 10)) + '十' + (r % 10 ? d.charAt(r % 10) : '');
+    }
+    return String(n);
+  }
+
+  function full(r) {
+    var b = r.book, unit = b.u || '章';
+    if (C.lang === 'en') {
+      var s = b.t + ' ' + r.ch;
+      if (r.v) s += ':' + r.v;
+      if (r.ch2 && r.v2) s += '-' + r.ch2 + ':' + r.v2;
+      else if (r.v2) s += '-' + r.v2;
+      else if (r.ch2) s += '-' + r.ch2;
+      return s;
+    }
+    /* 單位詞只唸一次。
+       「二到四章」，不是「二章到四章」；
+       「十九到二十節」，不是「十九節到二十節」。
+       多唸一次不算錯，但唸起來很鈍，而且一課裡會出現幾十次。 */
+    if (r.ch2 && !r.v && !r.v2) return b.t + cn(r.ch) + W.to + cn(r.ch2) + unit;
+
+    var t = b.t + cn(r.ch) + unit;
+    if (r.v) t += cn(r.v) + (r.v2 && !r.ch2 ? W.to + cn(r.v2) : '') + W.v;
+    if (r.ch2 && r.v2) t += W.to + cn(r.ch2) + unit + cn(r.v2) + W.v;
+    else if (r.ch2) t += W.to + cn(r.ch2) + unit;
+    return t;
+  }
+
+  /* ── 括號裡的出處不用唸 ──────────────────────────────────────────
+   * 講義裡到處是「……神就是愛（約壹4:8）」這種註記。
+   * 那個括號是給眼睛看的——讀者想查的時候有得查。
+   * 唸出來就變成「神就是愛，約翰一書四章八節」，句子的氣被打斷了，
+   * 而且聽的人根本記不住那一串數字。
+   *
+   * 但不是所有括號都能拿掉。「（這裡的『愛』是 agape）」是說明，
+   * 拿掉就少了一塊。所以判準是：
+   *
+   *     把括號裡的出處拿走之後，還剩下有意義的字嗎？
+   *     沒有 → 整個括號拿掉。有 → 原封不動留著。
+   *
+   * 剩下來只算這些不算數：參、見、另見、比較、又、cf.、標點、空白。
+   * -------------------------------------------------------------------- */
+
+  var FILLER = /^[\s，,、;；。・·\-–—~～和與及或]*(?:參|參看|參閱|見|另見|另參|比較|又見|又|詳|cf\.?|see|compare)?[\s，,、;；。・·\-–—~～]*$/i;
+
+  function dropParenRefs(text) {
+    text = String(text == null ? '' : text);
+    /* 全形與半形的括號都要認。不用貪婪比對——括號不會巢狀。 */
+    return text.replace(/[（(]([^（()）]*)[)）]/g, function (whole, inner) {
+      var refs = find(inner);
+      if (!refs.length) return whole;              // 裡面根本沒有出處
+      var rest = '', last = 0, i;
+      for (i = 0; i < refs.length; i++) {
+        rest += inner.slice(last, refs[i].start);
+        last = refs[i].end;
+      }
+      rest += inner.slice(last);
+      if (!FILLER.test(rest)) return whole;        // 還有話要說，留著
+      return '';
+    })
+      /* 拿掉之後會留下縫：「God is love （…），that is」變成
+         「God is love ，that is」——一個空白掉在逗號前面。
+         英文版特別明顯，中文版則會多出兩個空格。 */
+      .replace(/[ \t]+([，。、；：！？,.;:!?）)」』])/g, '$1')
+      .replace(/([（(「『])[ \t]+/g, '$1')
+      .replace(/[ \t]{2,}/g, ' ');
+  }
+
+  /* 把一段文字裡的出處通通換成口語唸法 */
+  function speak(text) {
+    text = String(text == null ? '' : text);
+    var refs = find(text);
+    if (!refs.length) return text;
+    var out = '', last = 0;
+    for (var i = 0; i < refs.length; i++) {
+      out += text.slice(last, refs[i].start) + full(refs[i]);
+      last = refs[i].end;
+    }
+    return out + text.slice(last);
+  }
+
+  /* ── 掛上 ─────────────────────────────────────────────────────────── */
+
+  function init(cfg) {
+    C = ext(ext({}, DEF), cfg || {});
+    load(C.lang);
+    return API;
+  }
+
+  function setLang(lang) { C.lang = lang; load(lang); }
+
+  var API = {
+    init: init, setLang: setLang,
+    find: find, parse: parse, book: book,
+    linkify: linkify, speak: speak, format: full, open: open,
+    dropParenRefs: dropParenRefs,
+    cn: cn,
+    books: function () { return T; },
+    count: function () { return T ? T.length : 0; },
+    version: '1.1.0'
+  };
+  return API;
+})();
+
+if (typeof module !== 'undefined' && module.exports) module.exports = REF321;
+
+/* ============================================================================
+ * 321 App Core — 朗讀模組  tts.js  v1.4.0
+ * ----------------------------------------------------------------------------
+ * 這一份把「朗讀」這一整組功能從創世記講義 App 抽出來，收成一個可以掛到任何
+ * 321 App 上的模組。抽出來的理由很實際：這一組功能在五個 App 裡各自被重新做過
+ * 一次（破音字校正 4 次、朗讀跟讀 4 次、串流切塊 3 次），而且每一次都重新踩了
+ * 同一批坑。
+ *
+ * 包含的功能
+ *   · 串流播放      先抓兩段就開播，邊播邊抓，不必等整課下載完
+ *   · 逐句標示      播到哪一句，畫面上那一句就亮起來
+ *   · 自動跟讀      畫面跟著捲，使用者自己捲過之後先不搶
+ *   · 離線          音檔逐段存 IndexedDB，可整課預先下載
+ *   · 背景播放      MediaSession ＋ Wake Lock ＋ 看門狗（被打斷會自己接回來）
+ *   · 冷啟動        開機預熱 ＋ 退避重試，第一次朗讀不會掉到機器音
+ *   · 破音字        一張表，繁體 pattern 自動展開簡體
+ *   · 重繪重綁      畫線／換色／寫筆記重繪之後，標示會自己回到原位
+ *   · 開始暫停停止  三顆按鈕各按各的，不是一顆切換
+ *   · 停在哪裡      停止／暫停時記住位置，下次接著讀；也可以指定從第幾句起
+ *
+ * 語法：ES5。不是為了復古，是為了讓 WPS WebView 那幾支 App（空中團契、晨讀321）
+ * 也能共用同一份——核心只做一次決定，全家都受益。
+ *
+ * 掛法：見 README.md 的「宿主契約」。核心不認識任何一個 App 的資料結構，
+ * App 專屬的部分全部由 cfg 的幾個函式提供。
+ * ==========================================================================*/
+
+var TTS321 = (function () {
+  'use strict';
+
+  /* ── 預設值 ────────────────────────────────────────────────────────── */
+
+  var DEF = {
+    worker: '',
+    db: 'r321_tts',
+    store: 'a',
+    voices: {},
+    defaultVoice: '',
+    lang: 'zh-TW',
+    /* 中文一句約 110 字；英文一句長得多，所以每個 App 自己給 */
+    chunk: { punct: '。！？；\n', min: 110, max: 300 },
+    sil: { s: 140, c: 140, e: 260 },
+    say: [],              // 破音字修正 [[RegExp, '替代字'], …]
+    t2s: null,            // 繁→簡：單字表 {繁:簡} 或 fn(str)->str；給了就自動展開 say 的簡體版
+    script: null,         // 'tc' | 'sc' | fn()->'tc'|'sc'；知道是哪一套就只產那一套
+    preStart: 2,          // 抓到幾段就開播
+    preAhead: 8,          // 往前預抓幾段
+    parallel: 4,          // 同時幾個請求
+    retry: [800, 1600],   // 退避重試（毫秒）；Worker 冷啟動用
+    holdScroll: 6000,     // 使用者自己捲過之後，幾毫秒內不搶畫面
+    /* 停在哪裡：存進設定的哪一格。設成 '' 就不記。
+       這一格要加進 ST321 的 defaults（唯一欄位清單），不要另外開一個
+       localStorage key——不然匯出備份的時候會漏掉，換一台裝置就沒了。 */
+    bookmarkKey: 'ttsMark',
+    keyFor: null,         // fn(unit) -> string  這一句在這一頁的身分證（畫線／書籤用同一把）
+    labels: {
+      bar: '朗讀中', buffering: '緩衝中…', prev: '上一句', next: '下一句',
+      pause: '暫停', resume: '繼續', stop: '停止', follow: '自動捲動',
+      resumeFrom: '從上次停的地方繼續（第 {n} 句）',
+      startOver: '從頭開始讀',
+      followOn: '朗讀時自動捲動', followOff: '不自動捲動，畫面由你控制',
+      fallback: '真人語音連不上，改用裝置語音',
+      nosupport: '這台裝置不支援朗讀'
+    },
+    media: null,          // { artist, album, icon } 鎖屏／耳機／車機上顯示什麼
+    settings: null,       // { get: fn -> {human,voice,rate,follow}, save: fn }
+    elFor: null,          // fn(unit) -> DOM element | null
+    stillHere: null,      // fn(scope) -> bool   還在同一頁嗎
+    clean: null,          // fn(text) -> text    App 專屬的朗讀前清理
+    toast: null,          // fn(msg)
+    onItem: null          // fn(index, unit)     每換一句回呼（選用）
+  };
+
+  var C = null;                       // 生效中的設定
+  var SPK = { on: false, tok: 0 };    // 播放狀態
+  var PL = null;                      // 串流佇列
+  var AUP = null;                     // 兩個 <audio> 輪流用
+  var LAST = [];                      // 目前標示中的元素
+  var SAY = [];                       // 展開後的破音字表
+  var BAR = null;
+
+  /* ── 小工具 ────────────────────────────────────────────────────────── */
+
+  function ext(a, b) { for (var k in b) if (b.hasOwnProperty(k)) a[k] = b[k]; return a; }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  function set() { return (C && C.settings && C.settings.get && C.settings.get()) || {}; }
+  function save() { if (C && C.settings && C.settings.save) C.settings.save(); }
+  function toast(m) { if (C && C.toast) C.toast(m); }
+  function L(k) { return (C && C.labels && C.labels[k]) || DEF.labels[k] || ''; }
+
+  function voiceName() {
+    var s = set(), v = C.voices[s.voice] || C.voices[C.defaultVoice];
+    if (!v) { for (var k in C.voices) { v = C.voices[k]; break; } }
+    return v ? v.name : '';
+  }
+  function rateAttr() {
+    var r = set().rate || 0;
+    return (r >= 0 ? '+' : '') + (r * 5) + '%';
+  }
+
+  /* ── 破音字表：繁體 pattern 自動展開簡體 ──────────────────────────────
+   * 學神神學的教訓：SAYFIX 全是繁體 pattern，簡體模式下畫面文字已經是簡體，
+   * 整張表比對不到——902 處校正有 733 處對簡體讀者完全失效。
+   * 核心在這裡做掉，App 只要給一張繁→簡單字表（make_scmap.py 本來就有）。
+   * ------------------------------------------------------------------- */
+
+  /* C.t2s 可以是一張單字表 {繁:簡}，也可以是宿主自己的轉換函式（詞組表那種）。 */
+  function t2s(str) {
+    if (!C.t2s) return str;
+    if (typeof C.t2s === 'function') { try { return C.t2s(str); } catch (e) { return str; } }
+    var out = '', i;
+    for (i = 0; i < str.length; i++) out += (C.t2s[str.charAt(i)] || str.charAt(i));
+    return out;
+  }
+
+  /* 這裡有一個很容易漏掉的坑。
+   *
+   * 有些規則的 pattern 繁簡同形，但**替代字不同形**——例如
+   *
+   *     重生 → 蟲生（繁）    重生 → 虫生（簡）
+   *
+   * 兩條都加的話，pattern 一模一樣，先加的那一條永遠先換掉，
+   * 後面那一條再也找不到東西。簡體讀者拿到的就是「蟲生」——
+   * 唸得出來，但那是繁體字混進簡體版裡。
+   *
+   * 所以要知道現在是繁是簡。C.script 給了就只產那一套；
+   * 沒給就兩套都產（舊行為，不會弄壞既有的 App）。
+   * 切換語言之後記得叫一次 TTS321.rebuildSay()。
+   * ------------------------------------------------------------------- */
+
+  function script() {
+    if (!C || !C.script) return '';
+    try { return typeof C.script === 'function' ? C.script() : C.script; }
+    catch (e) { return ''; }
+  }
+
+  function buildSay() {
+    SAY = [];
+    var seen = {}, sc = script();
+    function add(re, to) {
+      var k = String(re) + '\u0000' + to;
+      if (seen[k]) return;
+      seen[k] = 1; SAY.push([re, to]);
+    }
+    function toSC(re, to) {
+      var srcS = t2s(re.source), toS = t2s(to);
+      return [new RegExp(srcS, re.flags || 'g'), toS];
+    }
+    for (var i = 0; i < (C.say || []).length; i++) {
+      var pair = C.say[i], re = pair[0], to = pair[1], v;
+      if (sc === 'sc' && C.t2s && re instanceof RegExp) {
+        v = toSC(re, to); add(v[0], v[1]);          // 簡體版只要簡體那一套
+        continue;
+      }
+      add(re, to);
+      if (sc === 'tc') continue;                    // 繁體版只要繁體那一套
+      if (C.t2s && re instanceof RegExp) {          // 不知道是哪一套：兩套都上
+        v = toSC(re, to);
+        if (v[0].source !== re.source || v[1] !== to) add(v[0], v[1]);
+      }
+    }
+  }
+
+  /* ── 送去合成之前的整理 ───────────────────────────────────────────── */
+
+  function sanitize(t) {
+    t = String(t == null ? '' : t).replace(/<[^>]+>/g, ' ');
+    t = t.replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&')
+         .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"');
+    if (C.clean) t = C.clean(t);                    // App 專屬清理（原文、括號出處…）
+    for (var i = 0; i < SAY.length; i++) t = t.replace(SAY[i][0], SAY[i][1]);
+    t = t.replace(/\s+([，。！？；、,.!?;])/g, '$1');
+    return t.replace(/\s{2,}/g, ' ').replace(/^\s+|\s+$/g, '');
+  }
+
+  function chunks(t) {
+    t = sanitize(t);
+    if (!t) return [];
+    var out = [], buf = '', i, ch, cfg = C.chunk;
+    for (i = 0; i < t.length; i++) {
+      ch = t.charAt(i); buf += ch;
+      if (cfg.punct.indexOf(ch) >= 0 && buf.length >= cfg.min) { out.push(buf); buf = ''; }
+    }
+    if (buf.replace(/^\s+|\s+$/g, '')) out.push(buf);
+    var fin = [];
+    for (i = 0; i < out.length; i++) {
+      var s = out[i];
+      while (s.length > cfg.max) { fin.push(s.slice(0, cfg.max)); s = s.slice(cfg.max); }
+      if (s) fin.push(s);
+    }
+    return fin.length ? fin : [t];
+  }
+
+  /* ── 原文（希伯來文／希臘文）只唸一遍 ──────────────────────────────
+   * 中文語音唸不出原文。後面若跟著括號裡的拼音，就只唸那個拼音；
+   * 沒有拼音就整段略過。略過之後還要把「原文是（）。」這種懸在半空的
+   * 括號與接續詞一起收乾淨——不收的話會唸成「原文是　。」。
+   *
+   * 這一段本來只在創世記 App 裡；啟示錄那一版只把希臘文拿掉，
+   * 留下一對空括號。收進核心之後兩邊都對。
+   * ------------------------------------------------------------------ */
+
+  var ORIG_CH = '\u0590-\u05FF\u0370-\u03FF\u1F00-\u1FFF';
+  var ORIG_RUN = '[' + ORIG_CH + '][' + ORIG_CH + '\\s\'\u2019\\-\u05be\u05f3\u05f4\u00b7]*';
+  var RE_ORIG_ROMAN = new RegExp(
+    ORIG_RUN + '\\s*[（(]\\s*([A-Za-z][A-Za-z\'\u2019\u0101\u0113\u012b\u014d\u016b\\- ]*)\\s*[）)]', 'g');
+  var RE_ORIG_RUN = new RegExp(ORIG_RUN, 'g');
+
+  function stripOriginal(t) {
+    t = String(t == null ? '' : t);
+    t = t.replace(RE_ORIG_ROMAN, ' $1 ').replace(RE_ORIG_RUN, '\u0000');
+    t = t.replace(/[（(]\s*\u0000\s*[）)]/g, '\u0000');
+    t = t.replace(/[是叫作為的]?\s*\u0000\s*(?=[，。；、！？])/g, '');
+    t = t.replace(/\s*\u0000\s*/g, ' ');
+    return t.replace(/[（(]\s*[）)]/g, ' ');
+  }
+
+  /* 送去合成的字 ≠ 畫面上的字。
+     畫面要留著原文、書名號、8:28 這些；送去唸的要換成「八章二十八節」。
+     核心在這裡統一做，宿主只要給畫面上的字就好——
+     否則每個 App 都要自己記得先 sanitize 一次，漏掉就整段原文照著亂唸。 */
+  function speechText(u) {
+    if (typeof u === 'string') return sanitize(u);
+    if (u._s == null) u._s = sanitize(u.t);
+    return u._s;
+  }
+
+  /* ── IndexedDB 音檔快取 ───────────────────────────────────────────── */
+
+  function db(cb) {
+    try {
+      if (!window.indexedDB) return cb(null);
+      var r = indexedDB.open(C.db, 1);
+      r.onupgradeneeded = function () {
+        try {
+          if (!r.result.objectStoreNames.contains(C.store)) r.result.createObjectStore(C.store);
+        } catch (e) {}
+      };
+      r.onsuccess = function () { cb(r.result); };
+      r.onerror = function () { cb(null); };
+    } catch (e) { cb(null); }
+  }
+
+  function cacheGet(k, cb) {
+    db(function (d) {
+      if (!d) return cb(null);
+      try {
+        var q = d.transaction(C.store).objectStore(C.store).get(k);
+        q.onsuccess = function () { cb(q.result || null); };
+        q.onerror = function () { cb(null); };
+      } catch (e) { cb(null); }
+    });
+  }
+
+  function cachePut(k, blob) {
+    db(function (d) {
+      if (!d) return;
+      try { d.transaction(C.store, 'readwrite').objectStore(C.store).put(blob, k); } catch (e) {}
+    });
+  }
+
+  function cacheCount(cb) {
+    db(function (d) {
+      if (!d) return cb(0);
+      try {
+        var q = d.transaction(C.store).objectStore(C.store).count();
+        q.onsuccess = function () { cb(q.result || 0); };
+        q.onerror = function () { cb(0); };
+      } catch (e) { cb(0); }
+    });
+  }
+
+  /* 這幾段已經下載了幾段？——一次交易查完，不逐段開連線。
+     用在「預先下載」按鈕上：進頁時要能說出「已有 12/45」。 */
+  function cacheHave(units, cb) {
+    units = units || [];
+    if (!units.length) return cb(0, 0);
+    var pre = voiceName() + '|' + rateAttr() + '|';
+    db(function (d) {
+      if (!d) return cb(0, units.length);
+      try {
+        var st = d.transaction(C.store).objectStore(C.store);
+        var n = 0, done = 0, i;
+        for (i = 0; i < units.length; i++) {
+          (function (u) {
+            var k = pre + speechText(u);
+            var q = st.getKey ? st.getKey(k) : st.count(k);
+            q.onsuccess = function () {
+              if (q.result !== undefined && q.result !== 0) n++;
+              if (++done === units.length) cb(n, units.length);
+            };
+            q.onerror = function () { if (++done === units.length) cb(n, units.length); };
+          })(units[i]);
+        }
+      } catch (e) { cb(0, units.length); }
+    });
+  }
+
+  function cacheClear(cb) {
+    db(function (d) {
+      if (!d) return cb && cb();
+      try {
+        var q = d.transaction(C.store, 'readwrite').objectStore(C.store).clear();
+        q.onsuccess = function () { cb && cb(); };
+        q.onerror = function () { cb && cb(); };
+      } catch (e) { cb && cb(); }
+    });
+  }
+
+  /* ── 取音檔：快取 → Worker（退避重試）───────────────────────────────
+   * 領導力 App 的教訓：一個 session 裡「只有第一次」會失敗，換語言再換回來就好——
+   * 那是 Worker 冷啟動的指紋，不是哪個語音的 bug。解法是開機預熱 ＋ 退避重試。
+   * ------------------------------------------------------------------- */
+
+  function post(text) {
+    return fetch(C.worker, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        voice: voiceName(), rate: rateAttr(),
+        sil: C.sil.s, silc: C.sil.c, sile: C.sil.e, text: text
+      })
+    }).then(function (res) {
+      if (!res.ok) throw new Error('TTS ' + res.status);
+      return res.blob();
+    });
+  }
+
+  function fetchAudio(piece) {
+    var key = voiceName() + '|' + rateAttr() + '|' + piece;
+    return new Promise(function (resolve, reject) {
+      cacheGet(key, function (hit) {
+        if (hit) return resolve(hit);
+        var n = 0;
+        function attempt() {
+          post(piece).then(function (blob) {
+            cachePut(key, blob); resolve(blob);
+          }, function (err) {
+            if (n >= C.retry.length) return reject(err);
+            var wait = C.retry[n++];
+            setTimeout(attempt, wait);
+          });
+        }
+        attempt();
+      });
+    });
+  }
+
+  /* 開機就先戳一下，把冷啟動的代價吃在使用者按下播放之前 */
+  function warmUp() {
+    if (!C || !C.worker) return;
+    /* 離線時不必預熱——Worker 也連不上，只會在主控台留下一筆紅字 */
+    try { if (navigator.onLine === false) return; } catch (e) {}
+    try { post('.').then(function () {}, function () {}); } catch (e) {}
+  }
+
+  /* ── 兩個 <audio> 輪流接力 ────────────────────────────────────────── */
+
+  var SILENT = 'data:audio/mp3;base64,//uQxAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAACcQCA';
+
+  function pair() {
+    if (!AUP) {
+      AUP = [];
+      for (var i = 0; i < 2; i++) {
+        var a = new Audio();
+        a.preload = 'auto'; a.loop = false;
+        a.setAttribute('playsinline', '');
+        a.addEventListener('play', function () { mediaState('playing'); });
+        a.addEventListener('pause', function () { if (!SPK.on) mediaState('paused'); });
+        AUP.push(a);
+      }
+    }
+    return AUP;
+  }
+
+  /* ── MediaSession（鎖屏控制）與 Wake Lock ─────────────────────────── */
+
+  var wake = null;
+
+  /* 鎖屏上的封面：宿主沒指定就用頁面自己的 apple-touch-icon／icon */
+  function appIcon() {
+    if (C.media && C.media.icon) return C.media.icon;
+    try {
+      var l = document.querySelector('link[rel="apple-touch-icon"], link[rel="icon"]');
+      return (l && l.getAttribute('href')) || '';
+    } catch (e) { return ''; }
+  }
+
+  /* Wake Lock 會被系統收回——螢幕一鎖就收，分頁一藏也收。
+     收回之後 wake 這個變數還在，看起來像還握著，其實早就沒了。
+     所以要看 released，而且回到前景時要再要一次。 */
+  function wakeGet() {
+    try {
+      if (!navigator.wakeLock || !navigator.wakeLock.request) return;
+      if (wake && !wake.released) return;
+      navigator.wakeLock.request('screen').then(function (w) {
+        wake = w;
+        try { w.addEventListener('release', function () { wake = null; }); } catch (e) {}
+      }, function () { wake = null; });
+    } catch (e) {}
+  }
+
+  /* 鎖屏上要看得到「唸到哪裡了」。每換一句就更新一次。 */
+  function mediaNow(k, total) {
+    try {
+      if (!navigator.mediaSession) return;
+      var md = navigator.mediaSession.metadata;
+      if (md && total) md.artist = (C.media && C.media.artist ? C.media.artist + '　·　' : '') +
+                                   'Sentence ' + (k + 1) + ' / ' + total;
+      if (navigator.mediaSession.setPositionState) {
+        navigator.mediaSession.setPositionState({
+          duration: total || 0, position: Math.min(k, total || 0), playbackRate: 1
+        });
+      }
+    } catch (e) {}
+  }
+
+  function mediaSetup(title) {
+    try {
+      if (!navigator.mediaSession || !window.MediaMetadata) return;
+      var m = C.media || {}, ic = appIcon();
+      navigator.mediaSession.metadata = new window.MediaMetadata({
+        title: title || L('bar'),
+        artist: m.artist || '',
+        album: m.album || '',
+        artwork: ic ? [{ src: ic, sizes: '180x180', type: 'image/png' }] : []
+      });
+      navigator.mediaSession.setActionHandler('play', function () { if (SPK.pause) togglePause(); });
+      navigator.mediaSession.setActionHandler('pause', function () { if (!SPK.pause) togglePause(); });
+      navigator.mediaSession.setActionHandler('stop', stop);
+      navigator.mediaSession.setActionHandler('previoustrack', function () { step(-1); });
+      navigator.mediaSession.setActionHandler('nexttrack', function () { step(1); });
+      /* 車機／耳機只給快轉鍵的，也讓它當上下一句用 */
+      navigator.mediaSession.setActionHandler('seekbackward', function () { step(-1); });
+      navigator.mediaSession.setActionHandler('seekforward', function () { step(1); });
+    } catch (e) {}
+    wakeGet();
+  }
+
+  function mediaState(s) {
+    try { if (navigator.mediaSession) navigator.mediaSession.playbackState = s; } catch (e) {}
+  }
+
+  function wakeRelease() {
+    try { if (wake) { wake.release(); wake = null; } } catch (e) {}
+  }
+
+  /* ── 背景播放的看門狗 ─────────────────────────────────────────────
+   * 接力本身是靠 <audio> 的 ended 事件走的，不靠計時器，所以切到背景
+   * 之後計時器被節流也不會斷。真正會斷的是另外三件事：
+   *
+   *   ① iOS 只認「手勢當下」play() 過的元素。兩個播放器輪流接力，
+   *      其中一個沒被解鎖的話，在前景看不出來（使用者的觸碰隨時在解鎖），
+   *      一切到背景就只有一半的句子出得了聲。
+   *      → play() 那一刻兩個都餵一段無聲檔解鎖（這一段本來就有）。
+   *
+   *   ② 電話、Siri、鬧鐘打斷之後，元素被系統按了暫停，而且不會自己回來。
+   *      畫面上還顯示「朗讀中」，耳機裡什麼都沒有。
+   *
+   *   ③ 切到背景的那一瞬間剛好在換句，新元素的 play() 被擋掉。
+   *
+   * ②③ 的指紋一模一樣：**我們認為正在播，可是元素是停的**。
+   * 所以不必分辨是哪一種，看到這個狀態就推一下。
+   *
+   * 每秒一次。背景節流會把它拉長到幾秒一次——那正好，反正是救援，
+   * 不是主線。
+   * ------------------------------------------------------------------- */
+
+  var WD = null;
+
+  function current() {
+    try { return PL ? pair()[PL.cur] : null; } catch (e) { return null; }
+  }
+
+  function nudge() {
+    if (!SPK.on || SPK.pause || SPK.buffering) return;
+    var a = current();
+    if (!a || !a.src || a.ended) return;
+    if (!a.paused) { SPK.stall = 0; return; }
+    SPK.stall = (SPK.stall || 0) + 1;
+    /* 連續推了十幾秒還是不動，就別再推了——再推下去只是在主控台刷紅字。
+       使用者回到前景按一下播放鍵，一切照常。 */
+    if (SPK.stall > 15) return;
+    try { var p = a.play(); if (p && p['catch']) p['catch'](function () {}); } catch (e) {}
+    mediaState('playing');
+  }
+
+  function watch(on) {
+    try { if (WD) { clearInterval(WD); WD = null; } } catch (e) {}
+    if (on) { try { WD = setInterval(nudge, 1000); } catch (e) {} }
+  }
+
+  var bgBound = false;
+  function bindBackground() {
+    if (bgBound) return;
+    bgBound = true;
+    try {
+      document.addEventListener('visibilitychange', function () {
+        if (document.hidden) return;
+        if (!SPK.on || SPK.pause) return;
+        wakeGet();        // 藏起來的時候被系統收回了，回來要再要一次
+        SPK.stall = 0;    // 回到前景重新給它機會
+        nudge();
+      });
+    } catch (e) {}
+  }
+
+  /* ── 逐句標示與跟讀 ───────────────────────────────────────────────
+   * 手動捲動偵測不可以用 scroll 事件——自己的 smooth scroll 會觸發它，
+   * 於是「使用者捲過了」永遠成立，跟讀就再也不動了。改聽真正的輸入意圖事件。
+   * ------------------------------------------------------------------- */
+
+  function clearMark() {
+    for (var i = 0; i < LAST.length; i++) {
+      try { LAST[i].classList.remove('spk-now'); } catch (e) {}
+    }
+    LAST = [];
+  }
+
+  function mark(unit) {
+    if (!unit || !PL) return;
+    if (C.stillHere && !C.stillHere(PL.scope)) return;   // 不在這一頁就不動畫面
+    clearMark();
+    var els = C.elFor ? C.elFor(unit) : (unit.el || null);
+    if (!els) return;
+    if (!(els instanceof Array)) els = [els];
+    if (!els.length) return;
+
+    /* 收起來的摺疊區塊，讀到就打開 */
+    try {
+      var dt = els[0].closest && els[0].closest('details');
+      if (dt && !dt.open) dt.open = true;
+    } catch (e) {}
+
+    for (var i = 0; i < els.length; i++) els[i].classList.add('spk-now');
+    LAST = els;
+
+    if (set().follow === 0) return;
+    if (Date.now() < (SPK.hold || 0)) return;
+    try { els[0].scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+    catch (e) { try { els[0].scrollIntoView(); } catch (e2) {} }
+  }
+
+  function bindIntent() {
+    var evs = ['wheel', 'touchstart', 'touchmove', 'pointerdown'];
+    for (var i = 0; i < evs.length; i++) {
+      window.addEventListener(evs[i], function () {
+        if (SPK.on) SPK.hold = Date.now() + C.holdScroll;
+      }, { passive: true });
+    }
+    window.addEventListener('keydown', function (e) {
+      if (!SPK.on) return;
+      var k = e.key;
+      if (k === 'ArrowUp' || k === 'ArrowDown' || k === 'PageUp' || k === 'PageDown' ||
+          k === 'Home' || k === 'End' || k === ' ') SPK.hold = Date.now() + C.holdScroll;
+    });
+  }
+
+  /* 畫面重繪之後把標示點回原位。
+     畫線／換色／寫筆記都會整個重繪，舊元素失效，不重綁就再也標不回來。 */
+  function rebind() {
+    if (!SPK.on || !PL) return;
+    var u = PL.units[PL.i];
+    if (!u) return;
+    var hold = SPK.hold;
+    SPK.hold = Date.now() + 1;      // 重綁不搶畫面
+    mark(u);
+    SPK.hold = hold;
+  }
+
+  /* ── 控制列 ───────────────────────────────────────────────────────── */
+
+  function drawBar() {
+    if (!SPK.on) { if (BAR) { BAR.parentNode && BAR.parentNode.removeChild(BAR); BAR = null; } return; }
+    if (!BAR) {
+      BAR = document.createElement('div');
+      BAR.id = 'spkbar'; BAR.className = 'spkbar';
+      document.body.appendChild(BAR);
+      BAR.addEventListener('click', function (e) {
+        var a = e.target.getAttribute && e.target.getAttribute('data-a');
+        if (a === 'prev') step(-1);
+        else if (a === 'next') step(1);
+        else if (a === 'pause') togglePause();
+        else if (a === 'stop') stop();
+        else if (a === 'follow') toggleFollow();
+      });
+    }
+    var st = SPK.buffering ? '<span class="pv">' + esc(L('buffering')) + '</span>'
+      : (SPK.total ? '<span class="pv">' + ((SPK.i || 0) + 1) + '/' + SPK.total + '</span>' : '');
+    /* 只要這一輪真的標示得到畫面上的元素，就該有「跟讀」開關——
+       同一支 App 可能一頁有句子結構、另一頁沒有（整頁唸完那種），
+       所以要問這一輪的第一個單位，不是問宿主有沒有給 elFor。 */
+    var canFollow = false;
+    try {
+      var u0 = PL && PL.units && PL.units[0];
+      if (u0) {
+        var e0 = C.elFor ? C.elFor(u0) : u0.el;
+        canFollow = !!(e0 && (!(e0 instanceof Array) || e0.length));
+      }
+    } catch (e) { canFollow = false; }
+    var fol = canFollow
+      ? '<button data-a="follow" class="' + (set().follow === 0 ? '' : 'on') + '" title="' +
+        esc(L('follow')) + '">' + (set().follow === 0 ? '⇕' : '⇳') + '</button>' : '';
+    BAR.innerHTML = '<span class="dot"></span><b>' + esc(SPK.title) + '</b>' + st +
+      '<button data-a="prev" title="' + esc(L('prev')) + '">⏮</button>' +
+      '<button data-a="pause" title="' + esc(SPK.pause ? L('resume') : L('pause')) + '">' +
+      (SPK.pause ? '▶' : '⏸') + '</button>' +
+      '<button data-a="next" title="' + esc(L('next')) + '">⏭</button>' +
+      fol +
+      '<button data-a="stop" title="' + esc(L('stop')) + '">✕</button>';
+  }
+
+  /* ── 串流播放 ─────────────────────────────────────────────────────── */
+
+  function pump() {
+    if (!PL || PL.tok !== SPK.tok) return;
+    var end = Math.min(PL.units.length, Math.max(C.preStart, PL.i + 1 + C.preAhead));
+    for (var k = PL.i; k < end && PL.running < C.parallel; k++) {
+      if ((PL.try[k] || 0) < 3) grab(k);
+    }
+  }
+
+  function grab(k) {
+    if (!PL || PL.tok !== SPK.tok) return;
+    if (PL.blobs[k] || PL.pend[k]) return;
+    PL.pend[k] = 1; PL.running++;
+    var my = SPK.tok;
+    fetchAudio(speechText(PL.units[k])).then(function (b) {
+      if (PL && PL.tok === my) PL.blobs[k] = b;
+    }, function () {
+      if (PL && PL.tok === my) { PL.fail++; PL.try[k] = (PL.try[k] || 0) + 1; }
+    })['then'](function () {
+      if (!PL || PL.tok !== my) return;
+      PL.pend[k] = 0; PL.running--;
+      var n = 0;
+      for (var i = 0; i < PL.blobs.length; i++) if (PL.blobs[i]) n++;
+      SPK.prep = n;
+      drawBar(); pump();
+    });
+  }
+
+  function playAt(k) {
+    if (!PL || PL.tok !== SPK.tok) return;
+    if (k >= PL.units.length) return stop({ done: true });
+    var b = PL.blobs[k];
+    if (!b) {
+      if ((PL.try[k] || 0) >= 3) {          // 這一段真的抓不到，跳過去，不要卡住整課
+        PL.i = k; SPK.i = k; return playAt(k + 1);
+      }
+      SPK.buffering = true; SPK.i = k; drawBar(); pump();
+      return setTimeout(function () { playAt(k); }, 150);
+    }
+    /* 還在緩衝的時候按了暫停：音檔一到就照放不誤，暫停等於沒按。
+       使用者會以為是當掉了。 */
+    if (SPK.pause) { SPK.buffering = false; PL.i = k; SPK.i = k; drawBar(); return; }
+    SPK.buffering = false;
+    PL.i = k; SPK.i = k;
+    var els = pair(), a = els[PL.cur];
+    a.src = URL.createObjectURL(b);
+    a.onended = function () {
+      if (!PL || PL.tok !== SPK.tok) return;
+      try { URL.revokeObjectURL(a.src); } catch (e) {}
+      PL.cur = 1 - PL.cur;
+      playAt(k + 1);
+    };
+    a.onerror = function () {
+      if (PL && PL.tok === SPK.tok) { PL.cur = 1 - PL.cur; playAt(k + 1); }
+    };
+    var p = a.play(); if (p && p['catch']) p['catch'](function () {});
+    mark(PL.units[k]);
+    mediaNow(k, PL.units.length);
+    if (C.onItem) { try { C.onItem(k, PL.units[k]); } catch (e) {} }
+    drawBar(); pump();
+    var nb = PL.blobs[k + 1];
+    if (nb) {
+      var nx = els[1 - PL.cur];
+      try { nx.src = URL.createObjectURL(nb); nx.load(); } catch (e) {}
+    }
+  }
+
+  function waitAndStart() {
+    var my = SPK.tok, st = (PL && PL.i) || 0;
+    (function tick() {
+      if (!PL || PL.tok !== my || !SPK.on) return;
+      var ready = PL.blobs[st] && (PL.blobs[st + 1] || PL.units.length < st + 2);
+      if (ready) return playAt(st);
+      if (PL.fail >= 3 && !PL.blobs[st]) {
+        var txt = [];
+        for (var i = st; i < PL.units.length; i++) txt.push(PL.units[i].t);
+        stop({ forget: true }); toast(L('fallback'));
+        return native(txt.join('\n'));
+      }
+      setTimeout(tick, 120);
+    })();
+  }
+
+  /* ── 裝置內建語音（離線／Worker 掛掉時的退路）──────────────────────── */
+
+  function native(t) {
+    if (!window.speechSynthesis) return toast(L('nosupport'));
+    try { speechSynthesis.cancel(); } catch (e) {}
+    var u = new window.SpeechSynthesisUtterance(sanitize(t));
+    u.lang = C.lang;
+    u.rate = 0.94 + (set().rate || 0) * 0.05;
+    try {
+      var vs = speechSynthesis.getVoices(), base = C.lang.split('-')[0], v = null, i;
+      for (i = 0; i < vs.length; i++) if (vs[i].lang.replace('_', '-') === C.lang) { v = vs[i]; break; }
+      if (!v) for (i = 0; i < vs.length; i++) if (vs[i].lang.indexOf(base) === 0) { v = vs[i]; break; }
+      if (v) u.voice = v;
+    } catch (e) {}
+    try { speechSynthesis.speak(u); } catch (e) {}
+  }
+
+  /* ── 停在哪裡 ───────────────────────────────────────────────────────
+   * 按停止多半不是「不要了」，是「先到這裡，等一下接著讀」。
+   * 所以停止的時候要把位置留下來——而且要留在設定裡，跟著備份走，
+   * 不要另外開一個 localStorage key（匯出的時候會漏掉，換一台裝置就沒了）。
+   *
+   * 留兩份：第幾句，加上那一句的身分證。
+   *   · 只留第幾句 → 講義改過一次（多一段、少一段），第 37 句就不是原來那句
+   *   · 只留身分證 → 宿主沒給 keyFor 的話什麼都沒有
+   * 回來的時候先認身分證，認不出來才退回第幾句。
+   * ------------------------------------------------------------------- */
+
+  function unitKey(u) {
+    if (!u) return '';
+    if (C && C.keyFor) { try { return String(C.keyFor(u) || ''); } catch (e) { return ''; } }
+    return String(u.key || u.id || '');
+  }
+
+  function bmSave() {
+    if (!C || !C.bookmarkKey || !PL || !PL.units.length) return null;
+    var i = Math.max(0, Math.min(PL.units.length - 1, PL.i || 0));
+    var b = {
+      scope: PL.scope || '', i: i, total: PL.units.length,
+      key: unitKey(PL.units[i]), title: SPK.title || '', at: Date.now()
+    };
+    try { var s = set(); s[C.bookmarkKey] = b; save(); } catch (e) {}
+    return b;
+  }
+
+  function bookmark(scope) {
+    if (!C || !C.bookmarkKey) return null;
+    var b = null;
+    try { b = set()[C.bookmarkKey]; } catch (e) { b = null; }
+    if (!b || typeof b.i !== 'number') return null;
+    /* 同一支 App 有好幾頁，書籤只對得上自己那一頁。
+       沒給 scope 就不挑——宿主自己知道它在問哪一頁。 */
+    if (scope != null && String(scope) !== String(b.scope == null ? '' : b.scope)) return null;
+    return b;
+  }
+
+  function clearBookmark() {
+    if (!C || !C.bookmarkKey) return;
+    try {
+      var s = set();
+      if (s[C.bookmarkKey] == null) return;
+      s[C.bookmarkKey] = null;
+      save();
+    } catch (e) {}
+  }
+
+  function keyIndex(units, key) {
+    key = String(key == null ? '' : key);
+    if (!key) return -1;
+    for (var i = 0; i < units.length; i++) if (unitKey(units[i]) === key) return i;
+    return -1;
+  }
+
+  function bmIndex(units, b) {
+    if (!b || !units || !units.length) return 0;
+    var k = keyIndex(units, b.key);
+    if (k >= 0) return k;
+    k = parseInt(b.i, 10) || 0;
+    return Math.max(0, Math.min(units.length - 1, k));
+  }
+
+  /* 這一輪要從第幾句起。三種說法，優先序由明確到含糊。 */
+  function startIndex(units, opts) {
+    var n = 0;
+    if (opts.from != null && opts.from !== 'bookmark') n = parseInt(opts.from, 10) || 0;
+    else if (opts.at != null) { n = keyIndex(units, opts.at); if (n < 0) n = 0; }
+    else if (opts.resume || opts.from === 'bookmark') n = bmIndex(units, bookmark(opts.scope));
+    if (n < 0) n = units.length + n;               // -1 = 最後一句
+    return Math.max(0, Math.min(units.length - 1, n));
+  }
+
+  /* ── 對外 API ─────────────────────────────────────────────────────── */
+
+  function play(units, opts) {
+    if (!C) throw new Error('TTS321.init() 還沒呼叫');
+    opts = opts || {};
+    units = (units || []).filter(function (u) { return u && speechText(u); });
+    if (!units.length) return;
+
+    var st = startIndex(units, opts);
+    if (!set().human) {
+      /* 裝置語音沒有「第幾句」的概念，但「從第幾句開始」還是要算數——
+         從 st 那一句起串起來唸就好。 */
+      var txt = [];
+      for (var i = st; i < units.length; i++) txt.push(units[i].t);
+      return native(txt.join('\n'));
+    }
+    stop();
+    var my = ++SPK.tok;
+    SPK = {
+      on: true, pause: false, tok: my, i: st, prep: 0,
+      total: units.length, title: opts.title || L('bar'), hold: 0
+    };
+    PL = {
+      tok: my, units: units, blobs: [], pend: [], try: [], i: st, cur: 0,
+      scope: opts.scope || null, fail: 0, running: 0
+    };
+    var els = pair(), k;
+    for (k = 0; k < els.length; k++) {
+      try { els[k].pause(); els[k].removeAttribute('src'); els[k].load(); } catch (e) {}
+    }
+    SPK.stall = 0;
+    watch(true);
+    /* iOS 只認手勢當下的 play()：趁這一刻把兩個播放器都解鎖。
+       這一步是背景播放的命根子——少了它，切到背景之後只有一半的句子
+       出得了聲，而且在前景永遠測不出來（使用者的觸碰隨時都在解鎖）。 */
+    for (k = 0; k < els.length; k++) {
+      try {
+        els[k].src = SILENT;
+        var p = els[k].play(); if (p && p['catch']) p['catch'](function () {});
+      } catch (e) {}
+    }
+    setTimeout(function () {
+      for (var i = 1; i < els.length; i++) { try { els[i].pause(); } catch (e) {} }
+    }, 0);
+
+    mediaSetup(SPK.title);
+    drawBar();
+    pump();
+    waitAndStart();
+  }
+
+  function stop(opt) {
+    opt = opt || {};
+    /* 停止 ≠ 不要了。先把停在哪裡記下來，再收攤。
+       真的讀完了（done）才把書籤清掉——不然下次點朗讀會從最後一句起唸。 */
+    if (SPK.on && !opt.forget && !opt.done) bmSave();
+    if (opt.done) clearBookmark();
+    SPK.tok++; SPK.on = false; SPK.pause = false; SPK.buffering = false;
+    SPK.stall = 0;
+    watch(false);
+    PL = null;
+    try {
+      var els = pair();
+      for (var i = 0; i < els.length; i++) { els[i].pause(); els[i].onended = null; els[i].onerror = null; }
+    } catch (e) {}
+    try { if (window.speechSynthesis) speechSynthesis.cancel(); } catch (e) {}
+    wakeRelease();
+    mediaState('paused');
+    clearMark();
+    drawBar();
+  }
+
+  function togglePause() {
+    if (!SPK.on) return;
+    SPK.pause = !SPK.pause;
+    try {
+      var a = pair()[PL ? PL.cur : 0];
+      if (SPK.pause) a.pause();
+      else { var p = a.play(); if (p && p['catch']) p['catch'](function () {}); }
+    } catch (e) {}
+    SPK.stall = 0;
+    if (SPK.pause) { bmSave(); wakeRelease(); }   // 暫停著被系統關掉，回來還找得到
+    else {
+      wakeGet();
+      /* 緩衝中按過暫停的話，現在手上這個元素根本沒有 src——
+         要從那一句重新排，不是對著空元素按播放。 */
+      try { if (PL && !pair()[PL.cur].src) playAt(PL.i); } catch (e) {}
+    }
+    mediaState(SPK.pause ? 'paused' : 'playing');
+    drawBar();
+  }
+
+  /* 開始、暫停、停止要能各按各的，不能只有一顆「切換」。
+     宿主的工具列上是三顆分開的按鈕，用 togglePause 去湊，
+     會出現「按暫停卻繼續播」那種怎麼看都像壞掉的情形。 */
+
+  function pausePlay() {
+    if (SPK.on && !SPK.pause) togglePause();
+    return !!SPK.pause;
+  }
+
+  function resumePlay() {
+    if (SPK.on && SPK.pause) togglePause();
+    return !!(SPK.on && !SPK.pause);
+  }
+
+  /* 從書籤（或指定的某一句）開始讀。
+       playFrom(units)                → 接著上次停的地方
+       playFrom(units, { from: 12 })  → 從第 13 句
+       playFrom(units, { at: 'p7' })  → 從身分證是 p7 的那一句 */
+  function playFrom(units, opts) {
+    var o = ext({}, opts || {});
+    if (o.from == null && o.at == null) o.resume = true;
+    return play(units, o);
+  }
+
+  function step(d) {
+    if (!SPK.on || !PL) return;
+    var k = Math.max(0, Math.min(PL.units.length - 1, PL.i + d));
+    try { pair()[PL.cur].pause(); } catch (e) {}
+    PL.cur = 1 - PL.cur;
+    SPK.pause = false;
+    playAt(k);
+  }
+
+  function toggleFollow() {
+    var s = set();
+    s.follow = (s.follow === 0) ? 1 : 0;
+    save(); drawBar();
+    toast(L(s.follow !== 0 ? 'followOn' : 'followOff'));
+    if (s.follow !== 0) { SPK.hold = 0; rebind(); }
+  }
+
+  /* 整課預先下載：抓完就進 IndexedDB，之後離線也能聽 */
+  function prefetch(units, onDone, onProgress) {
+    units = units || [];
+    var ok = 0, fail = 0, idx = 0, live = 0;
+    if (!units.length) return onDone && onDone(0, 0);
+    function next() {
+      while (live < C.parallel && idx < units.length) {
+        (function (u) {
+          live++; idx++;
+          fetchAudio(speechText(u)).then(function () { ok++; }, function () { fail++; })['then'](function () {
+            live--;
+            if (onProgress) onProgress(ok + fail, units.length);
+            if (ok + fail >= units.length) { if (onDone) onDone(ok, fail); }
+            else next();
+          });
+        })(units[idx]);
+      }
+    }
+    next();
+  }
+
+  /* ── 從畫面直接生出朗讀單元 ───────────────────────────────────────
+   * 新 App 最花時間的一段，其實是「把內容切成句子，而且每一句要綁得到畫面上的
+   * 元素」——沒有這一步就沒有逐句標示，也沒有跟讀。
+   *
+   * 這個函式就地把 root 底下的文字切成句子、包成 <span class="ms">，回傳
+   * [{t, el}]。App 不必改自己的渲染方式，掛上去就有跟讀。
+   *
+   * 已經自己有句子結構的 App（像創世記講義的 span.ms[data-s]）不要用這個，
+   * 直接給自己的 units 與 elFor 即可。
+   * ------------------------------------------------------------------- */
+
+  function fromDOM(root, opt) {
+    opt = opt || {};
+    var sel = opt.sel || 'p,li,h2,h3,h4,blockquote,td',
+        punct = opt.punct || '。！？；!?',
+        skip = opt.skip || '',
+        minLen = opt.min || 1;
+    if (!root) return [];
+
+    var blocks = root.querySelectorAll(sel), units = [], seq = 0;
+
+    for (var b = 0; b < blocks.length; b++) {
+      var el = blocks[b];
+      if (skip && el.closest && el.closest(skip)) continue;
+      if (el.querySelector && el.querySelector(sel)) continue;   // 只取最內層，不重複唸
+      if (el.getAttribute('data-noread') != null) continue;
+
+      /* 已經包過就沿用，不要每次重切（重切會讓畫線之類的標記失效）*/
+      var had = el.querySelectorAll('span.ms');
+      if (had.length) {
+        for (var h = 0; h < had.length; h++) {
+          var ht = had[h].textContent.replace(/^\s+|\s+$/g, '');
+          if (ht.length >= minLen) units.push({ t: ht, el: had[h], key: had[h].getAttribute('data-s') });
+        }
+        continue;
+      }
+
+      var txt = el.textContent;
+      if (!txt || !txt.replace(/^\s+|\s+$/g, '')) continue;
+
+      /* 切句：標點跟著前一句走 */
+      var parts = [], buf = '', i, ch;
+      for (i = 0; i < txt.length; i++) {
+        ch = txt.charAt(i); buf += ch;
+        if (punct.indexOf(ch) >= 0) { parts.push(buf); buf = ''; }
+      }
+      if (buf.replace(/^\s+|\s+$/g, '')) parts.push(buf);
+      if (!parts.length) continue;
+
+      /* 重建這個區塊的內容——只在這裡動 DOM，動完就不再動 */
+      el.textContent = '';
+      for (i = 0; i < parts.length; i++) {
+        var sp = document.createElement('span');
+        sp.className = 'ms';
+        sp.setAttribute('data-s', String(seq));
+        sp.textContent = parts[i];
+        el.appendChild(sp);
+        var pt = parts[i].replace(/^\s+|\s+$/g, '');
+        if (pt.length >= minLen) units.push({ t: pt, el: sp, key: String(seq) });
+        seq++;
+      }
+    }
+    return units;
+  }
+
+  function init(cfg) {
+    C = ext(ext({}, DEF), cfg || {});
+    C.chunk = ext(ext({}, DEF.chunk), (cfg && cfg.chunk) || {});
+    C.sil = ext(ext({}, DEF.sil), (cfg && cfg.sil) || {});
+    C.labels = ext(ext({}, DEF.labels), (cfg && cfg.labels) || {});
+    buildSay();
+    bindIntent();
+    bindBackground();
+    if (cfg && cfg.warmUp !== false) setTimeout(warmUp, 1200);
+    return API;
+  }
+
+  var API = {
+    init: init,
+    play: play,
+    playFrom: playFrom,             /* 從書籤／指定段落開始 */
+    fromDOM: fromDOM,
+    stop: stop,
+    pause: pausePlay,               /* 明確暫停（已經暫停就不動） */
+    resume: resumePlay,             /* 明確繼續 */
+    togglePause: togglePause,
+    bookmark: bookmark,             /* 上次停在哪 → { scope, i, total, key, title, at } */
+    saveBookmark: bmSave,
+    clearBookmark: clearBookmark,
+    canResume: function (scope) { return !!bookmark(scope); },
+    indexOfKey: function (units, key) { return keyIndex(units || [], key); },
+    step: step,
+    toggleFollow: toggleFollow,
+    rebind: rebind,
+    prefetch: prefetch,
+    warmUp: warmUp,
+    chunks: chunks,
+    sanitize: sanitize,
+    rebuildSay: buildSay,           /* 繁簡切換之後叫一次 */
+    stripOriginal: stripOriginal,
+    cacheCount: cacheCount,
+    cacheHave: cacheHave,
+    cacheClear: cacheClear,
+    nudge: nudge,                   /* 手動推一把（很少用得到；看門狗自己會推）*/
+    isOn: function () { return !!SPK.on; },
+    isPaused: function () { return !!SPK.pause; },
+    index: function () { return PL ? PL.i : -1; },
+    total: function () { return PL ? PL.units.length : 0; },
+    voices: function () { return C ? C.voices : {}; },
+    setVoice: function (k) { var s = set(); s.voice = k; save(); stop(); },
+    version: '1.4.0'
+  };
+  return API;
+})();
+
+if (typeof module !== 'undefined' && module.exports) module.exports = TTS321;
+
+</script>
 <script>/* ===== 321 Bible Study Notes · shared engine (English edition; the book comes from BOOK) ===== */
 const D = JSON.parse(document.getElementById('DATA').textContent);
 const BOOK = JSON.parse(document.getElementById('BOOK').textContent);
@@ -4290,7 +5932,7 @@ Object.keys(BLK).forEach(c => BLK[c].forEach((b, i) => {
 const byCh = {}; Object.keys(BLK).forEach(c => byCh[+c] = BLK[c]);
 const cuvOf = ref => { const [c, v] = ref.split(':'); const t = D.txt[c]; return t ? (t[+v - 1] || '') : ''; };
 const blkCuv = b => { const t = D.txt[b.ch] || []; let h = '';
-  for (let v = b.a; v <= b.z; v++) h += `<p><b>${v}</b>&ensp;${esc(t[v - 1] || '')}</p>`; return h; };
+  for (let v = b.a; v <= b.z; v++) h += `<p data-rv="${b.ch}:${v}"><b>${v}</b>&ensp;${esc(t[v - 1] || '')}</p>`; return h; };
 const KEY = 'r321en.' + BOOK.id + '.v1';
 const DAY = 864e5, GAPS = [0, 1, 3, 7, 16, 35, 75];
 
@@ -4363,7 +6005,7 @@ document.addEventListener('click', e => {
   go(b.dataset.t);
 });
 $('#back').onclick = () => { if (R.ch) go(R.tab === 'text' ? 'text' : 'course'); else go('today'); };
-$('#spk').onclick = () => { if (SPK.on) return stopSpeak(); speak(plain(), $('#ttl').textContent); };
+$('#spk').onclick = () => { if (TTS321.isOn()) return stopSpeak(); readPage(); };
 $('#spk').onlongpress = null;
 (function(){ let t; const b = $('#spk');
   const st = () => { t = setTimeout(() => { voiceSheet(); t = null; }, 550); };
@@ -4523,7 +6165,7 @@ function blkPlain(ref){ const v = VMAP[ref]; if (!v) return '';
   for (let i = v.a; i <= v.z; i++) c += (t[i - 1] || '') + ' ';
   return c + '\n' + (v.lit || '').replace(/<[^>]+>/g, ' ') + '\n' + (v.exp || '').replace(/<[^>]+>/g, ' '); }
 function sayV(ref){ const v = VMAP[ref]; if (!v) return;
-  speak(blkPlain(ref), BOOK.name + ' ' + v.ch + ':' + v.a); }
+  ttsSayBlock(ref, BOOK.name + ' ' + v.ch + ':' + v.a); }
 function sayMV(n){ const m = meta(n); speak(m.mv.t + ' ' + m.mv.r, 'Memory verse'); }
 function tglL(i, ref){ OPENL[i] = OPENL[i] ? 0 : 1; openV(ref); }
 
@@ -4883,163 +6525,162 @@ function vLang(){
     <p class="xs muted" style="margin:10px 0 0">Progress, highlights and reflections are stored separately for each language.</p></div>`;
 }
 
-/* ═══════ 1. Human-voice audio ═══════ */
-const TTS_DB = 'r321en_' + BOOK.id + '_tts';
-function ttsDB(cb){
-  try {
-    if (!window.indexedDB) return cb(null);
-    const r = indexedDB.open(TTS_DB, 1);
-    r.onupgradeneeded = () => { try { if (!r.result.objectStoreNames.contains('a')) r.result.createObjectStore('a'); } catch(e){} };
-    r.onsuccess = () => cb(r.result);
-    r.onerror = () => cb(null);
-  } catch(e){ cb(null); }
-}
-function ttsGet(k, cb){
-  ttsDB(db => { if (!db) return cb(null);
-    try { const q = db.transaction('a').objectStore('a').get(k);
-      q.onsuccess = () => cb(q.result || null); q.onerror = () => cb(null);
-    } catch(e){ cb(null); } });
-}
-function ttsPut(k, blob){
-  ttsDB(db => { if (!db) return;
-    try { db.transaction('a', 'readwrite').objectStore('a').put(blob, k); } catch(e){} });
-}
-async function ttsClear(){
-  return new Promise(res => ttsDB(db => { if (!db) return res();
-    try { const t = db.transaction('a', 'readwrite'); t.objectStore('a').clear(); t.oncomplete = () => res(); t.onerror = () => res(); }
-    catch(e){ res(); } }));
-}
-
-const voiceName = () => (TTS_VOICES[S.set.voice] || TTS_VOICES.andrew).name;
+/* ═══════ ① 真人朗讀（321-app-core · TTS321）═══════ */
+/* 串流分段（抓兩段就開播、邊播邊抓）、逐句高亮、跟讀、背景播放（單一 audio 解鎖＋Media Session＋Wake Lock＋看門狗）、
+   多音字表、括號出處不唸、失敗改用裝置語音——全在核心（<script id="TTS321CORE">），修 bug 修在核心。
+   這裡只留這一本書自己的掛點：怎麼清理要唸的字、一句話對到畫面上哪個元素、還在不在同一頁。 */
+const voiceName = () => (TTS_VOICES[S.set.voice] || TTS_VOICES.yunfan).name;
 const rateAttr  = () => (S.set.rate >= 0 ? '+' : '') + (S.set.rate * 5) + '%';
-
-/* clean up the text before reading aloud */
-function sanitize(t){
-  t = String(t || '').replace(/<[^>]+>/g, ' ');
-  t = t.replace(/&nbsp;/g, ' ').replace(/&amp;/g, 'and').replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&lt;|&gt;/g, ' ');
-  t = t.replace(/\*\*/g, '');
+function cnNum(n){ return String(parseInt(n, 10)); }
+const TTS_SAY = [];   /* English edition: no homophone fixes needed. */
+function ttsClean(t){
+  t = t.replace(/&#39;/g, "'").replace(/\s*&\s*/g, ' and ');
+  t = TTS321.stripOriginal(t);          // Greek is read once (rule lives in the core)
+  t = t.replace(/\*\*/g, '').replace(/[《》「」『』【】]/g, '');
   t = t.replace(/^[ \t]*#{1,6}[ \t]*/gm, '').replace(/^[ \t]*>[ \t]?/gm, '');
-  t = t.replace(/★|⚠|✓|❌|🟢|🟡|🔴|📋|📖|⚖|▸|▾|·/g, ' ');
-  // spoken form for references: 8:28 → chapter eight verse twenty-eight
+  t = t.replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}]|▸|▾|·/gu, ' ');
+  /* A reference inside brackets is for the eye, not the ear; one outside is read in full. */
+  t = REF321.dropParenRefs(t);
+  t = REF321.speak(t);
   t = t.replace(/(\d{1,3}):(\d{1,3})(?:[–-](\d{1,3}))?/g, (m, a, b, c) =>
     'chapter ' + a + ' verse ' + b + (c ? ' to ' + c : ''));
-  t = t.replace(/\b321\b/g, 'three two one').replace(/\b920\b/g, 'nine two oh').replace(/\b235\b/g, 'two three five');
-  // do not read the Greek aloud (it comes out badly)
-  t = t.replace(/[\u0370-\u03FF\u1F00-\u1FFF][\u0370-\u03FF\u1F00-\u1FFF\s,.·'’]*/g, ' ');
-  return t.replace(/\s{2,}/g, ' ').trim();
-}
-function cnNum(n){ return String(parseInt(n, 10)); }
-function ttsChunks(t){
-  t = sanitize(t); if (!t) return [];
-  const out = []; let buf = '';
-  // English: break after . ! ? ; : (followed by a space or a closing quote), once a chunk reaches ~220 chars
-  const parts = t.split(/(?<=[.!?;:][”’"')]*)(?=\s)|\n+/);
-  for (const sp of parts){
-    if (!sp) continue;
-    buf += sp;
-    if (buf.length >= 220 && !/\b(?:v|vv|ch|cf|Mr|Mrs|Dr|St|e\.g|i\.e)\.$/i.test(buf.trim())){ out.push(buf.trim()); buf = ''; }
-  }
-  if (buf.trim()) out.push(buf.trim());
-  const fin = [];
-  out.forEach(s => {
-    while (s.length > 500){
-      let cut = s.lastIndexOf(' ', 500); if (cut < 250) cut = 500;
-      fin.push(s.slice(0, cut)); s = s.slice(cut).trim();
-    }
-    if (s) fin.push(s);
-  });
-  return fin.length ? fin : [t];
-}
-async function ttsFetch(piece){
-  const key = voiceName() + '|' + rateAttr() + '|' + piece;
-  const cached = await new Promise(r => ttsGet(key, r));
-  if (cached) return cached;
-  const res = await fetch(SVC.tts, { method:'POST', headers:{ 'Content-Type':'application/json' },
-    body: JSON.stringify({ voice:voiceName(), rate:rateAttr(), sil:TTS_SIL.s, silc:TTS_SIL.c, sile:TTS_SIL.e, text:piece }) });
-  if (!res.ok) throw new Error('TTS ' + res.status);
-  const blob = await res.blob();
-  ttsPut(key, blob);
-  return blob;
+  t = t.replace(/\b321\b/g, 'three two one').replace(/\b920\b/g, 'nine twenty').replace(/\b235\b/g, 'two three five');
+  return t.replace(/[：]/g, ', ');
 }
 
-let AU = null, SPK = { on:false, pause:false, tok:0, list:[], i:0, title:'' };
-function audioEl(){
-  if (!AU){ AU = new Audio(); AU.preload = 'auto'; AU.setAttribute('playsinline',''); }
-  return AU;
-}
-async function speak(text, title){
-  if (!S.set.human) return sayNative(text);
-  const chunks = ttsChunks(text);
-  if (!chunks.length) return;
-  const my = ++SPK.tok;
-  SPK = { on:true, pause:false, tok:my, list:chunks, i:0, title:title || 'Reading' };
-  drawBar();
-  const a = audioEl(); a.pause();
-  try {
-    toast('Preparing audio…');
-    const blobs = [];
-    const CONC = 6;
-    let next = 0, fail = false;
-    await new Promise(res => {
-      let running = 0, done = 0;
-      const pump = () => {
-        if (my !== SPK.tok) return res();
-        while (running < CONC && next < chunks.length){
-          const k = next++; running++;
-          ttsFetch(chunks[k]).then(b => { blobs[k] = b; }, () => { fail = true; })
-            .then(() => { running--; done++;
-              if (done === chunks.length) res(); else pump(); });
-        }
-      };
-      pump();
-    });
-    if (my !== SPK.tok) return;
-    if (fail || blobs.filter(Boolean).length === 0) throw new Error('fetch failed');
-    const url = URL.createObjectURL(new Blob(blobs.filter(Boolean), { type:'audio/mpeg' }));
-    a.src = url;
-    a.onended = () => { if (my === SPK.tok) stopSpeak(); };
-    a.onerror = () => { if (my === SPK.tok){ stopSpeak(); sayNative(text); } };
-    await a.play();
-    drawBar();
-  } catch(e){
-    if (my !== SPK.tok) return;
-    stopSpeak();
-    toast('Human voice unavailable — using the device voice');
-    sayNative(text);
+/* ── 朗讀單元：畫面上本來就有的句子（.mks／.mkp，data-k 是它的身分證）一句一單元；
+      沒有句子結構的段落、標題整塊標起來，太長的段落切成串流用的小段 ── */
+REF321.init({ lang: 'en' });
+const TTS_CHUNK = { punct:'.!?;\n', min:220, max:500 };
+const TTS_SKIP = 'button,.btn,nav,.tabs,.spkbar,.mknote,.mkask,.flag,.eyebrow,.mkhint,.vrow,.chk,.pill,.hide,[hidden],[data-noread],textarea,select,svg,script,style';
+const TTS_PICK = '.mks,.mkp,.vt,p,li,h2,h3,h4,blockquote,td,th,.q,.hlq';
+function ttsBlocks(root){
+  const out = []; if (!root) return out;
+  const all = root.querySelectorAll(TTS_PICK);
+  for (let i = 0; i < all.length; i++){
+    const el = all[i];
+    if (el.closest(TTS_SKIP)) continue;
+    if (!el.matches('.mks,.mkp')){
+      if (el.querySelector(TTS_PICK)) continue;      // 只取最內層，不重複唸
+      if (el.closest('.mks,.mkp')) continue;
+    }
+    const t = (el.textContent || '').replace(/\s+/g, ' ').trim();
+    if (!t || !/[一-鿿A-Za-z0-9]/.test(t)) continue;
+    const k = el.getAttribute('data-k') || ((el.getAttribute('onclick') || '').match(/mkTap\('([^']+)'/) || [])[1] || '';
+    out.push({ el, t, k });
   }
+  return out;
 }
-function sayNative(t){
-  if (!window.speechSynthesis) return toast('This device does not support speech');
-  speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(sanitize(t));
-  u.lang = 'en-US'; u.rate = 0.98 + S.set.rate * 0.05;
-  const vs = speechSynthesis.getVoices();
-  const v = vs.find(x => /en[-_]US|en[-_]GB/i.test(x.lang)) || vs.find(x => /^en/i.test(x.lang));
-  if (v) u.voice = v;
-  speechSynthesis.speak(u);
+function ttsRawChunks(t){
+  const cf = TTS_CHUNK, out = []; let buf = '';
+  for (const ch of t){ buf += ch; if (cf.punct.indexOf(ch) >= 0 && buf.length >= cf.min){ out.push(buf); buf = ''; } }
+  if (buf.trim()) out.push(buf);
+  const fin = [];
+  out.forEach(s => { while (s.length > cf.max){ fin.push(s.slice(0, cf.max)); s = s.slice(cf.max); } if (s) fin.push(s); });
+  return fin.length ? fin : [t];
 }
-function stopSpeak(){
-  SPK.tok++; SPK.on = false; SPK.pause = false;
-  try { audioEl().pause(); } catch(e){}
-  try { if (window.speechSynthesis) speechSynthesis.cancel(); } catch(e){}
-  drawBar();
+function ttsUnits(blocks){
+  const us = [];
+  blocks.forEach((b, i) => {
+    (b.t.length > TTS_CHUNK.max ? ttsRawChunks(b.t) : [b.t]).forEach(p => us.push({ t: p, el: b.el, k: b.k, b: i }));
+  });
+  return us;
 }
-function togglePause(){
-  const a = audioEl();
-  if (SPK.pause){ a.play(); SPK.pause = false; } else { a.pause(); SPK.pause = true; }
-  drawBar();
+/* 重畫之後舊元素失效：先用 data-k 找回來，找不到再用「第幾個區塊」找 */
+function ttsEl(u){
+  if (!u) return null;
+  if (u.el && u.el.isConnected) return u.el;
+  const root = u.s ? $('#sbody') : $('#view'); if (!root) return null;
+  let e = null;
+  if (u.k) e = root.querySelector('[data-k="' + u.k + '"]') || root.querySelector('[onclick*="\'' + u.k + '\'"]');
+  if (!e && u.rv) e = root.querySelector('[data-rv="' + u.rv + '"]');
+  if (!e && u.b != null && !u.s){ const bl = ttsBlocks(root); e = bl[u.b] ? bl[u.b].el : null; }
+  u.el = e || null;
+  return u.el;
 }
-function drawBar(){
-  let el = $('#spkbar');
-  if (!SPK.on){ if (el) el.remove(); return; }
-  if (!el){
-    el = document.createElement('div'); el.id = 'spkbar'; el.className = 'spkbar';
-    document.body.appendChild(el);
+const ttsPageScope = () => 'p|' + R.tab + '|' + R.ch + '|' + R.sub;
+function ttsHere(sc){
+  if (!sc) return true;
+  if (sc === 'sheet') return $('#sheet').classList.contains('on');
+  return sc === ttsPageScope();
+}
+
+TTS321.init({
+  worker: SVC.tts,
+  db: 'r321en_tts',
+  voices: TTS_VOICES,
+  defaultVoice: 'yunfan',
+  lang: 'en-US',
+  sil: TTS_SIL,
+  chunk: TTS_CHUNK,
+  say: TTS_SAY,
+  t2s: null,
+  
+  labels: {
+    bar:'Reading', buffering:'Buffering…', prev:'Previous sentence', next:'Next sentence', pause:'Pause', resume:'Resume', stop:'Stop',
+    follow:'Auto-scroll', followOn:'Scrolling along while reading', followOff:'Not scrolling — the page is yours',
+    fallback:'Human voice unavailable — using the device voice', nosupport:'This device does not support speech'
+  },
+  media: { artist: (document.querySelector('meta[name="application-name"]') || {}).content || document.title, album: 'Kingdom 321 Online Fellowship' },
+  settings: { get: () => S.set, save: () => { try { save(); } catch(e){} } },
+  clean: ttsClean,
+  elFor: ttsEl,
+  bookmarkKey: '',
+  stillHere: ttsHere,
+  toast: m => { try { toast(m); } catch(e){} },
+});
+
+/* 呼叫端用得慣的那幾個名字留著——頁面上舊的 onclick 字串都還指著它們 */
+function speak(text, title){
+  const us = TTS321.chunks(String(text == null ? '' : text)).map(t => ({ t }));
+  if (!us.length) return;
+  TTS321.play(us, { title: title || 'Reading' });
+}
+/* 頂列 🔊：整頁跟讀。從畫面上看得到的第一句起唸，逐句高亮、畫面跟著走 */
+function readPage(){
+  const us = ttsUnits(ttsBlocks($('#view')));
+  if (!us.length) return toast('Nothing to read on this page');
+  let from = 0;
+  const top = 70, vh = window.innerHeight || 700;
+  for (let i = 0; i < us.length; i++){
+    const r = us[i].el.getBoundingClientRect();
+    if (r.bottom > top + 4 && r.top < vh){ from = i; break; }
   }
-  el.innerHTML = `<span class="dot"></span><b>${esc(SPK.title)}</b>
-    <button onclick="togglePause()">${SPK.pause ? '▶' : '⏸'}</button>
-    <button onclick="stopSpeak()">✕</button>`;
+  TTS321.play(us, { title: ($('#ttl') || {}).textContent || 'Reading', scope: ttsPageScope(), from });
 }
+/* 這一段解經（抽屜）旁的朗讀：和合本經文、直譯、經文解釋，一句一句標在抽屜裡 */
+function ttsSayBlock(ref, title){
+  const v = VMAP[ref]; if (!v) return;
+  let re = false;
+  [[1, 1], [3, v.lit], [6, v.exp]].forEach(p => { if (p[1] && !OPENL[p[0]]){ OPENL[p[0]] = 1; re = true; } });
+  if (re) openV(ref);                              // 要標得到句子，三層先打開
+  const us = [], tx = D.txt[v.ch] || [];
+  for (let i = v.a; i <= v.z; i++) if (tx[i - 1]) us.push({ t: tx[i - 1], rv: v.ch + ':' + i, s: 1 });
+  const add = (html, kind) => sentsOf(html).forEach((h, j) => {
+    const t = h.replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
+    if (t) us.push({ t, k: 'x|' + v.ch + ':' + v.a + '|' + kind + '|' + j, s: 1 });
+  });
+  if (v.lit) add(v.lit, 'lit');
+  if (v.exp) add(v.exp, 'exp');
+  TTS321.play(us, { title: title, scope: 'sheet' });
+}
+/* 停止與暫停不是系統提示音，是一個人在講話（帶入詞在 NAR321） */
+let spkCue = 0;
+function stopSpeak(){ const on = TTS321.isOn(); TTS321.stop(); if (on) { try { toast(NAR321.stop(spkCue++)); } catch(e){} } }
+function togglePause(){ TTS321.togglePause(); if (TTS321.isPaused()) { try { toast(NAR321.pause(spkCue++)); } catch(e){} } }
+function pauseSpeak(){ if (TTS321.pause()) { try { toast(NAR321.pause(spkCue++)); } catch(e){} } }
+function resumeSpeak(){ return TTS321.resume(); }
+function spkStep(d){ return TTS321.step(d); }
+function ttsClear(){ return new Promise(res => TTS321.cacheClear(res)); }
+/* 畫線、換色、寫領受、開關抽屜都會整個重畫：重畫完把高亮接回正在唸的那一句 */
+['render', 'sheet'].forEach(n => {
+  const f = window[n];
+  if (typeof f === 'function') window[n] = function(){
+    const r = f.apply(this, arguments);
+    try { if (TTS321.isOn()) setTimeout(() => { try { TTS321.rebind(); } catch(e){} }, 0); } catch(e){}
+    return r;
+  };
+});
 
 /* ═══════ 2. Highlights and reflections ═══════ */
 /* key format:  v|8:1        one verse

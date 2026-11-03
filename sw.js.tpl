@@ -3,11 +3,13 @@
    策略：App 殼採 network-first（確保更新拿得到），失敗時回退快取；
          圖示等靜態檔採 cache-first。 */
 
-const VERSION = '__VERSION__';
-const CACHE = '321bible-' + VERSION;
+const V = '__VERSION__-tri10171929-gxs1019-meet1020-gx1021c-hl8-vp1023-co1-gp1103-tts1103';   /* __VERSION__ 是 build.py 的內容摘要；尾碼是後加掛件的版本（GXP／TTS321…），重建不會把它們洗掉 */
+const SLUG = location.pathname.split('/')[1] || 'app';   /* 同一個 github.io 網域底下有很多 App，快取名稱與清理範圍都限定在自己這一個 */
+const PFX = '321bible-' + SLUG + '-';
+const CACHE = PFX + V;
 
-/* 由 src/build.py 依 books.json 自動產生 —— 不要手改 */
-const SHELL = __SHELL__;
+/* 由 src/build.py 依 books.json 自動產生 —— 不要手改；coread.js／peerjs.min.js 是共讀掛件，build 不認得，這裡補上 */
+const SHELL = __SHELL__.concat(['./coread.js', './peerjs.min.js']);
 
 self.addEventListener('install', e => {
   e.waitUntil(
@@ -21,7 +23,7 @@ self.addEventListener('install', e => {
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+      .then(keys => Promise.all(keys.filter(k => k.indexOf(PFX) === 0 && k !== CACHE).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
