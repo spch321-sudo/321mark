@@ -8210,5 +8210,124 @@ try { GX.boot(); } catch (e) { try { console.error("GX boot", e); } catch (_) {}
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();
 </script>
+<script id="AU">
+/* ═════════════════════════════════════════════════════════════════
+   AU 掛件 v2（-au1103）：空閒自動套用新版
+   · 偵測：載入、回到前景、每 30 分鐘 reg.update()，並輪詢 version.json（有變動就 reg.update()）
+   · 新版到了（新 SW 接手或在 waiting）：不忙碌就自動換新版並重整；忙碌（朗讀／播放中、美圖工作室開著、
+     輸入框正在輸入或有未存的字、小智回答中、共讀中）只在頂端顯示「有新版本了」條（可點立即更新），
+     忙碌結束後（連續兩次輪詢都空閒）自動套用
+   · 防無限重整：同一分頁（sessionStorage）自動重整最多 3 次、間隔至少 60 秒
+   ═════════════════════════════════════════════════════════════════ */
+(function () {
+  if (window.AU321) return;
+  var SHELL = false;   /* 講義舊式外殼沒有 UI321.update：自己出更新條、自己收新 SW（與創世記同一份掛件，只差這一行） */
+  var KEY = 'au321', POLL = 3000, EVERY = 1800000, TYPED = 600000;
+  var L = (document.documentElement.getAttribute('lang') || '') + ' ' + location.pathname;
+  var EN = /^en\b/i.test(document.documentElement.getAttribute('lang') || '') || /en\.html$/i.test(location.pathname);
+  var SC = !EN && (/sc\.html$/i.test(location.pathname) || /zh-(cn|hans)/i.test(L));
+  var TXT = EN ? 'A new version is ready  ·  tap to update' : (SC ? '有新版本了　·　点一下更新' : '有新版本了　·　點一下更新');
+  var idleN = 0, base = null, reg = null, need = false, asked = false, reloading = false, bar = null;
+  var hadCtl = false;
+  try { hadCtl = !!navigator.serviceWorker.controller; } catch (e) {}
+  function ss(v) { try { if (v === undefined) return JSON.parse(sessionStorage.getItem(KEY) || '{}'); sessionStorage.setItem(KEY, JSON.stringify(v)); } catch (e) { return {}; } }
+  function q(s) { try { return document.querySelector(s); } catch (e) { return null; } }
+  function vis(el) { try { return !!(el && (el.offsetWidth || el.offsetHeight || el.getClientRects().length)); } catch (e) { return false; } }
+  function isTxt(el) {
+    if (!el || !el.tagName) return false;
+    var t = el.tagName;
+    if (t === 'TEXTAREA') return true;
+    if (t === 'INPUT') return /^(|text|search|url|tel|email|password|number)$/i.test(el.type || '');
+    return !!el.isContentEditable;
+  }
+  document.addEventListener('input', function (e) { if (e.isTrusted !== false && isTxt(e.target)) e.target.__au = Date.now(); }, true);
+  function why() {
+    try {
+      if (typeof TTS321 !== 'undefined' && TTS321.isOn && TTS321.isOn()) return 'tts';
+      if (window.speechSynthesis && speechSynthesis.speaking) return 'speech';
+      var ms = document.querySelectorAll('audio,video'), i;
+      for (i = 0; i < ms.length; i++) if (!ms[i].paused && !ms[i].ended) return 'media';
+      if (q('#gxs.on') || q('#gxsSub') || q('#gxsRv') || q('.gxsmask.on')) return 'studio';
+      if (typeof SAGE321 !== 'undefined' && SAGE321.isBusy && SAGE321.isBusy()) return 'sage';
+      if (window.CR) { var cr = window.CR.role; if (typeof cr === 'function') { try { cr = cr.call(window.CR); } catch (e) { cr = ''; } } if (cr) return 'coread'; }
+      if (window.CR321 && window.CR321.state && window.CR321.state.role) return 'coread';
+      var a = document.activeElement;
+      if (isTxt(a) && (!document.hidden || (a.value || '').trim())) return 'focus';
+      var f = document.querySelectorAll('textarea,input,[contenteditable="true"]');
+      for (i = 0; i < f.length; i++) {
+        var el = f[i];
+        if (el.__au && Date.now() - el.__au < TYPED && isTxt(el)) {
+          var v = el.isContentEditable ? el.textContent : el.value;
+          if ((v || '').trim() && vis(el)) return 'draft';
+        }
+      }
+    } catch (e) {}
+    return '';
+  }
+  function pending() {
+    try {
+      if (SHELL) return !!(window.UI321 && UI321.updatePending && UI321.updatePending());
+    } catch (e) {}
+    return need || !!(reg && reg.waiting && navigator.serviceWorker.controller);
+  }
+  function reload() { if (reloading) return; reloading = true; try { location.reload(); } catch (e) {} }
+  function go() {
+    asked = true;
+    if (SHELL) { try { UI321.updateApply(); } catch (e) { reload(); } return; }
+    if (bar) bar.textContent = EN ? 'Updating…' : '正在更新…';
+    if (need) { reload(); return; }
+    try { reg.waiting.postMessage({ type: 'SKIP_WAITING' }); } catch (e) {}
+    setTimeout(reload, 3000);
+  }
+  function showBar() {
+    if (SHELL || bar) return;
+    bar = document.createElement('div');
+    bar.id = 'au321bar'; bar.setAttribute('role', 'button'); bar.setAttribute('tabindex', '0');
+    bar.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:2147483000;box-sizing:border-box;padding:calc(env(safe-area-inset-top,0px) + 10px) 12px 10px;background:#d9a441;color:#2a1d00;font:600 14px/1.3 system-ui,-apple-system,"PingFang TC",sans-serif;text-align:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.25)';
+    bar.textContent = TXT;
+    bar.addEventListener('click', go);
+    bar.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') go(); });
+    (document.body || document.documentElement).appendChild(bar);
+  }
+  function tick() {
+    if (!SHELL) {
+      try { navigator.serviceWorker.getRegistration().then(function (r) { reg = r || reg; }); } catch (e) {}
+    }
+    if (!pending()) { idleN = 0; return; }
+    showBar();
+    if (why()) { idleN = 0; return; }
+    idleN++;
+    if (idleN >= 2) {
+      var s = ss(), now = Date.now();
+      if ((s.n || 0) < 3 && now - (s.t || 0) > 60000) { s.n = (s.n || 0) + 1; s.t = now; ss(s); idleN = 0; go(); }
+    }
+  }
+  function upd() {
+    try { navigator.serviceWorker.getRegistration().then(function (r) { if (r) r.update(); }); } catch (e) {}
+  }
+  function ver() {
+    try {
+      fetch('version.json?_=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+        if (!j || !j.v) return;
+        if (base === null) base = j.v; else if (j.v !== base) { base = j.v; upd(); }
+      }).catch(function () {});
+    } catch (e) {}
+  }
+  function check() { ver(); upd(); }
+  if ('serviceWorker' in navigator && /^https?:/.test(location.protocol)) {
+    navigator.serviceWorker.addEventListener('controllerchange', function () {
+      if (reloading) return;
+      if (asked && !SHELL) { reload(); return; }
+      if (hadCtl && !SHELL) need = true;
+      hadCtl = true;
+    });
+    setInterval(tick, POLL);
+    setInterval(check, EVERY);
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) check(); });
+    ver();
+  }
+  window.AU321 = { why: why, tick: tick, check: check, pending: pending, state: function () { return { idleN: idleN, base: base, need: need, shell: SHELL, ss: ss() }; } };
+})();
+</script>
 </body>
 </html>

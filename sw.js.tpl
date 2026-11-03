@@ -3,7 +3,7 @@
    策略：App 殼採 network-first（確保更新拿得到），失敗時回退快取；
          圖示等靜態檔採 cache-first。 */
 
-const V = '__VERSION__-tri10171929-gxs1019-meet1020-gx1021c-hl8-vp1023-co1-gp1103-tts1103';   /* __VERSION__ 是 build.py 的內容摘要；尾碼是後加掛件的版本（GXP／TTS321…），重建不會把它們洗掉 */
+const V = '__VERSION__-tri10171929-gxs1019-meet1020-gx1021c-hl8-vp1023-co1-gp1103-tts1103-au1103';   /* __VERSION__ 是 build.py 的內容摘要；尾碼是後加掛件的版本（GXP／TTS321…），重建不會把它們洗掉 */
 const SLUG = location.pathname.split('/')[1] || 'app';   /* 同一個 github.io 網域底下有很多 App，快取名稱與清理範圍都限定在自己這一個 */
 const PFX = '321bible-' + SLUG + '-';
 const CACHE = PFX + V;
@@ -35,12 +35,12 @@ self.addEventListener('fetch', e => {
   const url = new URL(req.url);
   if (url.origin !== location.origin) return;
 
-  const isDoc = req.mode === 'navigate' || url.pathname.endsWith('/') || url.pathname.endsWith('.html');
+  const isDoc = req.mode === 'navigate' || url.pathname.endsWith('/') || /\.(html|js|json)$/i.test(url.pathname);   /* 網頁、程式、version.json 一律網路優先 */
 
   if (isDoc) {
     // network-first：有網路就拿最新的，沒網路就用快取
     e.respondWith(
-      fetch(req)
+      fetch(req, { cache: 'no-cache' })
         .then(res => {
           // 只快取成功且完整的回應，避免把部署中的 404 或空回應存起來
           if (res && res.ok && res.status === 200 && res.type !== 'opaque'){
@@ -70,5 +70,6 @@ self.addEventListener('fetch', e => {
 
 // 讓網頁可以主動要求立即更新
 self.addEventListener('message', e => {
-  if (e.data === 'skipWaiting') self.skipWaiting();
+  const d = e.data;
+  if (d === 'skipWaiting' || d === 'skip' || (d && (d.type === 'SKIP_WAITING' || d.t === 'skip'))) self.skipWaiting();
 });

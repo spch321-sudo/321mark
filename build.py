@@ -84,7 +84,10 @@ def do_build():
     for fname, html in pages.items():
         open(os.path.join(BASE, fname), 'w', encoding='utf-8').write(html)
         print(f'  ✓ {fname}　{len(html)/1024/1024:.2f} MB')
-    open(os.path.join(BASE, 'sw.js'), 'w', encoding='utf-8').write(render_sw(digest))
+    _sw = render_sw(digest)
+    open(os.path.join(BASE, 'sw.js'), 'w', encoding='utf-8').write(_sw)
+    import re as _re   # version.json 與 sw.js 的 V 同步（頁面的 AU 掛件輪詢它來偵測新版）
+    open(os.path.join(BASE, 'version.json'), 'w', encoding='utf-8').write('{"v": "%s"}\n' % _re.search(r"const V = '([^']+)'", _sw).group(1))
     print(f'  ✓ sw.js　版本 {digest}')
     print('\n組建完成。直接把整個資料夾推上 GitHub，開啟 Pages 即可。')
 
