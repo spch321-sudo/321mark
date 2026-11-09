@@ -10668,5 +10668,199 @@ try { GX.boot(); } catch (e) { try { console.error("GX boot", e); } catch (_) {}
   try { if (R.tab === 'text' && R.ch) render(); } catch (e) {}
 })();
 </script>
+<script id="CPAR">
+/* CPAR321 v1（2026-11-09）：講義全部內容中英並讀
+   繁／简頁並讀英文、英文頁並讀繁體中文：經文分頁的章標題、課程七個分頁（卡片、核心、小組、
+   講章、講義、操練、把關）、逐節解經面板、爭議議題面板，每一段下面附上另一種語言的同一段。
+   作法：讀同一卷另一個語言頁裡的 DATA，暫時把資料換成那個語言、用同一套版型再畫一次，
+   兩邊依段落結構（LCS 對齊）配對後插在主要段落下方（.cpar）。朗讀、畫線、領受都只作用在主要內容。 */
+(function () {
+  if (window.CPAR321 || typeof D === 'undefined' || typeof window.vCourse !== 'function') return;
+  var LN = (typeof LANG_NOW !== 'undefined') ? LANG_NOW : 'tc';
+  var EN = LN === 'en';
+  function ui() { if (EN) return 'en'; try { if (LN === 'sc' || (S && S.set && S.set.sc)) return 'sc'; } catch (e) {} return 'tc'; }
+  var ALT_FILE = EN ? 'index.html' : 'en.html', ALT_LANG = EN ? 'zh-Hant' : 'en';
+  var STR = {
+    tc: { btn: '中英並讀', on: '開', off: '關', loading: '英文內容載入中…', fail: '英文內容載入失敗，請檢查網路' },
+    sc: { btn: '中英并读', on: '开', off: '关', loading: '英文内容载入中…', fail: '英文内容载入失败，请检查网络' },
+    en: { btn: 'Chinese parallel', on: 'On', off: 'Off', loading: 'Loading the Chinese text…', fail: 'Couldn’t load the Chinese text — check your connection' }
+  };
+  function T(k) { return STR[ui()][k]; }
+  function isOn() { try { return localStorage.getItem('cpar321') === '1'; } catch (e) { return false; } }
+  function setOn(v) { try { localStorage.setItem('cpar321', v ? '1' : ''); } catch (e) {} }
+
+  /* ── 另一語言的資料 ── */
+  var ALT = null, ALTS = null, loading = false, failed = false;
+  function prepAlt(d) {
+    var vm = {}, by = {};
+    Object.keys(d.blk || {}).forEach(function (c) {
+      (d.blk[c] || []).forEach(function (b, i) {
+        b.ch = +c; b.i = i; b.ref = c + ':' + (b.a === b.z ? b.a : b.a + '–' + b.z);
+        for (var v = b.a; v <= b.z; v++) vm[c + ':' + v] = b;
+      });
+      by[+c] = d.blk[c];
+    });
+    return { vmap: vm, bych: by };
+  }
+  function load(cb) {
+    if (ALT) return cb(true);
+    if (loading) return; loading = true;
+    fetch(ALT_FILE, { cache: 'force-cache' }).then(function (r) { if (!r.ok) throw 0; return r.text(); }).then(function (s) {
+      var m = s.match(/<script id="DATA"[^>]*>([\s\S]*?)<\/script>/);
+      if (!m) throw 0;
+      ALT = JSON.parse(m[1]); ALTS = prepAlt(ALT); loading = false; failed = false; cb(true);
+    }).catch(function () { loading = false; failed = true; cb(false); });
+  }
+  /* 兩個容器（物件或陣列）就地互換內容；再呼叫一次就換回來。原程式用別名（CH、BLK、VMAP、byCh）拿到的也一起換 */
+  function exch(a, b) {
+    if (!a || !b || typeof a !== 'object' || typeof b !== 'object' || Array.isArray(a) !== Array.isArray(b)) return false;
+    if (Array.isArray(a)) { var ta = a.slice(); a.length = 0; Array.prototype.push.apply(a, b); b.length = 0; Array.prototype.push.apply(b, ta); return true; }
+    var t = {}, k; for (k in a) t[k] = a[k]; for (k in a) delete a[k]; for (k in b) a[k] = b[k]; for (k in b) delete b[k]; for (k in t) b[k] = t[k]; return true;
+  }
+  function swap() {
+    var done = [];
+    Object.keys(D).forEach(function (k) { if (ALT[k] !== undefined && exch(D[k], ALT[k])) done.push([D[k], ALT[k]]); });
+    try { if (typeof VMAP !== 'undefined' && exch(VMAP, ALTS.vmap)) done.push([VMAP, ALTS.vmap]); } catch (e) {}
+    try { if (typeof byCh !== 'undefined' && exch(byCh, ALTS.bych)) done.push([byCh, ALTS.bych]); } catch (e) {}
+    return done;
+  }
+  function unswap(done) { for (var i = done.length - 1; i >= 0; i--) exch(done[i][0], done[i][1]); }
+  /* 用另一語言的資料執行一次畫面函式，取得它的 HTML；標題、sheet 等副作用都擋掉 */
+  function altRun(fn, args) {
+    if (!ALT) return null;
+    var ttl = document.getElementById('ttl'), tt = ttl ? ttl.textContent : null, out = null, done = [];
+    var oldSheet = window.sheet, cap = null, U = window.UI321, oldU = U && U.sheet;
+    var sb = document.getElementById('sbody'), before = sb ? sb.innerHTML : null;
+    var grab = function (h) { cap = h; };
+    try { window.sheet = grab; } catch (e) {}
+    if (U && oldU) U.sheet = grab;
+    try { done = swap(); out = fn.apply(null, args || []); } catch (e) { out = null; }
+    finally {
+      unswap(done);
+      try { window.sheet = oldSheet; } catch (e) {}
+      if (U && oldU) U.sheet = oldU;
+      if (sb && sb.innerHTML !== before) { if (cap == null) cap = sb.innerHTML; sb.innerHTML = before; }   // sheet 是 const 換不掉時：取回畫面再還原
+      if (ttl && tt != null) ttl.textContent = tt;
+    }
+    return typeof out === 'string' ? out : cap;
+  }
+
+  /* ── 段落配對 ── */
+  var SEL = 'h1,h2,h3,h4,h5,p,li,blockquote,td,th,dt,dd';
+  function blocks(root) {
+    var all = root.querySelectorAll(SEL), out = [];
+    for (var i = 0; i < all.length; i++) {
+      var e = all[i];
+      if (e.closest('.cpar,.par-tx,.vs,button,.parbar,.mkhint,.mknote')) continue;
+      var p = e.parentElement, nested = false;
+      while (p && p !== root) { if (p.matches && p.matches(SEL)) { nested = true; break; } p = p.parentElement; }
+      if (!nested) out.push(e);
+    }
+    return out;
+  }
+  function sig(e) { return e.tagName + '.' + (e.className || '').toString().split(/\s+/).filter(function (c) { return c && !/^(hl|on|mks)$/.test(c); }).sort().join('.'); }
+  function lcs(a, b) {
+    var n = a.length, m = b.length, i, j, L = [];
+    for (i = 0; i <= n; i++) { L.push(new Uint16Array(m + 1)); }
+    for (i = n - 1; i >= 0; i--) for (j = m - 1; j >= 0; j--) L[i][j] = a[i] === b[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+    var pairs = []; i = 0; j = 0;
+    while (i < n && j < m) { if (a[i] === b[j]) { pairs.push([i, j]); i++; j++; } else if (L[i + 1][j] >= L[i][j + 1]) i++; else j++; }
+    return pairs;
+  }
+  function clean(e) {
+    var c = e.cloneNode(true);
+    var kill = c.querySelectorAll('button,input,textarea,select,script,style,svg,.mknote,.flag');
+    for (var i = 0; i < kill.length; i++) kill[i].parentNode.removeChild(kill[i]);
+    var all = [c].concat([].slice.call(c.querySelectorAll('*')));
+    all.forEach(function (x) { for (var k = x.attributes.length - 1; k >= 0; k--) { var n = x.attributes[k].name; if (n !== 'dir' && n !== 'lang') x.removeAttribute(n); } });
+    return c.innerHTML.replace(/\s+/g, ' ').trim();
+  }
+  function txt(e) { return (e.textContent || '').replace(/\s+/g, ' ').trim(); }
+  function pairInto(root, altHtml) {
+    if (!root || !altHtml) return 0;
+    var old = root.querySelectorAll('.cpar'); for (var o = 0; o < old.length; o++) old[o].parentNode.removeChild(old[o]);
+    var box = document.createElement('div'); box.innerHTML = altHtml;
+    var A = blocks(root), B = blocks(box);
+    if (!A.length || !B.length) return 0;
+    var cut = 1500;                                     // 太大的頁面分段對齊，避免卡頓
+    var pairs = [];
+    for (var s = 0; s < Math.max(A.length, B.length); s += cut) {
+      var a = A.slice(s, s + cut), b = B.slice(s, s + cut);
+      lcs(a.map(sig), b.map(sig)).forEach(function (p) { pairs.push([p[0] + s, p[1] + s]); });
+    }
+    var n = 0;
+    pairs.forEach(function (p) {
+      var me = A[p[0]], al = B[p[1]], t1 = txt(me), t2 = txt(al);
+      if (!t2 || t1 === t2 || !/[A-Za-z一-鿿]/.test(t2)) return;
+      var d = document.createElement('div'); d.className = 'cpar'; d.setAttribute('lang', ALT_LANG); d.innerHTML = clean(al);
+      if (/^(LI|TD|TH|DD|DT)$/.test(me.tagName)) me.appendChild(d);
+      else me.parentNode.insertBefore(d, me.nextSibling);
+      n++;
+    });
+    return n;
+  }
+  function css() {
+    if (document.getElementById('cparCss')) return;
+    var st = document.createElement('style'); st.id = 'cparCss';
+    st.textContent = '.cpar{margin:4px 0 12px;padding:4px 0 4px 10px;border-left:3px solid color-mix(in srgb,var(--pine) 45%,transparent);font-size:.9em;line-height:1.7;color:color-mix(in srgb,currentColor 64%,transparent);font-weight:400;letter-spacing:0;text-transform:none}'
+      + 'h1+.cpar,h2+.cpar,h3+.cpar,h4+.cpar{font-weight:600}li>.cpar,td>.cpar{margin:4px 0 2px}'
+      + '.cparbtn{border:1px solid var(--line);background:var(--card);color:inherit;border-radius:999px;padding:6px 14px;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer;margin-left:6px}'
+      + '.cparbtn.on{border-color:var(--pine);color:var(--pine)}.cparbar{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:6px;margin:-4px 0 8px}.cpar-st{font-size:12.5px;opacity:.75;margin:0 0 8px}';
+    document.head.appendChild(st);
+  }
+  function btnHtml() { var on = isOn(); return '<button class="cparbtn' + (on ? ' on' : '') + '" onclick="CPAR321.toggle()">🌐 ' + T('btn') + '：' + (on ? T('on') : T('off')) + '</button>'; }
+  function addBtn(h) {
+    if (h.indexOf('<div class="parbar">') >= 0) return h.replace('<div class="parbar">', '<div class="parbar">' + btnHtml());
+    var i = h.indexOf('</div>');                        // 放在第一個區塊（章標題）之後
+    return i >= 0 ? h.slice(0, i + 6) + '<div class="cparbar">' + btnHtml() + '</div>' + h.slice(i + 6) : '<div class="cparbar">' + btnHtml() + '</div>' + h;
+  }
+  function status(root, msg) {
+    if (!root) return; var s = root.querySelector('.cpar-st');
+    if (!msg) { if (s) s.parentNode.removeChild(s); return; }
+    if (!s) { s = document.createElement('div'); s.className = 'cpar-st'; var bar = root.querySelector('.cparbar,.parbar'); if (bar) bar.parentNode.insertBefore(s, bar.nextSibling); else root.insertBefore(s, root.firstChild); }
+    s.textContent = msg;
+  }
+  /* ── 畫面掛鉤 ── */
+  function wrapView(name, test) {
+    var orig = window[name]; if (typeof orig !== 'function') return;
+    window[name] = function () {
+      var args = arguments, h = orig.apply(this, args);
+      if (typeof h !== 'string' || !test()) return h;
+      css(); h = addBtn(h);
+      if (isOn()) {
+        var key = R.tab + '|' + R.ch + '|' + R.sub;
+        setTimeout(function () {
+          var root = document.getElementById('view'); if (!root || R.tab + '|' + R.ch + '|' + R.sub !== key) return;
+          if (!ALT) { status(root, failed ? T('fail') : T('loading')); load(function (ok) { if (R.tab + '|' + R.ch + '|' + R.sub !== key) return; if (ok) render(); else status(root, T('fail')); }); return; }
+          pairInto(root, altRun(orig, args));
+        }, 0);
+      }
+      return h;
+    };
+  }
+  wrapView('vCourse', function () { return R.tab === 'course' && !!R.ch; });
+  wrapView('vText', function () { return R.tab === 'text' && !!R.ch && R.sub !== 'vpk'; });
+  function wrapSheet(name) {
+    var orig = window[name]; if (typeof orig !== 'function') return;
+    window[name] = function () {
+      var args = arguments, r = orig.apply(this, args);
+      if (isOn()) {
+        var go2 = function () { var sb = document.getElementById('sbody'); if (sb) { css(); pairInto(sb, altRun(orig, args)); } };
+        if (ALT) setTimeout(go2, 0); else load(function (ok) { if (ok) go2(); });
+      }
+      return r;
+    };
+  }
+  ['openV', 'openIssue'].forEach(wrapSheet);
+  window.CPAR321 = {
+    toggle: function () {
+      var on = !isOn(); setOn(on); var y = window.scrollY;
+      if (on && !ALT) load(function () { render(); window.scrollTo(0, y); });
+      render(); window.scrollTo(0, y);
+    },
+    _pair: pairInto, _run: altRun, _load: load
+  };
+})();
+</script>
 </body>
 </html>
