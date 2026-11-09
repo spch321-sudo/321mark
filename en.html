@@ -9900,5 +9900,148 @@ try { GX.boot(); } catch (e) { try { console.error("GX boot", e); } catch (_) {}
   try { if (R.tab === 'text') render(); } catch (e) {}
 })();
 </script>
+<script id="PAR">
+/* PAR321 v1（2026-11-09）：講義「經文」分頁的並讀譯本（移植自 321互動聖經 v2.61.0）
+   每一節下面附上另一種譯本的同一節（灰色小字），29 種語言可選；經文資料直接讀
+   同網域的互動聖經 /bible/bible.<語言>.<分卷>.json，不另存一份。
+   並讀文字放在 .vs 之外（.par-tx），朗讀、畫線、解經都只作用在主要經文。 */
+(function () {
+  if (window.PAR321 || typeof window.vText !== 'function' || typeof go !== 'function') return;
+  var SLUG = {
+    genesis: 'Genesis', exodus: 'Exodus', leviticus: 'Leviticus', numbers: 'Numbers', deuteronomy: 'Deuteronomy',
+    joshua: 'Joshua', judges: 'Judges', ruth: 'Ruth', '1samuel': '1Samuel', '2samuel': '2Samuel', '1kings': '1Kings', '2kings': '2Kings',
+    '1chronicles': '1Chronicles', '2chronicles': '2Chronicles', ezra: 'Ezra', nehemiah: 'Nehemiah', esther: 'Esther', job: 'Job',
+    psalms: 'Psalms', proverbs: 'Proverbs', ecclesiastes: 'Ecclesiastes', isaiah: 'Isaiah', jeremiah: 'Jeremiah', daniel: 'Daniel',
+    matthew: 'Matthew', mark: 'Mark', luke: 'Luke', john: 'John', acts: 'Acts', romans: 'Romans', '1cor': '1Corinthians', '2cor': '2Corinthians',
+    gal: 'Galatians', eph: 'Ephesians', php: 'Philippians', col: 'Colossians', '1th': '1Thessalonians', '2th': '2Thessalonians',
+    '1ti': '1Timothy', '2ti': '2Timothy', tit: 'Titus', phm: 'Philemon', heb: 'Hebrews', jas: 'James', '1pe': '1Peter', '1peter': '1Peter',
+    '2peter': '2Peter', '2pe': '2Peter', '1jn': '1John', '2jn': '2John', '3jn': '3John', jud: 'Jude', revelation: 'Revelation'
+  };
+  var SHARD = { law: 'Genesis Exodus Leviticus Numbers Deuteronomy', hist: 'Joshua Judges Ruth 1Samuel 2Samuel 1Kings 2Kings 1Chronicles 2Chronicles Ezra Nehemiah Esther',
+    poet: 'Job Psalms Proverbs Ecclesiastes SongofSolomon', proph: 'Isaiah Jeremiah Lamentations Ezekiel Daniel Hosea Joel Amos Obadiah Jonah Micah Nahum Habakkuk Zephaniah Haggai Zechariah Malachi' };
+  var seg = (location.pathname.split('/').filter(Boolean)[0] || '').toLowerCase().replace(/^321-?/, '');
+  var BOOK = SLUG[seg] || (window.PAR321_BOOK || '');
+  if (!BOOK) return;
+  var shard = 'nt'; for (var k in SHARD) if ((' ' + SHARD[k] + ' ').indexOf(' ' + BOOK + ' ') >= 0) shard = k;
+  var BASE = window.PAR321_BASE || '/bible/';
+  var LANGS = [['zh', '繁體中文 和合本'], ['zs', '简体中文 和合本'], ['en', 'English (WEB)'], ['ko', '한국어'], ['ja', '日本語'], ['id', 'Bahasa Indonesia'], ['ms', 'Bahasa Malaysia'],
+    ['tl', 'Filipino'], ['ceb', 'Cebuano'], ['my', 'မြန်မာ'], ['vi', 'Tiếng Việt'], ['th', 'ภาษาไทย'], ['es', 'Español'], ['pt', 'Português'], ['fr', 'Français'], ['de', 'Deutsch'],
+    ['it', 'Italiano'], ['ru', 'Русский'], ['uk', 'Українська'], ['el', 'Ελληνικά'], ['he', 'עברית'], ['ar', 'العربية'], ['fa', 'فارسی'], ['hi', 'हिन्दी'], ['bn', 'বাংলা'],
+    ['ne', 'नेपाली'], ['ta', 'தமிழ்'], ['sw', 'Kiswahili'], ['am', 'አማርኛ']];
+  var FILE = { ms: 'id' };                        // 馬來文沿用印尼文譯本（與互動聖經相同）
+  var RTL = { ar: 1, he: 1, fa: 1 }, CJK = { zh: 1, zs: 1, ja: 1 };
+  var LN = (typeof LANG_NOW !== 'undefined') ? LANG_NOW : 'tc';
+  function ui() { if (LN === 'en') return 'en'; try { if (LN === 'sc' || (S && S.set && S.set.sc)) return 'sc'; } catch (e) {} return 'tc'; }
+  function main() { var u = ui(); return u === 'en' ? 'en' : (u === 'sc' ? 'zs' : 'zh'); }
+  var STR = {
+    tc: { btn: '並讀', off: '關', pick: '選擇並讀譯本', none: '不並讀', hint: '每一節下面會附上另一種譯本，方便對照閱讀。', loading: '並讀譯本載入中…', fail: '並讀譯本載入失敗，請檢查網路', miss: '（此譯本沒有單獨的這一節，可能併在前後節）' },
+    sc: { btn: '并读', off: '关', pick: '选择并读译本', none: '不并读', hint: '每一节下面会附上另一种译本，方便对照阅读。', loading: '并读译本载入中…', fail: '并读译本载入失败，请检查网络', miss: '（此译本没有单独的这一节，可能并在前后节）' },
+    en: { btn: 'Parallel', off: 'Off', pick: 'Choose a parallel translation', none: 'No parallel text', hint: 'Each verse is followed by the same verse in another translation.', loading: 'Loading the parallel translation…', fail: 'Couldn’t load the parallel translation — check your connection', miss: '(no separate verse here — it may be joined to a neighbouring verse)' }
+  };
+  function T(k) { return STR[ui()][k]; }
+  function getPar() { var p = ''; try { p = localStorage.getItem('par321') || ''; } catch (e) {} return p === main() ? '' : p; }
+  function setPar(p) { try { localStorage.setItem('par321', p); } catch (e) {} }
+  function name(p) { for (var i = 0; i < LANGS.length; i++) if (LANGS[i][0] === p) return LANGS[i][1]; return p; }
+  function escH(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  var CACHE = {}, WAIT = {};
+  function load(p, cb) {
+    var f = FILE[p] || p, key = f + '|' + shard;
+    if (CACHE[key]) return cb(CACHE[key]);
+    if (WAIT[key]) { WAIT[key].push(cb); return; }
+    WAIT[key] = [cb];
+    fetch(BASE + 'bible.' + f + '.' + shard + '.json').then(function (r) { if (!r.ok) throw 0; return r.json(); })
+      .then(function (j) { CACHE[key] = j; var l = WAIT[key]; delete WAIT[key]; l.forEach(function (fn) { fn(j); }); })
+      .catch(function () { var l = WAIT[key]; delete WAIT[key]; l.forEach(function (fn) { fn(null); }); });
+  }
+  /* 一章的段落 [樣式, 節號, 文字, 節號, 文字…]（節號 0＝同一節接續）→ {節:文字} */
+  function verses(data, ch, p) {
+    var b = data && data[BOOK]; if (!b) return null;
+    var chap = Array.isArray(b) ? b[ch - 1] : b[ch]; if (!chap) return null;
+    var out = {}, cur = 0, j = CJK[p] ? '' : ' ';
+    chap.forEach(function (par) {
+      if (!Array.isArray(par)) return;
+      for (var i = 1; i < par.length; i += 2) {
+        var n = par[i], t = par[i + 1];
+        if (typeof n === 'number' && n > 0) cur = n;
+        if (!cur || typeof t !== 'string') continue;
+        t = t.replace(/\s*\[[^\]]{24,}\]/g, '');           // 去掉英文譯本的長註腳
+        out[cur] = out[cur] ? out[cur] + j + t : t;
+      }
+    });
+    for (var v in out) out[v] = out[v].replace(/\s+/g, CJK[p] ? '' : ' ').replace(/([,;:.!?])(?=[A-Za-z])/g, '$1 ').trim();
+    return out;
+  }
+  function css() {
+    if (document.getElementById('parCss')) return;
+    var st = document.createElement('style'); st.id = 'parCss';
+    st.textContent = '.parbar{display:flex;justify-content:flex-end;margin:-4px 0 8px}'
+      + '.parbar button{border:1px solid var(--line);background:var(--card);color:inherit;border-radius:999px;padding:6px 14px;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer}'
+      + '.parbar button.on{border-color:var(--pine);color:var(--pine)}'
+      + '.par-tx{margin:-2px 0 10px 29px;padding:2px 0 2px 10px;border-left:3px solid var(--line);font-size:.9em;line-height:1.7;color:color-mix(in srgb,currentColor 62%,transparent)}'
+      + '.par-tx[dir=rtl]{border-left:0;border-right:3px solid var(--line);padding:2px 10px 2px 0;text-align:right}'
+      + '.par-tx.miss{font-style:italic;opacity:.7}.par-st{font-size:12.5px;margin:0 0 8px 29px;opacity:.75}'
+      + '.parsh{position:fixed;inset:0;z-index:120;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center}'
+      + '.parsh .in{background:var(--card,#fff);color:inherit;width:100%;max-width:560px;max-height:80vh;overflow:auto;border-radius:18px 18px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom))}'
+      + '.parsh h3{margin:0 0 4px;font-size:17px}.parsh p{margin:0 0 10px;font-size:13px;opacity:.75}'
+      + '.parsh .g{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.parsh .g button{text-align:left;border:1px solid var(--line);background:none;color:inherit;border-radius:10px;padding:10px 12px;font:inherit;font-size:14px;cursor:pointer}'
+      + '.parsh .g button.on{border-color:var(--pine);background:color-mix(in srgb,var(--pine) 12%,transparent);font-weight:700}';
+    document.head.appendChild(st);
+  }
+  function bar() {
+    var p = getPar();
+    return '<div class="parbar"><button class="' + (p ? 'on' : '') + '" onclick="PAR321.open()">🌐 ' + T('btn') + '：' + escH(p ? name(p) : T('off')) + ' ▾</button></div>';
+  }
+  function apply() {
+    var p = getPar(); if (!p || !(R.tab === 'text' && R.ch) || R.sub === 'vpk') return;
+    var ch = R.ch, rows = document.querySelectorAll('.vs[data-v^="' + ch + ':"]'); if (!rows.length) return;
+    var first = rows[0], st = document.createElement('div'); st.className = 'par-st'; st.textContent = T('loading');
+    first.parentNode.insertBefore(st, first);
+    load(p, function (data) {
+      if (!(R.tab === 'text' && R.ch === ch) || getPar() !== p) { if (st.parentNode) st.parentNode.removeChild(st); return; }
+      var vv = verses(data, ch, p);
+      if (!vv) { st.textContent = T('fail'); return; }
+      if (st.parentNode) st.parentNode.removeChild(st);
+      var old = document.querySelectorAll('.par-tx'); for (var i = 0; i < old.length; i++) old[i].parentNode.removeChild(old[i]);
+      rows = document.querySelectorAll('.vs[data-v^="' + ch + ':"]');
+      for (var r = 0; r < rows.length; r++) {
+        var vn = +(rows[r].getAttribute('data-v').split(':')[1]), t = vv[vn];
+        var d = document.createElement('div'); d.className = 'par-tx' + (t ? '' : ' miss');
+        d.setAttribute('lang', FILE[p] || p); if (RTL[p]) d.setAttribute('dir', 'rtl');
+        d.textContent = t || T('miss');
+        var after = rows[r].nextSibling;
+        while (after && after.nodeType === 1 && after.classList && after.classList.contains('mknote')) after = after.nextSibling;   // 領受之後再放並讀
+        rows[r].parentNode.insertBefore(d, after);
+      }
+      var fl = document.querySelector('.vs.vpk-flash'); if (fl) fl.scrollIntoView({ block: 'center' });
+    });
+  }
+  var _vText = window.vText;
+  window.vText = function () {
+    var h = _vText.apply(this, arguments);
+    if (R.tab === 'text' && R.ch && R.sub !== 'vpk' && typeof h === 'string') {
+      css();
+      var i = h.indexOf('<div class="mkhint">');
+      h = i >= 0 ? h.slice(0, i) + bar() + h.slice(i) : bar() + h;
+      setTimeout(apply, 0);
+    }
+    return h;
+  };
+  window.PAR321 = {
+    book: BOOK, shard: shard,
+    open: function () {
+      css();
+      var p = getPar(), m = main(), g = '<button class="' + (p ? '' : 'on') + '" onclick="PAR321.pick(\'\')">✕ ' + T('none') + '</button>';
+      LANGS.forEach(function (o) { if (o[0] !== m) g += '<button class="' + (p === o[0] ? 'on' : '') + '" onclick="PAR321.pick(\'' + o[0] + '\')"' + (RTL[o[0]] ? ' dir="rtl"' : '') + '>' + escH(o[1]) + '</button>'; });
+      var el = document.createElement('div'); el.className = 'parsh'; el.id = 'parSheet';
+      el.innerHTML = '<div class="in"><h3>🌐 ' + T('pick') + '</h3><p>' + T('hint') + '</p><div class="g">' + g + '</div></div>';
+      el.onclick = function (e) { if (e.target === el) PAR321.close(); };
+      PAR321.close(); document.body.appendChild(el);
+    },
+    close: function () { var el = document.getElementById('parSheet'); if (el) el.parentNode.removeChild(el); },
+    pick: function (p) { setPar(p); PAR321.close(); var y = window.scrollY; render(); window.scrollTo(0, y); }
+  };
+  try { if (R.tab === 'text' && R.ch) render(); } catch (e) {}
+})();
+</script>
 </body>
 </html>
